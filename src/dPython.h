@@ -35,6 +35,10 @@
 #ifndef __dPython_h
 #define __dPython_h
 
+/* Undefine macros that Python.h defines to avoid redefinition warning.  */
+#undef _POSIX_C_SOURCE
+#undef _POSIX_THREADS
+  
 /* 
    Use the real python debugging library if it is provided.  
    Otherwise use the "documented" trick involving checking for _DEBUG
