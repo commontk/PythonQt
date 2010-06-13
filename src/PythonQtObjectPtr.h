@@ -42,7 +42,7 @@
 */
 //----------------------------------------------------------------------------------
 
-#include <Python.h>
+#include <dPython.h>
 #include "PythonQtSystem.h"
 #include <QVariant>
 #include <QVariantList>

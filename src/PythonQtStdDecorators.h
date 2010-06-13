@@ -43,7 +43,7 @@
 //----------------------------------------------------------------------------------
 
 #include "PythonQtSystem.h"
-#include <Python.h>
+#include <dPython.h>
 #include <QObject>
 #include <QVariantList>
 #include <QTextDocument>

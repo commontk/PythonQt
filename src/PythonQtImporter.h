@@ -42,7 +42,7 @@
 */
 //----------------------------------------------------------------------------------
 
-#include "Python.h"
+#include "dPython.h"
 #include "structmember.h"
 #include "osdefs.h"
 #include "marshal.h"
