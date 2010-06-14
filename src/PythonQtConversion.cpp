@@ -977,7 +977,8 @@ QVariant PythonQtConv::PyObjToQVariant(PyObject* val, int type)
     {
       if (PyMapping_Check(val)) {
         QMap<QString,QVariant> map;
-        PyObject* items = PyMapping_Items(val);
+        // PyObject* items = PyMapping_Items(val);
+        PyObject* items = PyObject_CallMethod(val, const_cast<char*>("items"), NULL);
         if (items) {
           int count = PyList_Size(items);
           PyObject* value;

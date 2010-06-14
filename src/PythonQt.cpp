@@ -150,7 +150,7 @@ PythonQt::PythonQt(int flags, const QByteArray& pythonQtModuleName)
   _p->_PythonQtObjectPtr_metaId = qRegisterMetaType<PythonQtObjectPtr>("PythonQtObjectPtr");
 
   if ((flags & PythonAlreadyInitialized) == 0) {
-    Py_SetProgramName("PythonQt");
+    Py_SetProgramName(const_cast<char*>("PythonQt"));
     if (flags & IgnoreSiteModule) {
       // this prevents the automatic importing of Python site files
       Py_NoSiteFlag = 1;

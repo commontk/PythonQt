@@ -317,7 +317,7 @@ PythonQtSlotInfo*
 PythonQtSlotFunction_GetSlotInfo(PyObject *op)
 {
   if (!PythonQtSlotFunction_Check(op)) {
-    PyErr_BadInternalCall();
+    PyErr_Format(PyExc_SystemError, "%s:%d: bad argument to internal function", __FILE__, __LINE__);
     return NULL;
   }
   return ((PythonQtSlotFunctionObject *)op) -> m_ml;
@@ -327,7 +327,7 @@ PyObject *
 PythonQtSlotFunction_GetSelf(PyObject *op)
 {
   if (!PythonQtSlotFunction_Check(op)) {
-    PyErr_BadInternalCall();
+    PyErr_Format(PyExc_SystemError, "%s:%d: bad argument to internal function", __FILE__, __LINE__);
     return NULL;
   }
   return ((PythonQtSlotFunctionObject *)op) -> m_self;
@@ -392,9 +392,9 @@ meth_get__self__(PythonQtSlotFunctionObject *m, void * /*closure*/)
 }
 
 static PyGetSetDef meth_getsets [] = {
-  {"__doc__",  (getter)meth_get__doc__,  NULL, NULL},
-  {"__name__", (getter)meth_get__name__, NULL, NULL},
-  {"__self__", (getter)meth_get__self__, NULL, NULL},
+  {const_cast<char*>("__doc__"),  (getter)meth_get__doc__,  NULL, NULL},
+  {const_cast<char*>("__name__"), (getter)meth_get__name__, NULL, NULL},
+  {const_cast<char*>("__self__"), (getter)meth_get__self__, NULL, NULL},
   {NULL, NULL, NULL,NULL},
 };
 
@@ -405,7 +405,7 @@ static PyGetSetDef meth_getsets [] = {
 #define OFF(x) offsetof(PythonQtSlotFunctionObject, x)
 
 static PyMemberDef meth_members[] = {
-  {"__module__",    T_OBJECT,     OFF(m_module), PY_WRITE_RESTRICTED},
+  {const_cast<char*>("__module__"),    T_OBJECT,     OFF(m_module), PY_WRITE_RESTRICTED},
   {NULL}
 };
 
