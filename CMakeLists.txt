@@ -48,12 +48,14 @@ endforeach()
 
 set(minimum_required_qt_version "4.6.2")
 
-find_package(Qt4 4.6.2)
+find_package(Qt4)
 
 if(QT4_FOUND)
 
-  if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}" VERSION_LESS "${minimum_required_qt_version}")
-      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH}.")
+  set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+
+  if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
+      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
   endif()
   
   # Enable required qt module
