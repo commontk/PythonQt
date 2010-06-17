@@ -71,7 +71,9 @@ typedef void* PythonQtPolymorphicHandlerCB(const void *ptr, char **class_name);
 
 typedef void PythonQtShellSetInstanceWrapperCB(void* object, PythonQtInstanceWrapper* wrapper);
 
-template<class T> void PythonQtSetInstanceWrapperOnShell(void* object, PythonQtInstanceWrapper* wrapper) { ((T*)object)->_wrapper = wrapper; };
+template<class T> void PythonQtSetInstanceWrapperOnShell(void* object, PythonQtInstanceWrapper* wrapper) { 
+  (reinterpret_cast<T*>(object))->_wrapper = wrapper;
+}
 
 //! returns the offset that needs to be added to upcast an object of type T1 to T2
 template<class T1, class T2> int PythonQtUpcastingOffset() {
