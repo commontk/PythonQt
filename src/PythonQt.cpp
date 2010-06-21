@@ -142,6 +142,8 @@ void PythonQt::cleanup()
   }
 }
 
+PythonQt* PythonQt::self() { return _self; }
+
 PythonQt::PythonQt(int flags, const QByteArray& pythonQtModuleName)
 {
   _p = new PythonQtPrivate;

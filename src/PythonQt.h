@@ -158,7 +158,7 @@ public:
   static void cleanup();
 
   //! get the singleton instance
-  static PythonQt* self() { return _self; }
+  static PythonQt* self();
 
   //@}
   
