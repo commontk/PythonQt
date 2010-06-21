@@ -673,15 +673,15 @@ QString PythonQtConv::PyObjGetString(PyObject* val, bool strict, bool& ok) {
   if (val->ob_type == &PyString_Type) {
     r = QString(PyString_AS_STRING(val));
   } else if (PyUnicode_Check(val)) {
-#ifdef WIN32
-    r = QString::fromUtf16(PyUnicode_AS_UNICODE(val));
-#else
+//#ifdef WIN32
+//    r = QString::fromUtf16(PyUnicode_AS_UNICODE(val));
+//#else
     PyObject *ptmp = PyUnicode_AsUTF8String(val);
     if(ptmp) {
       r = QString::fromUtf8(PyString_AS_STRING(ptmp));
       Py_DECREF(ptmp);
     }
-#endif
+//#endif
   } else if (!strict) {
     // EXTRA: could also use _Unicode, but why should we?
     PyObject* str =  PyObject_Str(val);
@@ -1039,12 +1039,12 @@ PyObject* PythonQtConv::QStringToPyObject(const QString& str)
   if (str.isNull()) {
     return PyString_FromString("");
   } else {
-#ifdef WIN32
+//#ifdef WIN32
     //    return PyString_FromString(str.toLatin1().data());
-    return PyUnicode_FromUnicode(str.utf16(), str.length());
-#else
+//    return PyUnicode_FromUnicode(str.utf16(), str.length());
+//#else
     return PyUnicode_DecodeUTF16((const char*)str.utf16(), str.length()*2, NULL, NULL);
-#endif
+//#endif
   }
 }
 
