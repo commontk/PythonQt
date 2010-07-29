@@ -61,6 +61,9 @@ if(QT4_FOUND)
   # Enable required qt module
   foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
     string(TOUPPER ${qtlib} qtlib_uppercase)
+    if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
+      message(FATAL_ERROR "QT_QT${${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
+    endif()
     set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
   endforeach()
   
