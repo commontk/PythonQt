@@ -171,7 +171,9 @@ void SetupGenerator::generate()
 
 
     {
-      FileOut initFile(m_out_dir + "/generated_cpp/" + packName + "/" + packKey + "_init.cpp");
+      QString fileName(packName + "/" + packKey + "_init.cpp");
+      FileOut initFile(m_out_dir + "/generated_cpp/" + fileName);
+      ReportHandler::debugSparse(QString("generating: %1").arg(fileName));
       QTextStream &s = initFile.stream;
 
       s << "#include <PythonQt.h>" << endl;
