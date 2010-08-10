@@ -281,7 +281,7 @@ QStringList SetupGenerator::writePolymorphicHandler(QTextStream &s, const QStrin
           s << "    if ("
             << polyId.replace("%1", "object")
             << ") {" << endl
-            << "        *class_name = \"" << clazz->name() << "\";" << endl
+            << "        *class_name = const_cast<char*>(\"" << clazz->name() << "\");" << endl
             << "        return (" << clazz->qualifiedCppName() << "*)object;" << endl
             << "    }" << endl;
         } else {
