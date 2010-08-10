@@ -77,7 +77,8 @@ template<class T> void PythonQtSetInstanceWrapperOnShell(void* object, PythonQtI
 
 //! returns the offset that needs to be added to upcast an object of type T1 to T2
 template<class T1, class T2> int PythonQtUpcastingOffset() {
-  return (((char*)(static_cast<T2*>(reinterpret_cast<T1*>(0x100)))) - ((char*)reinterpret_cast<T1*>(0x100))); 
+  return ((reinterpret_cast<char*>(static_cast<T2*>(reinterpret_cast<T1*>(0x100)))) 
+    - (reinterpret_cast<char*>(reinterpret_cast<T1*>(0x100))));
 }
 
 //! callback to create a QObject lazily
