@@ -1,4 +1,5 @@
 #include <PythonQt.h>
+#include <PythonQtSystem.h>
 #include "com_trolltech_qt_gui0.h"
 #include "com_trolltech_qt_gui1.h"
 #include "com_trolltech_qt_gui2.h"
@@ -10,6 +11,8 @@
 #include "com_trolltech_qt_gui8.h"
 #include "com_trolltech_qt_gui9.h"
 #include "com_trolltech_qt_gui10.h"
+
+PYTHONQT_EXPORT void PythonQt_init_QtGui(PyObject* module);
 
 static void* polymorphichandler_QStyleOption(const void *ptr, char **class_name)
 {
