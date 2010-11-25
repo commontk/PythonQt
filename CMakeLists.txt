@@ -39,7 +39,7 @@ include_directories("${PYTHON_INCLUDE_DIR}")
 #-----------------------------------------------------------------------------
 # Build options
 
-foreach(qtlib gui network opengl sql svg uitools webkit xml xmlpatterns)
+foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
   OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
 endforeach()
 
@@ -140,7 +140,7 @@ set(moc_sources
 #-----------------------------------------------------------------------------
 # Add extra sources
 
-foreach(qtlib gui network opengl sql svg uitools webkit xml xmlpatterns)
+foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
   
   if (${PythonQt_Wrap_Qt${qtlib}})
   
