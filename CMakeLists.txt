@@ -112,6 +112,8 @@ set(sources
     src/PythonQtStdDecorators.cpp
     src/PythonQtStdOut.cpp
     src/gui/PythonQtScriptingConsole.cpp
+    
+    generated_cpp/PythonQt_QtBindings.cpp
 
     generated_cpp/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
     generated_cpp/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
@@ -143,6 +145,7 @@ set(headers
     src/PythonQtSystem.h
     src/PythonQtVariants.h
     src/dPython.h
+    generated_cpp/PythonQt_QtBindings.h
 )
 
 #-----------------------------------------------------------------------------
@@ -160,11 +163,12 @@ set(moc_sources
 
 #-----------------------------------------------------------------------------
 # Add extra sources
-
 foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
   
   if (${PythonQt_Wrap_Qt${qtlib}})
-  
+    
+    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
+    
     set(file_prefix generated_cpp/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
     
     foreach(index RANGE 0 10)
@@ -203,8 +207,6 @@ qt4_add_resources(gen_qrc_sources ${qrc_sources})
 #-----------------------------------------------------------------------------
 # Build the library
 
-add_definitions("-DPYTHONQT_EXPORTS")
-
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
@@ -215,6 +217,7 @@ add_library(PythonQt SHARED
             ${gen_ui_sources}
             ${gen_qrc_sources}
   )
+set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
 #
 # That should solve linkage error on Mac when the project is used in a superbuild setup
