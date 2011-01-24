@@ -1062,11 +1062,21 @@ void PythonQt::setModuleImportPath(PyObject* module, const QStringList& paths)
 
 void PythonQt::stdOutRedirectCB(const QString& str)
 {
+  if (!PythonQt::self())
+    {
+    std::cout << str.toLatin1().data() << std::endl;
+    return;
+    }
   emit PythonQt::self()->pythonStdOut(str);
 }
 
 void PythonQt::stdErrRedirectCB(const QString& str)
 {
+  if (!PythonQt::self())
+    {
+    std::cerr << str.toLatin1().data() << std::endl;
+    return;
+    }
   emit PythonQt::self()->pythonStdErr(str);
 }
 
