@@ -110,6 +110,7 @@ set(sources
     src/PythonQtSignalReceiver.cpp
     src/PythonQtSlot.cpp
     src/PythonQtStdDecorators.cpp
+    src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
     src/gui/PythonQtScriptingConsole.cpp
     
@@ -141,6 +142,7 @@ set(headers
     src/PythonQtSignalReceiver.h
     src/PythonQtSlot.h
     src/PythonQtStdDecorators.h
+    src/PythonQtStdIn.h
     src/PythonQtStdOut.h
     src/PythonQtSystem.h
     src/PythonQtVariants.h

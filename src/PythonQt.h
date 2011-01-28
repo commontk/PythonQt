@@ -47,6 +47,7 @@
 #include "PythonQtClassWrapper.h"
 #include "PythonQtSlot.h"
 #include "PythonQtObjectPtr.h"
+#include "PythonQtStdIn.h"
 #include <QObject>
 #include <QVariant>
 #include <QList>
@@ -172,6 +173,21 @@ public:
     Anything,
     CallOverloads
   };
+
+
+  //---------------------------------------------------------------------------
+  //! \name Standard input handling
+  //@{
+
+  //! Overwrite default handling of stdin using a custom callback. It internally backup
+  //! the original 'sys.stdin' into 'sys.pythonqt_original_stdin'
+  void setRedirectStdInCallBack(PythonQtInputChangedCB* callback, void * callbackData = 0);
+
+  //! Enable or disable stdin custom callback. It resets 'sys.stdin' using either 'sys.pythonqt_stdin'
+  //! or 'sys.pythonqt_original_stdin'
+  void setRedirectStdInCallBackEnabled(bool enabled);
+
+  //@}
 
   //---------------------------------------------------------------------------
   //! \name Modules

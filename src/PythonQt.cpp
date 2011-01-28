@@ -45,6 +45,7 @@
 #include "PythonQtMethodInfo.h"
 #include "PythonQtSignalReceiver.h"
 #include "PythonQtConversion.h"
+#include "PythonQtStdIn.h"
 #include "PythonQtStdOut.h"
 #include "PythonQtCppWrapperFactory.h"
 #include "PythonQtVariants.h"
@@ -192,6 +193,12 @@ PythonQt::PythonQt(int flags, const QByteArray& pythonQtModuleName)
   }
   Py_INCREF(&PythonQtStdOutRedirectType);
 
+  // add our own python object types for redirection of stdin
+  if (PyType_Ready(&PythonQtStdInRedirectType) < 0) {
+    std::cerr << "could not initialize PythonQtStdInRedirectType" << ", in " << __FILE__ << ":" << __LINE__ << std::endl;
+  }
+  Py_INCREF(&PythonQtStdInRedirectType);
+
   initPythonQtModule(flags & RedirectStdOut, pythonQtModuleName);
 
   _p->setupSharedLibrarySuffixes();
@@ -218,6 +225,46 @@ PythonQtPrivate::~PythonQtPrivate() {
   PythonQtConv::global_variantStorage.clear();
 
   PythonQtMethodInfo::cleanupCachedMethodInfos();
+}
+
+void PythonQt::setRedirectStdInCallBack(PythonQtInputChangedCB* callback, void * callbackData)
+{
+  if (!callback)
+    {
+    std::cerr << "PythonQt::setRedirectStdInCallBack - callback parameter is NULL !" << std::endl;
+    return;
+    }
+
+  PythonQtObjectPtr sys;
+  PythonQtObjectPtr in;
+  sys.setNewRef(PyImport_ImportModule("sys"));
+
+  // Backup original 'sys.stdin' if not yet done
+  PyRun_SimpleString("if not hasattr(sys, 'pythonqt_original_stdin'):"
+                     "sys.pythonqt_original_stdin = sys.stdin");
+
+  in = PythonQtStdInRedirectType.tp_new(&PythonQtStdInRedirectType, NULL, NULL);
+  ((PythonQtStdInRedirect*)in.object())->_cb = callback;
+  ((PythonQtStdInRedirect*)in.object())->_callData = callbackData;
+  // replace the built in file objects with our own objects
+  PyModule_AddObject(sys, "stdin", in);
+
+  // Backup custom 'stdin' into 'pythonqt_stdin'
+  PyRun_SimpleString("sys.pythonqt_stdin = sys.stdin");
+}
+
+void PythonQt::setRedirectStdInCallBackEnabled(bool enabled)
+{
+  if (enabled)
+    {
+    PyRun_SimpleString("if hasattr(sys, 'pythonqt_stdin'):"
+                       "sys.stdin = sys.pythonqt_stdin");
+    }
+  else
+    {
+    PyRun_SimpleString("if hasattr(sys,'pythonqt_original_stdin'):"
+                       "sys.stdin = sys.pythonqt_original_stdin");
+    }
 }
 
 PythonQtImportFileInterface* PythonQt::importInterface()
