@@ -394,7 +394,11 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
      }
 #ifdef PYTHONQT_USE_VTK
      else if (info.name.startsWith("vtk")) {
+#if (VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION <= 6) || VTK_MAJOR_VERSION < 5
+       vtkObjectBase * vtkObj = vtkPythonGetPointerFromObject(obj, info.name.data());
+#else
        vtkObjectBase * vtkObj = vtkPythonUtil::GetPointerFromObject(obj, info.name.data());
+#endif
        if (vtkObj) {
          PythonQtValueStorage_ADD_VALUE_IF_NEEDED(alreadyAllocatedCPPObject,global_ptrStorage, void*, vtkObj, ptr);
        }

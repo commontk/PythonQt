@@ -415,7 +415,11 @@ PyObject* PythonQtPrivate::wrapPtr(void* ptr, const QByteArray& name)
     if (name.startsWith("vtk"))
       {
       vtkObject * _vtkObj = reinterpret_cast<vtkObject*>(ptr);
+#if (VTK_MAJOR_VERSION == 5 && VTK_MINOR_VERSION <= 6) || VTK_MAJOR_VERSION < 5
+      return vtkPythonGetObjectFromPointer(_vtkObj);
+#else
       return vtkPythonUtil::GetObjectFromPointer(_vtkObj);
+#endif
       }
 #endif
     wrap = createNewPythonQtInstanceWrapper(wrapper, info, ptr);
