@@ -49,7 +49,7 @@ PythonQtObjectPtr::PythonQtObjectPtr(PyObject* o)
 
 PythonQtObjectPtr::~PythonQtObjectPtr()
 { 
-  if (_object) Py_DECREF(_object); 
+  if (_object && Py_IsInitialized()) Py_DECREF(_object);
 }
 
 void PythonQtObjectPtr::setNewRef(PyObject* o)

@@ -440,7 +440,7 @@ public:
   //@{
 
   //! get access to internal data (should not be used on the public API, but is used by some C functions)
-  static PythonQtPrivate* priv() { return _self->_p; }
+  static PythonQtPrivate* priv() { return _self ? _self->_p : 0; }
 
   //! handle a python error, call this when a python function fails. If no error occurred, it returns false.
   //! The error is currently just output to the python stderr, future version might implement better trace printing
