@@ -96,3 +96,4 @@ typedef struct PythonQtInstanceWrapperStruct {
 int PythonQtInstanceWrapper_init(PythonQtInstanceWrapper * self, PyObject * args, PyObject * kwds);
 
 #endif
+
