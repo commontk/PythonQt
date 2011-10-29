@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (C) Kitware, Inc. All Rights Reserved.
+ *  Copyright (C) 2011 MeVis Medical Solutions AG All Rights Reserved.
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -23,26 +23,21 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  Contact information: Kitware, Inc., 101 East Weaver St,
- *  Carrboro, North Carolina, 27510, USA or:
+ *  Contact information: MeVis Medical Solutions AG, Universitaetsallee 29,
+ *  28359 Bremen, Germany or:
  *
- *  http://www.kitware.com
+ *  http://www.mevis.de
  *
  */
-/*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    vtkPython.h
-
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
-
-=========================================================================*/
+//----------------------------------------------------------------------------------
+/*!
+// \file    dPython.h - This file was copied from VTK and was originally named vtkPython.h
+// \author  David Gobbi
+// \author  Last changed by $Author: jcfr $
+// \date    2011
+*/
+//----------------------------------------------------------------------------------
 
 #ifndef __dPython_h
 #define __dPython_h
