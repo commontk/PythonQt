@@ -60,14 +60,34 @@
 */
 
 #ifdef _DEBUG
-# undef _DEBUG
-# if defined(_MSC_VER) && _MSC_VER >= 1400
-#   define _CRT_NOFORCE_MANIFEST 1
-# endif
-# include <Python.h>
-# define _DEBUG
+// Include these low level headers before undefing _DEBUG. Otherwise when doing
+// a debug build against a release build of python the compiler will end up
+// including these low level headers without DEBUG enabled, causing it to try
+// and link release versions of this low level C api.
+# include <basetsd.h>
+# include <assert.h>
+# include <ctype.h>
+# include <errno.h>
+# include <io.h>
+# include <math.h>
+# include <sal.h>
+# include <stdarg.h>
+# include <stddef.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <sys/stat.h>
+# include <time.h>
+# include <wchar.h>
+#  undef _DEBUG
+#  if defined(_MSC_VER) && _MSC_VER >= 1400
+#    define _CRT_NOFORCE_MANIFEST 1
+#  endif
+#  include <Python.h>
+#  define _DEBUG
 #else
-# include <Python.h>
+#  include <Python.h>
 #endif
+
 
 #endif
