@@ -79,14 +79,14 @@
 # include <sys/stat.h>
 # include <time.h>
 # include <wchar.h>
-#  undef _DEBUG
-#  if defined(_MSC_VER) && _MSC_VER >= 1400
-#    define _CRT_NOFORCE_MANIFEST 1
-#  endif
-#  include <Python.h>
-#  define _DEBUG
+# undef _DEBUG
+# if defined(_MSC_VER) && _MSC_VER >= 1400
+#  define _CRT_NOFORCE_MANIFEST 1
+# endif
+# include <Python.h>
+# define _DEBUG
 #else
-#  include <Python.h>
+# include <Python.h>
 #endif
 
 
