@@ -978,6 +978,7 @@ PythonQtPrivate::PythonQtPrivate()
   _noLongerWrappedCB = NULL;
   _wrappedCB = NULL;
   _currentClassInfoForClassWrapperCreation = NULL;
+  _ErrorOccured = false;
 }
 
 void PythonQtPrivate::setupSharedLibrarySuffixes()
@@ -1088,7 +1089,13 @@ bool PythonQt::handleError()
     PyErr_Clear();
     flag = true;
   }
+  PythonQt::priv()->_ErrorOccured = flag;
   return flag;
+}
+
+bool PythonQt::errorOccured()const
+{
+  return PythonQt::priv()->_ErrorOccured;
 }
 
 void PythonQt::addSysPath(const QString& path)
