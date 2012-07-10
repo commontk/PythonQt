@@ -14,9 +14,20 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 #-----------------------------------------------------------------------------
 # Build options
 
-foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
+option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
+
+set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns)
+foreach(qtlib ${qtlibs})
   OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
 endforeach()
+
+# Force option if it applies
+if(PythonQt_Wrap_QtAll)
+  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(  
+  foreach(qtlib ${qtlibs})
+    set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
+  endforeach()
+endif()
 
 option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
 if(PythonQt_DEBUG)
