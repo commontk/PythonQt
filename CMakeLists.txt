@@ -55,6 +55,17 @@ else()
 endif()
 
 #-----------------------------------------------------------------------------
+# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers 
+# associated with the Qt version being used.
+set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
+if("${generated_cpp_suffix}" STREQUAL "_48")
+  set(generated_cpp_suffix "")
+endif()
+if("${generated_cpp_suffix}" STREQUAL "_46")
+  set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
+endif()
+
+#-----------------------------------------------------------------------------
 # Sources
 
 set(sources
@@ -76,12 +87,12 @@ set(sources
     src/PythonQtStdOut.cpp
     src/gui/PythonQtScriptingConsole.cpp
     
-    generated_cpp/PythonQt_QtBindings.cpp
+    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
 
-    generated_cpp/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
-    generated_cpp/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
-    generated_cpp/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
-    generated_cpp/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
 )
 
 #-----------------------------------------------------------------------------
@@ -110,7 +121,7 @@ set(headers
     src/PythonQtSystem.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
-    generated_cpp/PythonQt_QtBindings.h
+    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
 )
 
 #-----------------------------------------------------------------------------
@@ -122,8 +133,8 @@ set(moc_sources
     src/PythonQtStdDecorators.h
     src/gui/PythonQtScriptingConsole.h
 
-    generated_cpp/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
-    generated_cpp/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
 )
 
 #-----------------------------------------------------------------------------
@@ -134,7 +145,7 @@ foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
     
     ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
     
-    set(file_prefix generated_cpp/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
+    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
     
     foreach(index RANGE 0 10)
     
