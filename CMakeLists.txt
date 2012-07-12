@@ -25,7 +25,10 @@ endforeach()
 if(PythonQt_Wrap_QtAll)
   list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(  
   foreach(qtlib ${qtlibs})
-    set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
+    if(NOT ${PythonQt_Wrap_Qt${qtlib}})
+      set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
+      message(STATUS "Enabling [PythonQt_Wrap_Qt${qtlib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
+    endif()
   endforeach()
 endif()
 
