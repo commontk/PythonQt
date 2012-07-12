@@ -45,6 +45,29 @@
 #include "PythonQtPythonInclude.h"
 
 #include "PythonQtSystem.h"
+
+/*
+ * The following undefs for C standard library macros prevent
+ * build errors of the following type on mac ox 10.7.4 and XCode 4.3.3
+ *
+/usr/include/c++/4.2.1/bits/localefwd.h:57:21: error: too many arguments provided to function-like macro invocation
+    isspace(_CharT, const locale&);
+                    ^
+/usr/include/c++/4.2.1/bits/localefwd.h:56:5: error: 'inline' can only appear on functions
+    inline bool
+    ^
+/usr/include/c++/4.2.1/bits/localefwd.h:57:5: error: variable 'isspace' declared as a template
+    isspace(_CharT, const locale&);
+    ^
+*/
+#undef isspace
+#undef isupper
+#undef islower
+#undef isalpha
+#undef isalnum
+#undef toupper
+#undef tolower
+
 #include <QPointer>
 
 #include "structmember.h"
