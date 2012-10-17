@@ -675,6 +675,7 @@ PythonQtObjectPtr PythonQt::importModule(const QString& name)
 
 QVariant PythonQt::evalCode(PyObject* object, PyObject* pycode) {
   QVariant result;
+  this->resetErrorFlag();
   if (pycode) {
     PyObject* dict = NULL;
     if (PyModule_Check(object)) {
@@ -703,6 +704,7 @@ QVariant PythonQt::evalScript(PyObject* object, const QString& script, int start
   QVariant result;
   PythonQtObjectPtr p;
   PyObject* dict = NULL;
+  this->resetErrorFlag();
   if (PyModule_Check(object)) {
     dict = PyModule_GetDict(object);
   } else if (PyDict_Check(object)) {
@@ -722,6 +724,7 @@ QVariant PythonQt::evalScript(PyObject* object, const QString& script, int start
 void PythonQt::evalFile(PyObject* module, const QString& filename)
 {
   PythonQtObjectPtr code = parseFile(filename);
+  this->resetErrorFlag();
   if (code) {
     evalCode(module, code);
   } else {
@@ -733,6 +736,7 @@ PythonQtObjectPtr PythonQt::parseFile(const QString& filename)
 {
   PythonQtObjectPtr p;
   p.setNewRef(PythonQtImport::getCodeFromPyc(filename));
+  this->resetErrorFlag();
   if (!p) {
     handleError();
   }
@@ -1022,6 +1026,7 @@ QVariant PythonQt::call(PyObject* callable, const QVariantList& args)
   QVariant r;
   PythonQtObjectPtr result;
   result.setNewRef(callAndReturnPyObject(callable, args));
+  this->resetErrorFlag();
   if (result) {
     r = PythonQtConv::PyObjToQVariant(result);
   } else {
@@ -1241,6 +1246,14 @@ bool PythonQt::handleError()
 bool PythonQt::errorOccured()const
 {
   return PythonQt::priv()->_ErrorOccured;
+}
+
+void PythonQt::resetErrorFlag()
+{
+  if (PythonQt::self())
+    {
+    PythonQt::priv()->_ErrorOccured = false;
+    }
 }
 
 void PythonQt::addSysPath(const QString& path)
@@ -1568,6 +1581,7 @@ PythonQtInstanceWrapper* PythonQtPrivate::findWrapperAndRemoveUnused(void* obj)
 PythonQtObjectPtr PythonQtPrivate::createModule(const QString& name, PyObject* pycode)
 {
   PythonQtObjectPtr result;
+  PythonQt::self()->resetErrorFlag();
   if (pycode) {
     result.setNewRef(PyImport_ExecCodeModule((char*)name.toLatin1().data(), pycode));
   } else {

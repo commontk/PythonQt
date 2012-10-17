@@ -484,6 +484,10 @@ public:
   //! return \a True if \a handleError() has been called and an error occured.
   bool errorOccured()const;
 
+  //! reset error flag. After calling this, errorOccured() will return False.
+  //! \sa PythonQt::errorOccured()
+  void resetErrorFlag();
+
   //! set a callback that is called when a QObject with parent == NULL is wrapped by pythonqt
   void setQObjectWrappedCallback(PythonQtQObjectWrappedCB* cb);
   //! set a callback that is called when a QObject with parent == NULL is no longer wrapped by pythonqt
