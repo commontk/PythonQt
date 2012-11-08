@@ -488,6 +488,15 @@ public:
   //! \sa PythonQt::errorOccured()
   void resetErrorFlag();
 
+  //! if set to True, signal will be emitted if exception SystemExit is caught
+  //! \sa PythonQt::handleError(), PythonQt::
+  void setSystemExitExceptionHandlerEnabled(bool value);
+
+  //! return \a True if SystemExit exception is handled by PythonQt
+  //! \sa setSystemExitExceptionHandlerEnabled()
+  bool systemExitExceptionHandlerEnabled()const;
+
+
   //! set a callback that is called when a QObject with parent == NULL is wrapped by pythonqt
   void setQObjectWrappedCallback(PythonQtQObjectWrappedCB* cb);
   //! set a callback that is called when a QObject with parent == NULL is no longer wrapped by pythonqt
@@ -516,6 +525,11 @@ signals:
 
   //! emitted when help() is called on a PythonQt object and \c ExternalHelp is enabled
   void pythonHelpRequest(const QByteArray& cppClassName);
+
+  //! emitted when both custom SystemExit exception handler is enabled and a SystemExit
+  //! exception is raised.
+  //! \sa setSystemExitExceptionHandlerEnabled(bool)
+  void systemExitExceptionRaised(int exitCode);
 
 private:
   void initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQtModuleName);
@@ -716,6 +730,7 @@ private:
   int _PythonQtObjectPtr_metaId;
 
   bool _ErrorOccured;
+  bool _SystemExitExceptionHandlerEnabled;
 
   friend class PythonQt;
 };
