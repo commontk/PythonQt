@@ -49,7 +49,11 @@ QHash<QByteArray, QByteArray> PythonQtMethodInfo::_parameterNameAliases;
 PythonQtMethodInfo::PythonQtMethodInfo(const QMetaMethod& meta, PythonQtClassInfo* classInfo)
 {
 #ifdef PYTHONQT_DEBUG
+# if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  QByteArray sig(meta.methodSignature());
+# else
   QByteArray sig(meta.signature());
+# endif
   sig = sig.mid(sig.indexOf('('));
   QByteArray fullSig = QByteArray(meta.typeName()) + " " + sig;
   std::cout << "caching " << fullSig.data() << std::endl;
@@ -78,7 +82,11 @@ PythonQtMethodInfo::PythonQtMethodInfo(const QByteArray& typeName, const QList<Q
 
 const PythonQtMethodInfo* PythonQtMethodInfo::getCachedMethodInfo(const QMetaMethod& signal, PythonQtClassInfo* classInfo)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  QByteArray sig(signal.methodSignature());
+#else
   QByteArray sig(signal.signature());
+#endif
   sig = sig.mid(sig.indexOf('('));
   QByteArray fullSig = QByteArray(signal.typeName()) + " " + sig;
   PythonQtMethodInfo* result = _cachedSignatures.value(fullSig);
@@ -151,7 +159,11 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
     type.typeId = nameToType(name);
     if ((type.pointerCount == 0) && type.typeId == Unknown) {
       type.typeId = QMetaType::type(name.constData());
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+      if (type.typeId == QMetaType::UnknownType) {
+#else
       if (type.typeId == QMetaType::Void) {
+#endif
         type.typeId = Unknown;
       }
     }
@@ -370,7 +382,11 @@ QString PythonQtSlotInfo::fullSignature()
 
 QByteArray PythonQtSlotInfo::slotName()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  QByteArray sig(_meta.methodSignature());
+#else
   QByteArray sig(_meta.signature());
+#endif
   int idx = sig.indexOf('(');
   sig = sig.left(idx);
   return sig;

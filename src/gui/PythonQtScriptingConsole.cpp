@@ -41,6 +41,7 @@
 
 #include "PythonQtScriptingConsole.h"
 
+#include <QAbstractItemView>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QKeyEvent>
