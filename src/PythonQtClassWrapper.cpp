@@ -245,6 +245,16 @@ static int PythonQtClassWrapper_init(PythonQtClassWrapper* self, PyObject* args,
   if (!self->classInfo()) {
     PyTypeObject*  superType = ((PyTypeObject *)self)->tp_base;
 
+    // recursively search for PythonQtClassWrapper superclass,
+    // this is needed for multiple levels of inheritance in python,
+    // e.g.
+    // class MyWidgetBase(QWidget):
+    //  ...
+    // class MyWidget(MyWidgetBase):
+    //  ...
+    while( superType && superType->ob_type != &PythonQtClassWrapper_Type )
+        superType = superType->tp_base;
+
     if (!superType || (superType->ob_type != &PythonQtClassWrapper_Type)) {
       PyErr_Format(PyExc_TypeError, "type %s is not derived from PythonQtClassWrapper", ((PyTypeObject*)self)->tp_name);
       return -1;
