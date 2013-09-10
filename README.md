@@ -44,15 +44,18 @@ Available branches
 ------------------
 
 This repository contains three branches:
-* Based on [r244](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=244)
+* Based on [r245](http://sourceforge.net/p/pythonqt/code/245/)
+
+### patched-4
+* Based on patched-3 + [r245](http://sourceforge.net/p/pythonqt/code/245/)
 
 ### patched-3
 * Backported:
- * Most of the [change specific to](https://github.com/commontk/PythonQt/compare/e2dce4b...patched-2) `patched-2` branch have been backported upstream: [r241](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=241), [r242](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=242), [r243](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=243)
+ * Most of the [change specific to](https://github.com/commontk/PythonQt/compare/e2dce4b...patched-2) `patched-2` branch have been backported upstream: [r241](http://sourceforge.net/p/pythonqt/code/241/), [r242](http://sourceforge.net/p/pythonqt/code/242/), [r243](http://sourceforge.net/p/pythonqt/code/243/)
 
 ### patched-2
 
-* Based on [r228](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=228)
+* Based on [r228](http://sourceforge.net/p/pythonqt/code/228/)
 * List of features:
  * At configuration time, detect the Qt version used and seamlessly compile the appropriate wrappers (Qt 4.8, 4.7 or 4.6).
  * Add method allowing to know if a python error occurred: [5935f29](https://github.com/commontk/PythonQt/commit/5935f29978deed892a13ddef02cb14c205c6124d)
@@ -66,12 +69,12 @@ This repository contains three branches:
  * Add SystemExit exception handler. If enabled, the signal "systemExitExceptionRaised" will be emitted. It gives application the opportunity to cleanup and terminate nicely: [3c84463d](https://github.com/commontk/PythonQt/commit/3c84463d3fc4a99c94207c1116ba33d7a412a95f)
  * Add "isatty" function to StdOutRedirect. Needed by some logging frame: [7132dba9](https://github.com/commontk/PythonQt/commit/7132dba93064c2a02591b42305fecdd5d59702d3)
 * Backported:
- * Most of the [change specific to](https://github.com/commontk/PythonQt/compare/svn-mirror...patched) `patched` branch have been backported upstream: [r200](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=200), [r201](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=201), [r202](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=202), [r203](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=203), [r204](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=204)
- * CMake option `PYTHONQT_USE_VTK` has been removed ([r205](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=205)), the foreign wrapper mechanism should be used: [r206](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=206)
+ * Most of the [change specific to](https://github.com/commontk/PythonQt/compare/svn-mirror...patched) `patched` branch have been backported upstream: [r200](http://sourceforge.net/p/pythonqt/code/200/), [r201](http://sourceforge.net/p/pythonqt/code/201/), [r202](http://sourceforge.net/p/pythonqt/code/202/), [r203](http://sourceforge.net/p/pythonqt/code/203/), [r204](http://sourceforge.net/p/pythonqt/code/204/)
+ * CMake option `PYTHONQT_USE_VTK` has been removed ([r205](http://sourceforge.net/p/pythonqt/code/205/)), the foreign wrapper mechanism should be used: [r206](http://sourceforge.net/p/pythonqt/code/206/)
 
 ### patched
 
-* Based on [r193](http://pythonqt.svn.sourceforge.net/viewvc/pythonqt?view=revision&revision=193)
+* Based on [r193](http://sourceforge.net/p/pythonqt/code/193/)
 * List of features:
  * CMake'ified PythonQt project
  * CMake'ified PythonQt/generator project
