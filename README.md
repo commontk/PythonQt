@@ -48,6 +48,8 @@ This repository contains three branches:
 
 ### patched-4
 * Based on patched-3 + [r245](http://sourceforge.net/p/pythonqt/code/245/)
+* List of features:
+ * Add BUILD_TESTING option disabled by default to keep behavior consistent with previous version.
 
 ### patched-3
 * Backported:
