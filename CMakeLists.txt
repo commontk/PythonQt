@@ -11,8 +11,6 @@ cmake_minimum_required(VERSION 2.8)
 project(PythonQt)
 #-----------------------------------------------------------------------------
 
-include(CTestUseLaunchers OPTIONAL)
-
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -71,7 +69,9 @@ if(QT4_FOUND)
     endif()
     set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
   endforeach()
-  
+
+  set(QT_USE_QTTEST ${BUILD_TESTING})
+
   include(${QT_USE_FILE})
 else()
   message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
@@ -238,3 +238,35 @@ install(TARGETS PythonQt
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 install(FILES ${headers} DESTINATION include/PythonQt)
+
+#-----------------------------------------------------------------------------
+# Testing
+
+option(BUILD_TESTING "Build the testing tree." OFF)
+include(CTest)
+
+if(BUILD_TESTING)
+  create_test_sourcelist(test_sources PythonQtCppTests.cpp
+    tests/PythonQtTestMain.cpp
+    )
+
+  list(APPEND test_sources
+    tests/PythonQtTests.cpp
+    tests/PythonQtTests.h
+    )
+
+  QT4_WRAP_CPP(test_sources
+    tests/PythonQtTests.h
+    )
+
+  set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
+  
+  add_executable(PythonQtCppTests ${test_sources})
+  target_link_libraries(PythonQtCppTests PythonQt)
+  
+  add_test(
+    NAME tests_PythonQtTestMain
+    COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
+    )
+endif()
+
