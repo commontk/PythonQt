@@ -298,7 +298,20 @@ void PythonQtTestSlotCalling::testCppFactory()
   // with int overload to check overloading
   QVERIFY(_helper->runScript("obj.testNoArg()\nfrom PythonQt.private import PQCppObject2\na = PQCppObject2()\nif a.testEnumFlag3(PQCppObject2.TestEnumValue2)==PQCppObject2.TestEnumValue2: obj.setPassed();\n"));
 
+  PythonQt::self()->registerCPPClass("PQCppObjectQFlagOnly",NULL,NULL, PythonQtCreateObject<PQCppObjectQFlagOnlyDecorator>);
+
+
+  // local enum (decorated)
+  QVERIFY(_helper->runScript("obj.testNoArg()\nfrom PythonQt.private import PQCppObjectQFlagOnly\na = PQCppObjectQFlagOnly()\nprint a.testEnumFlag1\nif a.testEnumFlag1(PQCppObjectQFlagOnly.TestEnumValue2)==PQCppObjectQFlagOnly.TestEnumValue2: obj.setPassed();\n"));
+
+  // enum with namespace (decorated)
+  QVERIFY(_helper->runScript("obj.testNoArg()\nfrom PythonQt.private import PQCppObjectQFlagOnly\na = PQCppObjectQFlagOnly()\nif a.testEnumFlag2(PQCppObjectQFlagOnly.TestEnumValue2)==PQCppObjectQFlagOnly.TestEnumValue2: obj.setPassed();\n"));
+  // with int overload to check overloading
+  QVERIFY(_helper->runScript("obj.testNoArg()\nfrom PythonQt.private import PQCppObjectQFlagOnly\na = PQCppObjectQFlagOnly()\nif a.testEnumFlag3(PQCppObjectQFlagOnly.TestEnumValue2)==PQCppObjectQFlagOnly.TestEnumValue2: obj.setPassed();\n"));
+
 }
+
+// PQCppObject2Decorator
 
 PQCppObject2Decorator::TestEnumFlag PQCppObject2Decorator::testEnumFlag1(PQCppObject2* obj, PQCppObject2Decorator::TestEnumFlag flag) {
   return flag;
@@ -315,6 +328,26 @@ PQCppObject2Decorator::TestEnumFlag PQCppObject2Decorator::testEnumFlag3(PQCppOb
 PQCppObject2Decorator::TestEnumFlag PQCppObject2Decorator::testEnumFlag3(PQCppObject2* obj, PQCppObject2Decorator::TestEnumFlag flag) {
   return flag;
 }
+
+// PQCppObjectQFlagOnlyDecorator
+
+PQCppObjectQFlagOnlyDecorator::TestEnumFlag PQCppObjectQFlagOnlyDecorator::testEnumFlag1(PQCppObjectQFlagOnly* obj, PQCppObjectQFlagOnlyDecorator::TestEnumFlag flag) {
+  return flag;
+}
+
+PQCppObjectQFlagOnly::TestEnumFlag PQCppObjectQFlagOnlyDecorator::testEnumFlag2(PQCppObjectQFlagOnly* obj, PQCppObjectQFlagOnly::TestEnumFlag flag) {
+  return flag;
+}
+
+// with int overload
+PQCppObjectQFlagOnlyDecorator::TestEnumFlag PQCppObjectQFlagOnlyDecorator::testEnumFlag3(PQCppObjectQFlagOnly* obj, int flag) {
+  return (TestEnumFlag)-1;
+}
+PQCppObjectQFlagOnlyDecorator::TestEnumFlag PQCppObjectQFlagOnlyDecorator::testEnumFlag3(PQCppObjectQFlagOnly* obj, PQCppObjectQFlagOnlyDecorator::TestEnumFlag flag) {
+  return flag;
+}
+
+// PythonQtTestSlotCalling
 
 void PythonQtTestSlotCalling::testMultiArgsSlotCall()
 {
