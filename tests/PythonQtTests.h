@@ -295,6 +295,36 @@ public:
 
 };
 
+typedef PQCppObject2 PQCppObjectQFlagOnly;
+
+class PQCppObjectQFlagOnlyDecorator : public QObject {
+  Q_OBJECT
+
+public:
+  Q_FLAGS(TestEnumFlag)
+
+  enum TestEnumFlag {
+    TestEnumValue1 = 0,
+    TestEnumValue2 = 1
+  };
+
+  Q_DECLARE_FLAGS(TestEnum, TestEnumFlag)
+
+  public slots:
+  PQCppObjectQFlagOnly* new_PQCppObjectQFlagOnly() {
+    return new PQCppObjectQFlagOnly();
+  }
+
+  TestEnumFlag testEnumFlag1(PQCppObjectQFlagOnly* obj, TestEnumFlag flag);
+
+  PQCppObjectQFlagOnly::TestEnumFlag testEnumFlag2(PQCppObjectQFlagOnly* obj, PQCppObjectQFlagOnly::TestEnumFlag flag);
+
+  // with int overload
+  TestEnumFlag testEnumFlag3(PQCppObjectQFlagOnly* obj, int flag);
+  TestEnumFlag testEnumFlag3(PQCppObjectQFlagOnly* obj, TestEnumFlag flag);
+
+};
+
 class PQUnknownValueObject
 {
 public:
