@@ -50,6 +50,8 @@ This repository contains three branches:
 * Based on patched-3 + [r245](http://sourceforge.net/p/pythonqt/code/245/)
 * List of features:
  * Add BUILD_TESTING option disabled by default to keep behavior consistent with previous version.
+ * Do not exclude enums from wrapping if they are QFlags.
+ * Ensure enums added using only Q_FLAGS without corresponding Q_ENUMS are wrapped.
 
 ### patched-3
 * Backported:
