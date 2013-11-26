@@ -161,15 +161,19 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
       src/PythonQtStdDecorators.cpp
       src/PythonQtStdIn.cpp
       src/PythonQtStdOut.cpp
-      src/gui/PythonQtScriptingConsole.cpp
-    
       generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
-
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
+  )
+  
+  if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
+    set(sources
+      ${sources}
+      src/gui/PythonQtScriptingConsole.cpp
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
-  )
+    )
+  endif()
 
 #-----------------------------------------------------------------------------
 # List headers.  This is list is used for the install command.
@@ -207,11 +211,17 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
       src/PythonQt.h
       src/PythonQtSignalReceiver.h
       src/PythonQtStdDecorators.h
-      src/gui/PythonQtScriptingConsole.h
-
+      
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
-      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
   )
+  
+  if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
+    set(moc_sources
+      ${moc_sources}
+      src/gui/PythonQtScriptingConsole.h
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
+    )
+  endif()
 
 #-----------------------------------------------------------------------------
 # Add extra sources

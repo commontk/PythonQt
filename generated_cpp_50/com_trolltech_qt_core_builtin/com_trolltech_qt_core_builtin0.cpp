@@ -2,26 +2,6 @@
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QDate>
-#include <QGesture>
-#include <QNoImplicitBoolCast>
-#include <QStringList>
-#include <QTextDocument>
-#include <QVariant>
-#include <qbitarray.h>
-#include <qbytearray.h>
-#include <qdatetime.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmatrix.h>
-#include <qmatrix4x4.h>
-#include <qpoint.h>
-#include <qrect.h>
-#include <qregexp.h>
-#include <qsize.h>
-#include <qstringlist.h>
-#include <qtransform.h>
-#include <qurl.h>
 
 QBitArray* PythonQtWrapper_QBitArray::new_QBitArray()
 { 
@@ -1520,6 +1500,7 @@ int  PythonQtWrapper_QPoint::manhattanLength(QPoint* theWrappedObject) const
   return ( theWrappedObject->manhattanLength());
 }
 
+#if defined(QT_GUI_LIB)
 QPoint  PythonQtWrapper_QPoint::__mul__(QPoint* theWrappedObject, const QMatrix&  m)
 {
   return ( (*theWrappedObject)* m);
@@ -1534,6 +1515,7 @@ QPoint  PythonQtWrapper_QPoint::__mul__(QPoint* theWrappedObject, const QTransfo
 {
   return ( (*theWrappedObject)* m);
 }
+#endif
 
 const QPoint  PythonQtWrapper_QPoint::__mul__(QPoint* theWrappedObject, double  factor)
 {
@@ -1651,6 +1633,7 @@ qreal  PythonQtWrapper_QPointF::manhattanLength(QPointF* theWrappedObject) const
   return ( theWrappedObject->manhattanLength());
 }
 
+#if defined(QT_GUI_LIB)
 QPointF  PythonQtWrapper_QPointF::__mul__(QPointF* theWrappedObject, const QMatrix&  m)
 {
   return ( (*theWrappedObject)* m);
@@ -1665,6 +1648,7 @@ QPointF  PythonQtWrapper_QPointF::__mul__(QPointF* theWrappedObject, const QTran
 {
   return ( (*theWrappedObject)* m);
 }
+#endif
 
 const QPointF  PythonQtWrapper_QPointF::__mul__(QPointF* theWrappedObject, qreal  c)
 {

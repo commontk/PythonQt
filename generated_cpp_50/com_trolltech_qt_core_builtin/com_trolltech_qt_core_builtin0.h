@@ -1,28 +1,28 @@
 #include <PythonQt.h>
 #include <QDate>
-#include <QGesture>
 #include <QNoImplicitBoolCast>
 #include <QObject>
 #include <QStringList>
-#include <QTextDocument>
 #include <QVariant>
 #include <qbitarray.h>
 #include <qbytearray.h>
 #include <qdatetime.h>
 #include <qlist.h>
 #include <qlocale.h>
-#include <qmatrix.h>
-#include <qmatrix4x4.h>
 #include <qnamespace.h>
 #include <qpoint.h>
 #include <qrect.h>
 #include <qregexp.h>
 #include <qsize.h>
 #include <qstringlist.h>
-#include <qtransform.h>
 #include <qurl.h>
 
-
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
+  #include <qmatrix.h>
+  #include <qmatrix4x4.h>
+  #include <qtransform.h>
+#endif
 
 class PythonQtWrapper_QBitArray : public QObject
 { Q_OBJECT
@@ -430,9 +430,11 @@ return a; }
 void delete_QPoint(QPoint* obj) { delete obj; } 
     bool  isNull(QPoint* theWrappedObject) const;
     int  manhattanLength(QPoint* theWrappedObject) const;
+#if defined(QT_GUI_LIB)
     QPoint  __mul__(QPoint* theWrappedObject, const QMatrix&  m);
     QPoint  __mul__(QPoint* theWrappedObject, const QMatrix4x4&  matrix);
     QPoint  __mul__(QPoint* theWrappedObject, const QTransform&  m);
+#endif    
     const QPoint  __mul__(QPoint* theWrappedObject, double  factor);
     const QPoint  __mul__(QPoint* theWrappedObject, float  factor);
     const QPoint  __mul__(QPoint* theWrappedObject, int  factor);
@@ -472,9 +474,11 @@ return a; }
 void delete_QPointF(QPointF* obj) { delete obj; } 
     bool  isNull(QPointF* theWrappedObject) const;
     qreal  manhattanLength(QPointF* theWrappedObject) const;
+#if defined(QT_GUI_LIB)
     QPointF  __mul__(QPointF* theWrappedObject, const QMatrix&  m);
     QPointF  __mul__(QPointF* theWrappedObject, const QMatrix4x4&  matrix);
     QPointF  __mul__(QPointF* theWrappedObject, const QTransform&  m);
+#endif
     const QPointF  __mul__(QPointF* theWrappedObject, qreal  c);
     QPointF*  __imul__(QPointF* theWrappedObject, qreal  c);
     const QPointF  __add__(QPointF* theWrappedObject, const QPointF&  p2);

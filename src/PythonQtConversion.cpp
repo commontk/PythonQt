@@ -283,6 +283,8 @@ return Py_None;
 
 void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, void* alreadyAllocatedCPPObject)
 {
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
   void* ptr = alreadyAllocatedCPPObject;
 
   static int penId = QMetaType::type("QPen");
@@ -351,6 +353,11 @@ void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, vo
       return ptr;
     }
   }
+#else
+  Q_UNUSED(typeId);
+  Q_UNUSED(obj);
+  Q_UNUSED(alreadyAllocatedCPPObject);
+#endif
   return NULL;
 }
 
@@ -1262,24 +1269,27 @@ QString PythonQtConv::CPPObjectToString(int type, const void* data) {
     case QVariant::Time: {
       const QTime* s = static_cast<const QTime*>(data);
       r = s->toString(Qt::ISODate);
-    }
+      }
       break;
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
     case QVariant::Pixmap:
-    {
+      {
       const QPixmap* s = static_cast<const QPixmap*>(data);
       r = QString("Pixmap ") + QString::number(s->width()) + ", " + QString::number(s->height());
-    }
+      }
       break;
     case QVariant::Image:
-    {
+      {
       const QImage* s = static_cast<const QImage*>(data);
       r = QString("Image ") + QString::number(s->width()) + ", " + QString::number(s->height());
-    }
+      }
       break;
+#endif
     case QVariant::Url:
       {
-        const QUrl* s = static_cast<const QUrl*>(data);
-        r = s->toString();
+      const QUrl* s = static_cast<const QUrl*>(data);
+      r = s->toString();
       }
       break;
       //TODO: add more printing for other variant types

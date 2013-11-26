@@ -58,7 +58,9 @@
 PythonQt* PythonQt::_self = NULL;
 int       PythonQt::_uniqueModuleCount = 0;
 
+#if defined(QT_GUI_LIB)
 void PythonQt_init_QtGuiBuiltin(PyObject*);
+#endif
 void PythonQt_init_QtCoreBuiltin(PyObject*);
 
 
@@ -90,8 +92,10 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
     // TODO: which other POD types should be available for QList etc.
 
     PythonQt_init_QtCoreBuiltin(NULL);
+#if defined(QT_GUI_LIB)
     PythonQt_init_QtGuiBuiltin(NULL);
-
+#endif
+    
     PythonQt::self()->addDecorators(new PythonQtStdDecorators());
     PythonQt::self()->registerCPPClass("QMetaObject",0, "QtCore", PythonQtCreateObject<PythonQtWrapper_QMetaObject>);
 
@@ -111,6 +115,8 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
     PythonQtRegisterToolClassesTemplateConverter(QPointF);
     PythonQtRegisterToolClassesTemplateConverter(QRegExp);
 
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
     PythonQtRegisterToolClassesTemplateConverter(QFont);
     PythonQtRegisterToolClassesTemplateConverter(QPixmap);
     PythonQtRegisterToolClassesTemplateConverter(QBrush);
@@ -128,7 +134,7 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
     PythonQtRegisterToolClassesTemplateConverter(QTextLength);
     PythonQtRegisterToolClassesTemplateConverter(QTextFormat);
     PythonQtRegisterToolClassesTemplateConverter(QMatrix);
-
+#endif
 
     PyObject* pack = PythonQt::priv()->packageByName("QtCore");
     PyObject* pack2 = PythonQt::priv()->packageByName("Qt");
