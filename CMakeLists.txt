@@ -16,7 +16,11 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 
 set(PythonQt_QT_VERSION "" CACHE STRING "Choose which version of Qt (4 or 5) you wand to wrap")
 
-if (PythonQt_QT_VERSION)
+if (PythonQt_QT_VERSION VERSION_GREATER "4")
+  set(Qt5_CMAKE_PATH NOTFOUND CACHE PATH "Path containing the Qt5* folders with inside the Qt5*Config.cmake files.")
+endif()
+
+if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAKE_PATH)
 
   option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 
@@ -28,6 +32,9 @@ if (PythonQt_QT_VERSION)
       list(APPEND qtlibs_lower ${qtlib_lower})
     endforeach()
     set(qtlibs ${qtlibs_lower})
+  else()
+    # Add Qt5 CMake path in CMAKE_PREFIX_PATH
+    SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Qt5_CMAKE_PATH})
   endif()
 
   foreach(qtlib ${qtlibs})
