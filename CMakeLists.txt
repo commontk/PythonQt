@@ -38,7 +38,12 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
   endif()
 
   foreach(qtlib ${qtlibs})
-    OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
+    if ((PythonQt_QT_VERSION VERSION_GREATER "4") AND (${qtlib} STREQUAL "Core"))
+      # Because the macro qt5_wrap_cpp is available in Qt5Core
+      OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" TRUE)
+    else ()
+      OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" FALSE)
+    endif ()
   endforeach()
 
   # TODO: xmlpatterns wrapper does *NOT* build at all :(
