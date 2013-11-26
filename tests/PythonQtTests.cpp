@@ -535,7 +535,10 @@ void PythonQtTestApi::testQtNamespace()
 {
   QVERIFY(_main.getVariable("PythonQt.QtCore.Qt.red").toInt()==Qt::red);
   QVERIFY(_main.getVariable("PythonQt.QtCore.Qt.FlatCap").toInt()==Qt::FlatCap);
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
+  // The function 'escape' (http://qt-project.org/doc/qt-4.8/qt.html#escape) does not exist in Qt5
   QVERIFY(PythonQtObjectPtr(_main.getVariable("PythonQt.QtCore.Qt.escape")));
+#endif
   // check for an enum type wrapper
   QVERIFY(PythonQtObjectPtr(_main.getVariable("PythonQt.QtCore.Qt.AlignmentFlag")));
   // check for a flags type wrapper
