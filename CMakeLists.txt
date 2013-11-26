@@ -229,23 +229,11 @@ if (PythonQt_QT_VERSION)
   endforeach()
 
 #-----------------------------------------------------------------------------
-# UI files
-  set(ui_sources )
-
-#-----------------------------------------------------------------------------
-# Resources
-  set(qrc_sources )
-
-#-----------------------------------------------------------------------------
 # Do wrapping
   if (PythonQt_QT_VERSION VERSION_GREATER "4")
     qt5_wrap_cpp(gen_moc_sources ${moc_sources})
-    qt5_wrap_ui(gen_ui_sources ${ui_sources})
-    qt5_add_resources(gen_qrc_sources ${qrc_sources})
   else()
     qt4_wrap_cpp(gen_moc_sources ${moc_sources})
-    qt4_wrap_ui(gen_ui_sources ${ui_sources})
-    qt4_add_resources(gen_qrc_sources ${qrc_sources})
   endif()
 
 #-----------------------------------------------------------------------------
