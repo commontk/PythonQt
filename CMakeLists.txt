@@ -22,6 +22,7 @@ if (PythonQt_QT_VERSION VERSION_LESS "5")
   foreach(qtlib ${qtlibs})
     string(TOLOWER ${qtlib} qtlib_lower)
     list(APPEND qtlibs_lower ${qtlib_lower})
+  endforeach()
   set(qtlibs ${qtlibs_lower})
 endif()
 
