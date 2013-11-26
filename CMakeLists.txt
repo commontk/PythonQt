@@ -123,7 +123,7 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
     set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
   endif()
 
-  if("${generated_cpp_suffix}" STREQUAL "_51")
+  if(("${generated_cpp_suffix}" STREQUAL "_51") OR ("${generated_cpp_suffix}" STREQUAL "_52"))
     set(generated_cpp_suffix "_50")
   endif()
   if("${generated_cpp_suffix}" STREQUAL "_48")
