@@ -383,7 +383,7 @@ if(BUILD_TESTING)
   
   add_test(
     NAME tests_PythonQtTestMain
-    COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
+    COMMAND PythonQtCppTests tests/PythonQtTestMain
     )
 endif()
 
