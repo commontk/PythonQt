@@ -1,33 +1,24 @@
 #include <PythonQt.h>
+
 #include <QAbstractTextDocumentLayout>
 #include <QIconEngine>
 #include <QObject>
-#include <QPrinterInfo>
-#include <QTextEdit>
 #include <QVariant>
-#include <qabstractprintdialog.h>
-#include <qaction.h>
+
 #include <qbitmap.h>
 #include <qbrush.h>
-#include <qbuttongroup.h>
 #include <qbytearray.h>
 #include <qcolor.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
-#include <qdialog.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
 #include <qiodevice.h>
 #include <qkeysequence.h>
-#include <qlabel.h>
-#include <qlayout.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
 #include <qmatrix.h>
-#include <qmenu.h>
 #include <qmimedata.h>
 #include <qobject.h>
 #include <qpaintdevice.h>
@@ -39,34 +30,15 @@
 #include <qpictureformatplugin.h>
 #include <qpixmap.h>
 #include <qpixmapcache.h>
-#include <qplaintextedit.h>
 #include <qpoint.h>
 #include <qpolygon.h>
-#include <qprintdialog.h>
-#include <qprintengine.h>
-#include <qprinter.h>
-#include <qprintpreviewdialog.h>
-#include <qprintpreviewwidget.h>
-#include <qprogressbar.h>
-#include <qprogressdialog.h>
-#include <qpushbutton.h>
 #include <qquaternion.h>
-#include <qradiobutton.h>
 #include <qrect.h>
 #include <qregexp.h>
 #include <qregion.h>
-#include <qrubberband.h>
-#include <qscrollarea.h>
-#include <qscrollbar.h>
 #include <qsessionmanager.h>
-#include <qshortcut.h>
 #include <qsize.h>
-#include <qsizegrip.h>
-#include <qsizepolicy.h>
-#include <qslider.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qtextcursor.h>
 #include <qtextdocument.h>
 #include <qtextformat.h>
@@ -77,9 +49,45 @@
 #include <qvector.h>
 #include <qvector3d.h>
 #include <qvector4d.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <QTextEdit>
+
+#include <qaction.h>
+#include <qbuttongroup.h>
+#include <qdialog.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qmenu.h>
+#include <qplaintextedit.h>
+#include <qprogressbar.h>
+#include <qprogressdialog.h>
+#include <qpushbutton.h>
+#include <qradiobutton.h>
+#include <qrubberband.h>
+#include <qscrollarea.h>
+#include <qscrollbar.h>
+#include <qshortcut.h>
+#include <qsizegrip.h>
+#include <qsizepolicy.h>
+#include <qslider.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
 #include <qwidget.h>
+#endif
 
+#if defined(QT_PRINTSUPPORT_LIB)
+#include <QPrinterInfo>
 
+#include <qabstractprintdialog.h>
+#include <qprintdialog.h>
+#include <qprintengine.h>
+#include <qprinter.h>
+#include <qprintpreviewdialog.h>
+#include <qprintpreviewwidget.h>
+#endif
 
 class PythonQtShell_QPicture : public QPicture
 {
@@ -259,7 +267,7 @@ void delete_QPixmapCache_Key(QPixmapCache::Key* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QPlainTextDocumentLayout : public QPlainTextDocumentLayout
 {
@@ -474,7 +482,7 @@ void delete_QPlainTextEdit(QPlainTextEdit* obj) { delete obj; }
     QTextOption::WrapMode  wordWrapMode(QPlainTextEdit* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -545,7 +553,7 @@ void delete_QPolygonF(QPolygonF* obj) { delete obj; }
 
 
 
-
+#if defined(QT_PRINTSUPPORT_LIB)
 
 class PythonQtShell_QPrintDialog : public QPrintDialog
 {
@@ -937,9 +945,9 @@ void delete_QPrinter(QPrinter* obj) { delete obj; }
     int  toPage(QPrinter* theWrappedObject) const;
 };
 
+#endif
 
-
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QProgressBar : public QProgressBar
 {
@@ -1226,7 +1234,7 @@ void delete_QPushButton(QPushButton* obj) { delete obj; }
     QSize  sizeHint(QPushButton* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1318,7 +1326,7 @@ void delete_QRadialGradient(QRadialGradient* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QRadioButton : public QRadioButton
 {
@@ -1400,7 +1408,7 @@ void delete_QRadioButton(QRadioButton* obj) { delete obj; }
     QSize  sizeHint(QRadioButton* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1467,7 +1475,7 @@ void delete_QResizeEvent(QResizeEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QRubberBand : public QRubberBand
 {
@@ -1740,7 +1748,7 @@ void delete_QScrollBar(QScrollBar* obj) { delete obj; }
     void wheelEvent(QScrollBar* theWrappedObject, QWheelEvent*  arg__1);
 };
 
-
+#endif
 
 
 
@@ -1771,7 +1779,7 @@ public slots:
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QShortcut : public QShortcut
 {
@@ -1817,7 +1825,7 @@ void delete_QShortcut(QShortcut* obj) { delete obj; }
     QString  whatsThis(QShortcut* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1857,7 +1865,7 @@ void delete_QShowEvent(QShowEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QSizeGrip : public QSizeGrip
 {
@@ -2032,4 +2040,4 @@ void delete_QSlider(QSlider* obj) { delete obj; }
     QSlider::TickPosition  tickPosition(QSlider* theWrappedObject) const;
 };
 
-
+#endif

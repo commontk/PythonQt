@@ -1,58 +1,10 @@
 #include "com_trolltech_qt_gui6.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QIconEngine>
-#include <QSize>
-#include <QStringList>
-#include <QVariant>
-#include <qabstractitemmodel.h>
-#include <qaction.h>
-#include <qapplication.h>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlineedit.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpalette.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qspinbox.h>
-#include <qsplashscreen.h>
-#include <qsplitter.h>
-#include <qstackedlayout.h>
-#include <qstackedwidget.h>
-#include <qstandarditemmodel.h>
-#include <qstatusbar.h>
-#include <qstringlist.h>
-#include <qstringlistmodel.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtextstream.h>
-#include <qtransform.h>
-#include <qvector.h>
-#include <qwidget.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QSpacerItem::~PythonQtShell_QSpacerItem() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -6062,7 +6014,7 @@ QWidget*  PythonQtWrapper_QStackedWidget::widget(QStackedWidget* theWrappedObjec
   return ( theWrappedObject->widget(arg__1));
 }
 
-
+#endif
 
 PythonQtShell_QStandardItem::~PythonQtShell_QStandardItem() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -7942,7 +7894,7 @@ QStandardItem*  PythonQtWrapper_QStandardItemModel::verticalHeaderItem(QStandard
   return ( theWrappedObject->verticalHeaderItem(row));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QStatusBar::~PythonQtShell_QStatusBar() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -8914,7 +8866,7 @@ void PythonQtWrapper_QStatusBar::showEvent(QStatusBar* theWrappedObject, QShowEv
   ( ((PythonQtPublicPromoter_QStatusBar*)theWrappedObject)->promoted_showEvent(arg__1));
 }
 
-
+#endif
 
 QStatusTipEvent* PythonQtWrapper_QStatusTipEvent::new_QStatusTipEvent(const QString&  tip)
 { 
@@ -9936,7 +9888,7 @@ Qt::DropActions  PythonQtWrapper_QStringListModel::supportedDropActions(QStringL
   return ( ((PythonQtPublicPromoter_QStringListModel*)theWrappedObject)->promoted_supportedDropActions());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QStyle::~PythonQtShell_QStyle() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10921,4 +10873,4 @@ QStyleOptionSizeGrip* PythonQtWrapper_QStyleOptionSizeGrip::new_QStyleOptionSize
 { 
 return new PythonQtShell_QStyleOptionSizeGrip(other); }
 
-
+#endif

@@ -69,12 +69,16 @@
   #include <QRegion>
   #include <QBitmap>
   #include <QCursor>
-  #include <QSizePolicy>
   #include <QKeySequence>
   #include <QPen>
   #include <QTextLength>
   #include <QTextFormat>
   #include <QMatrix>
+#endif
+
+// Only included if QtWidgets is wrapped
+#if defined(QT_WIDGETS_LIB)
+  #include <QSizePolicy>
 #endif
 
 #endif

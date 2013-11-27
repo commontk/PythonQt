@@ -128,12 +128,16 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
     PythonQtRegisterToolClassesTemplateConverter(QRegion);
     PythonQtRegisterToolClassesTemplateConverter(QBitmap);
     PythonQtRegisterToolClassesTemplateConverter(QCursor);
-    PythonQtRegisterToolClassesTemplateConverter(QSizePolicy);
     PythonQtRegisterToolClassesTemplateConverter(QKeySequence);
     PythonQtRegisterToolClassesTemplateConverter(QPen);
     PythonQtRegisterToolClassesTemplateConverter(QTextLength);
     PythonQtRegisterToolClassesTemplateConverter(QTextFormat);
     PythonQtRegisterToolClassesTemplateConverter(QMatrix);
+#endif
+    
+// Only included if QtWidgets is wrapped
+#if defined(QT_WIDGETS_LIB)
+    PythonQtRegisterToolClassesTemplateConverter(QSizePolicy);
 #endif
 
     PyObject* pack = PythonQt::priv()->packageByName("QtCore");

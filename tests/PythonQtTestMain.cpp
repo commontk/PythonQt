@@ -45,7 +45,7 @@
 int main( int argc, char **argv )
 {
 #if defined(QT_GUI_LIB)
-  QApplication qapp(argc, argv);
+  QGuiApplication qapp(argc, argv);
 #else
   QCoreApplication qapp(argc, argv);
 #endif

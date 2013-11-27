@@ -81,6 +81,7 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
   set(minimum_required_qt_version "4.6.2")
 
   if (PythonQt_QT_VERSION VERSION_GREATER "4")
+    
     set(QT_LIBRARIES)
     foreach(qtlib ${qtlibs})
       if (${PythonQt_Wrap_Qt${qtlib}})
@@ -175,9 +176,15 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
   if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
     set(sources
       ${sources}
-      src/gui/PythonQtScriptingConsole.cpp
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
+    )
+  endif()
+  
+  if (PythonQt_Wrap_QtWidgets OR PythonQt_Wrap_Qtwidgets)
+    set(sources
+      ${sources}
+      src/gui/PythonQtScriptingConsole.cpp
     )
   endif()
 
@@ -217,15 +224,20 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
       src/PythonQt.h
       src/PythonQtSignalReceiver.h
       src/PythonQtStdDecorators.h
-      
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
   )
   
   if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
     set(moc_sources
       ${moc_sources}
-      src/gui/PythonQtScriptingConsole.h
       generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
+    )
+  endif()
+  
+  if (PythonQt_Wrap_QtWidgets OR PythonQt_Wrap_Qtwidgets)
+    set(moc_sources
+      ${moc_sources}
+      src/gui/PythonQtScriptingConsole.h
     )
   endif()
 
@@ -236,29 +248,31 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
     
       ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
       string(TOLOWER ${qtlib} qtlib_lower)
-      # TODO: gui is currently including widgets and printsupport files
-      # TODO: WebKit is currently including WebKitWidgets files
+      
+      # NOTE: Gui is currently including Widgets and PrintSupport files. However, both modules must be selected in CMake to include their classes in gui
+      # NOTE: WebKit is currently including WebKitWidgets files. However, it must be selected in CMake to include its classes in WebKit.
       if ((NOT "${qtlib_lower}" STREQUAL "widgets")
           AND (NOT "${qtlib_lower}" STREQUAL "printsupport")
-          AND (NOT "${qtlib_lower}" STREQUAL "webkitwidgets")
-          )
+          AND (NOT "${qtlib_lower}" STREQUAL "webkitwidgets"))
+         
         set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib_lower}/com_trolltech_qt_${qtlib_lower})
-    
+
         foreach(index RANGE 0 11)
-    
+        
           # Source files
           if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
             list(APPEND sources ${file_prefix}${index}.cpp)
           endif()
-      
+        
           # Headers that should run through moc
           if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
             list(APPEND moc_sources ${file_prefix}${index}.h)
           endif()
-      
+        
         endforeach()
-    
+
         list(APPEND sources ${file_prefix}_init.cpp)
+        
       endif()
 
     endif()

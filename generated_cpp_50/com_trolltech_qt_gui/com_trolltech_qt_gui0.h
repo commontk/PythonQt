@@ -1,4 +1,5 @@
 #include <PythonQt.h>
+
 #include <QBasicTimer>
 #include <QFont>
 #include <QFontMetrics>
@@ -11,59 +12,25 @@
 #include <QPixmap>
 #include <QTextCharFormat>
 #include <QVariant>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qabstractprintdialog.h>
-#include <qabstractscrollarea.h>
-#include <qabstractslider.h>
-#include <qabstractspinbox.h>
-#include <qaction.h>
-#include <qactiongroup.h>
-#include <qapplication.h>
+
 #include <qbitmap.h>
-#include <qboxlayout.h>
 #include <qbrush.h>
-#include <qbuttongroup.h>
 #include <qbytearray.h>
-#include <qcalendarwidget.h>
-#include <qcheckbox.h>
 #include <qclipboard.h>
 #include <qcolor.h>
-#include <qcolordialog.h>
-#include <qcolumnview.h>
-#include <qcombobox.h>
-#include <qcommandlinkbutton.h>
-#include <qcommonstyle.h>
-#include <qcompleter.h>
 #include <qcoreapplication.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
-#include <qdatawidgetmapper.h>
 #include <qdatetime.h>
-#include <qdatetimeedit.h>
 #include <qdesktopservices.h>
-#include <qdesktopwidget.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsitem.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicsscene.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicstransform.h>
-#include <qgraphicswidget.h>
 #include <qimage.h>
 #include <qitemselectionmodel.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlineedit.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
-#include <qmenu.h>
 #include <qmimedata.h>
 #include <qobject.h>
 #include <qpaintdevice.h>
@@ -76,25 +43,66 @@
 #include <qpixmap.h>
 #include <qpoint.h>
 #include <qpolygon.h>
-#include <qprinter.h>
 #include <qrect.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsessionmanager.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qtextformat.h>
 #include <qtransform.h>
 #include <qtranslator.h>
 #include <qurl.h>
 #include <qvalidator.h>
 #include <qvector.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <qabstractbutton.h>
+#include <qabstractitemdelegate.h>
+#include <qabstractitemmodel.h>
+#include <qabstractitemview.h>
+#include <qabstractscrollarea.h>
+#include <qabstractslider.h>
+#include <qabstractspinbox.h>
+#include <qaction.h>
+#include <qactiongroup.h>
+#include <qapplication.h>
+#include <qboxlayout.h>
+#include <qbuttongroup.h>
+#include <qcalendarwidget.h>
+#include <qcheckbox.h>
+#include <qcolordialog.h>
+#include <qcolumnview.h>
+#include <qcombobox.h>
+#include <qcommandlinkbutton.h>
+#include <qcommonstyle.h>
+#include <qcompleter.h>
+#include <qdatawidgetmapper.h>
+#include <qdatetimeedit.h>
+#include <qdesktopwidget.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsitem.h>
+#include <qgraphicsproxywidget.h>
+#include <qgraphicsscene.h>
+#include <qgraphicssceneevent.h>
+#include <qgraphicstransform.h>
+#include <qgraphicswidget.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qlineedit.h>
+#include <qmenu.h>
+#include <qscrollbar.h>
+#include <qsizepolicy.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
 #include <qwidget.h>
+#endif
 
+#if defined(QT_PRINTSUPPORT_LIB)
+#include <qabstractprintdialog.h>
+#include <qprinter.h>
+#endif
 
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QAbstractButton : public QAbstractButton
 {
@@ -602,9 +610,9 @@ void delete_QAbstractItemView(QAbstractItemView* obj) { delete obj; }
     bool  viewportEvent(QAbstractItemView* theWrappedObject, QEvent*  event);
 };
 
+#endif
 
-
-
+#if defined(QT_PRINTSUPPORT_LIB)
 
 class PythonQtShell_QAbstractPrintDialog : public QAbstractPrintDialog
 {
@@ -693,9 +701,9 @@ void delete_QAbstractPrintDialog(QAbstractPrintDialog* obj) { delete obj; }
     int  toPage(QAbstractPrintDialog* theWrappedObject) const;
 };
 
+#endif
 
-
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QAbstractScrollArea : public QAbstractScrollArea
 {
@@ -1163,7 +1171,7 @@ void delete_QAction(QAction* obj) { delete obj; }
     QString  whatsThis(QAction* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1179,7 +1187,7 @@ void delete_QActionEvent(QActionEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QActionGroup : public QActionGroup
 {
@@ -1634,7 +1642,7 @@ void delete_QCheckBox(QCheckBox* obj) { delete obj; }
     QSize  sizeHint(QCheckBox* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1676,7 +1684,7 @@ void delete_QCloseEvent(QCloseEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QColorDialog : public QColorDialog
 {
@@ -2334,7 +2342,7 @@ void delete_QCompleter(QCompleter* obj) { delete obj; }
     bool  wrapAround(QCompleter* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -2396,7 +2404,7 @@ void delete_QContextMenuEvent(QContextMenuEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QDataWidgetMapper : public QDataWidgetMapper
 {
@@ -2674,7 +2682,7 @@ void delete_QDateTimeEdit(QDateTimeEdit* obj) { delete obj; }
     void wheelEvent(QDateTimeEdit* theWrappedObject, QWheelEvent*  event);
 };
 
-
+#endif
 
 
 

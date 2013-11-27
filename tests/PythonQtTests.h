@@ -42,6 +42,9 @@
 */
 //----------------------------------------------------------------------------------
 
+#ifndef PythonQtTests_h
+#define PythonQtTests_h
+
 #include "PythonQt.h"
 #include <QtTest/QtTest>
 #include <QVariant>
@@ -54,6 +57,15 @@
 #include <QColor>
 #include <QBrush>
 #include <QCursor>
+#endif
+
+// qVariantValue was removed in Qt5 ... Let's resurect it only for the tests!
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+template<typename T>
+inline T qVariantValue(const QVariant &variant)
+{
+  return qvariant_cast<T>(variant);
+}
 #endif
 
 class PythonQtTestSlotCallingHelper;
@@ -549,4 +561,5 @@ private:
   PythonQtTestSignalHandler* _test;
 };
 
+#endif
 #endif

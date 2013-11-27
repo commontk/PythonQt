@@ -34,13 +34,15 @@
 #include <qrect.h>
 #include <qregion.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
 #include <qtextformat.h>
 #include <qtransform.h>
 #include <qvector.h>
 
-
+// Only included if QtWidgets is wrapped
+#if defined(QT_WIDGETS_LIB)
+#include <qsizepolicy.h>
+#endif
 
 class PythonQtShell_QBitmap : public QBitmap
 {
@@ -1024,7 +1026,7 @@ void delete_QRegion(QRegion* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtWrapper_QSizePolicy : public QObject
 { Q_OBJECT
@@ -1067,8 +1069,7 @@ void delete_QSizePolicy(QSizePolicy* obj) { delete obj; }
     QString py_toString(QSizePolicy*);
 };
 
-
-
+#endif
 
 
 class PythonQtWrapper_QTextFormat : public QObject

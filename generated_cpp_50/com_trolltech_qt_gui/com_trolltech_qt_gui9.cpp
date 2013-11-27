@@ -1,66 +1,10 @@
 #include "com_trolltech_qt_gui9.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QGesture>
-#include <QIcon>
-#include <QIconEngine>
-#include <QMessageBox>
-#include <QVariant>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qaction.h>
-#include <qactiongroup.h>
-#include <qbitmap.h>
-#include <qboxlayout.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicswidget.h>
-#include <qheaderview.h>
-#include <qitemselectionmodel.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmatrix4x4.h>
-#include <qmenu.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpalette.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qscrollbar.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtreewidget.h>
-#include <qundogroup.h>
-#include <qundostack.h>
-#include <qundoview.h>
-#include <qvalidator.h>
-#include <qvector.h>
-#include <qvector2d.h>
-#include <qvector3d.h>
-#include <qvector4d.h>
-#include <qwidget.h>
-#include <qwidgetaction.h>
-#include <qwizard.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QTreeWidget::~PythonQtShell_QTreeWidget() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -5312,7 +5256,7 @@ QVBoxLayout* PythonQtWrapper_QVBoxLayout::new_QVBoxLayout(QWidget*  parent)
 { 
 return new PythonQtShell_QVBoxLayout(parent); }
 
-
+#endif
 
 PythonQtShell_QValidator::~PythonQtShell_QValidator() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -6055,7 +5999,7 @@ QString PythonQtWrapper_QVector4D::py_toString(QVector4D* obj) {
   return result;
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 QAction*  PythonQtWrapper_QWhatsThis::static_QWhatsThis_createAction(QObject*  parent)
 {
@@ -6087,7 +6031,7 @@ void PythonQtWrapper_QWhatsThis::static_QWhatsThis_showText(const QPoint&  pos, 
   (QWhatsThis::showText(pos, text, w));
 }
 
-
+#endif
 
 QWhatsThisClickedEvent* PythonQtWrapper_QWhatsThisClickedEvent::new_QWhatsThisClickedEvent(const QString&  href)
 { 
@@ -6181,7 +6125,7 @@ int  PythonQtWrapper_QWheelEvent::y(QWheelEvent* theWrappedObject) const
   return ( theWrappedObject->y());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QWidget::~PythonQtShell_QWidget() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -9000,7 +8944,7 @@ QWidget*  PythonQtWrapper_QWidgetItem::widget(QWidgetItem* theWrappedObject)
   return ( ((PythonQtPublicPromoter_QWidgetItem*)theWrappedObject)->promoted_widget());
 }
 
-
+#endif
 
 QWindowStateChangeEvent* PythonQtWrapper_QWindowStateChangeEvent::new_QWindowStateChangeEvent(Qt::WindowStates  aOldState, bool  isOverride)
 { 
@@ -9016,7 +8960,7 @@ Qt::WindowStates  PythonQtWrapper_QWindowStateChangeEvent::oldState(QWindowState
   return ( theWrappedObject->oldState());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QWizard::~PythonQtShell_QWizard() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -11383,4 +11327,4 @@ bool  PythonQtWrapper_QWizardPage::validatePage(QWizardPage* theWrappedObject)
   return ( ((PythonQtPublicPromoter_QWizardPage*)theWrappedObject)->promoted_validatePage());
 }
 
-
+#endif

@@ -1,4 +1,5 @@
 #include <PythonQt.h>
+
 #include <QColor>
 #include <QIconEngine>
 #include <QImage>
@@ -9,56 +10,31 @@
 #include <QSize>
 #include <QVarLengthArray>
 #include <QVariant>
-#include <QWidget>
-#include <qabstractanimation.h>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
+
 #include <qabstractitemmodel.h>
 #include <qabstractstate.h>
-#include <qaction.h>
 #include <qbitmap.h>
 #include <qbrush.h>
 #include <qbytearray.h>
 #include <qcolor.h>
-#include <qcompleter.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
-#include <qdialog.h>
-#include <qdockwidget.h>
 #include <qevent.h>
 #include <qfont.h>
 #include <qgenericmatrix.h>
-#include <qgesture.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
 #include <qimage.h>
 #include <qiodevice.h>
-#include <qitemselectionmodel.h>
 #include <qkeysequence.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlcdnumber.h>
 #include <qline.h>
-#include <qlineedit.h>
+
 #include <qlist.h>
-#include <qlistview.h>
-#include <qlistwidget.h>
 #include <qlocale.h>
-#include <qmainwindow.h>
 #include <qmargins.h>
 #include <qmatrix.h>
 #include <qmatrix4x4.h>
-#include <qmdiarea.h>
-#include <qmdisubwindow.h>
-#include <qmenu.h>
-#include <qmenubar.h>
-#include <qmessagebox.h>
 #include <qmimedata.h>
-#include <qmouseeventtransition.h>
 #include <qmovie.h>
 #include <qobject.h>
-#include <qpagesetupdialog.h>
 #include <qpaintdevice.h>
 #include <qpaintengine.h>
 #include <qpainter.h>
@@ -70,29 +46,62 @@
 #include <qpixmap.h>
 #include <qpoint.h>
 #include <qpolygon.h>
-#include <qprinter.h>
-#include <qpushbutton.h>
 #include <qquaternion.h>
 #include <qrect.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstate.h>
 #include <qstatemachine.h>
-#include <qstatusbar.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtoolbar.h>
 #include <qtransform.h>
 #include <qvalidator.h>
 #include <qvector.h>
 #include <qvector3d.h>
 #include <qvector4d.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <QWidget>
+#include <qabstractanimation.h>
+#include <qabstractbutton.h>
+#include <qabstractitemdelegate.h>
+#include <qaction.h>
+#include <qcompleter.h>
+#include <qdialog.h>
+#include <qdockwidget.h>
+#include <qgesture.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qitemselectionmodel.h>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qlcdnumber.h>
+#include <qlineedit.h>
+#include <qlistview.h>
+#include <qlistwidget.h>
+#include <qmainwindow.h>
+#include <qmdiarea.h>
+#include <qmdisubwindow.h>
+#include <qmenu.h>
+#include <qmenubar.h>
+#include <qmessagebox.h>
+#include <qmouseeventtransition.h>
+#include <qpushbutton.h>
+#include <qscrollbar.h> 
+#include <qsizepolicy.h>
+#include <qstatusbar.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
+#include <qtoolbar.h>
 #include <qwidget.h>
+#endif
 
+#if defined(QT_PRINTSUPPORT_LIB)
+#include <qpagesetupdialog.h>
+#include <qprinter.h>
+#endif
 
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QLCDNumber : public QLCDNumber
 {
@@ -623,7 +632,7 @@ void delete_QLineEdit(QLineEdit* obj) { delete obj; }
     const QValidator*  validator(QLineEdit* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -649,7 +658,7 @@ void delete_QLinearGradient(QLinearGradient* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QListView : public QListView
 {
@@ -1201,7 +1210,7 @@ void delete_QMainWindow(QMainWindow* obj) { delete obj; }
     bool  unifiedTitleAndToolBarOnMac(QMainWindow* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1311,7 +1320,7 @@ void delete_QMatrix4x4(QMatrix4x4* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QMdiArea : public QMdiArea
 {
@@ -1980,7 +1989,7 @@ void delete_QMessageBox(QMessageBox* obj) { delete obj; }
     int  static_QMessageBox_warning(QWidget*  parent, const QString&  title, const QString&  text, QMessageBox::StandardButton  button0, QMessageBox::StandardButton  button1);
 };
 
-
+#endif
 
 
 
@@ -2020,7 +2029,7 @@ void delete_QMouseEvent(QMouseEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QMouseEventTransition : public QMouseEventTransition
 {
@@ -2064,7 +2073,7 @@ void delete_QMouseEventTransition(QMouseEventTransition* obj) { delete obj; }
     void setModifierMask(QMouseEventTransition* theWrappedObject, Qt::KeyboardModifiers  modifiers);
 };
 
-
+#endif
 
 
 
@@ -2147,7 +2156,7 @@ void delete_QMovie(QMovie* obj) { delete obj; }
 
 
 
-
+#if defined(QT_PRINTSUPPORT_LIB)
 
 class PythonQtShell_QPageSetupDialog : public QPageSetupDialog
 {
@@ -2229,7 +2238,7 @@ void delete_QPageSetupDialog(QPageSetupDialog* obj) { delete obj; }
     QPrinter*  printer(QPageSetupDialog* theWrappedObject);
 };
 
-
+#endif
 
 
 
@@ -2786,7 +2795,7 @@ void delete_QPainterPathStroker(QPainterPathStroker* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QPanGesture : public QPanGesture
 {
@@ -2819,4 +2828,4 @@ void delete_QPanGesture(QPanGesture* obj) { delete obj; }
     void setOffset(QPanGesture* theWrappedObject, const QPointF&  value);
 };
 
-
+#endif

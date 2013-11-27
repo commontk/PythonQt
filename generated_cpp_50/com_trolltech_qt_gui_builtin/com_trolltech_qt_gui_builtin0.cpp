@@ -2,45 +2,6 @@
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QBrush>
-#include <QIconEngine>
-#include <QMatrix>
-#include <QPainterPath>
-#include <QPixmap>
-#include <QStringList>
-#include <QVariant>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcursor.h>
-#include <qfont.h>
-#include <qimage.h>
-#include <qimagereader.h>
-#include <qimagewriter.h>
-#include <qiodevice.h>
-#include <qkeysequence.h>
-#include <qline.h>
-#include <qlist.h>
-#include <qmatrix.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpalette.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstringlist.h>
-#include <qtextformat.h>
-#include <qtransform.h>
-#include <qvector.h>
 
 PythonQtShell_QBitmap::~PythonQtShell_QBitmap() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -3719,7 +3680,7 @@ QString PythonQtWrapper_QRegion::py_toString(QRegion* obj) {
 }
 
 
-
+#if defined(QT_WIDGETS_LIB)
 QSizePolicy* PythonQtWrapper_QSizePolicy::new_QSizePolicy()
 { 
 return new QSizePolicy(); }
@@ -3824,7 +3785,7 @@ QString PythonQtWrapper_QSizePolicy::py_toString(QSizePolicy* obj) {
   d << *obj;
   return result;
 }
-
+#endif
 
 
 QTextFormat* PythonQtWrapper_QTextFormat::new_QTextFormat()

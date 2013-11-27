@@ -50,11 +50,6 @@
 #include <QList>
 #include <vector>
 
-// Only included if QtGui is wrapped
-#if defined(QT_GUI_LIB)
-  #include <QWidget>
-#endif
-
 typedef PyObject* PythonQtConvertMetaTypeToPythonCB(const void* inObject, int metaTypeId);
 typedef bool PythonQtConvertPythonToMetaTypeCB(PyObject* inObject, void* outObject, int metaTypeId, bool strict);
 

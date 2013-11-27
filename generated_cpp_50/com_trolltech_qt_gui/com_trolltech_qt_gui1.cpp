@@ -2,76 +2,8 @@
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QAbstractProxyModel>
-#include <QIconEngine>
-#include <QPixmap>
-#include <QPoint>
-#include <QUrl>
-#include <QVariant>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcompleter.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qdesktopwidget.h>
-#include <qdial.h>
-#include <qdialog.h>
-#include <qdialogbuttonbox.h>
-#include <qdir.h>
-#include <qdockwidget.h>
-#include <qdrag.h>
-#include <qerrormessage.h>
-#include <qevent.h>
-#include <qfiledialog.h>
-#include <qfileiconprovider.h>
-#include <qfileinfo.h>
-#include <qfocusframe.h>
-#include <qfont.h>
-#include <qfontcombobox.h>
-#include <qfontdialog.h>
-#include <qfontinfo.h>
-#include <qfontmetrics.h>
-#include <qframe.h>
-#include <qgraphicsanchorlayout.h>
-#include <qgraphicseffect.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicsproxywidget.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlineedit.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpair.h>
-#include <qpalette.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpushbutton.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qspinbox.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qurl.h>
-#include <qvalidator.h>
-#include <qvector.h>
-#include <qwidget.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QDesktopWidget::~PythonQtShell_QDesktopWidget() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -6136,7 +6068,7 @@ double  PythonQtWrapper_QDoubleSpinBox::valueFromText(QDoubleSpinBox* theWrapped
   return ( ((PythonQtPublicPromoter_QDoubleSpinBox*)theWrappedObject)->promoted_valueFromText(text));
 }
 
-
+#endif
 
 PythonQtShell_QDoubleValidator::~PythonQtShell_QDoubleValidator() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -6658,7 +6590,7 @@ QObject*  PythonQtWrapper_QDropEvent::source(QDropEvent* theWrappedObject) const
   return ( theWrappedObject->source());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QErrorMessage::~PythonQtShell_QErrorMessage() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -8970,7 +8902,7 @@ QString  PythonQtWrapper_QFileIconProvider::type(QFileIconProvider* theWrappedOb
   return ( ((PythonQtPublicPromoter_QFileIconProvider*)theWrappedObject)->promoted_type(info));
 }
 
-
+#endif
 
 QFileOpenEvent* PythonQtWrapper_QFileOpenEvent::new_QFileOpenEvent(const QString&  file)
 { 
@@ -9006,7 +8938,7 @@ bool  PythonQtWrapper_QFocusEvent::lostFocus(QFocusEvent* theWrappedObject) cons
   return ( theWrappedObject->lostFocus());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QFocusFrame::~PythonQtShell_QFocusFrame() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -11899,7 +11831,7 @@ bool  PythonQtWrapper_QFontDialog::testOption(QFontDialog* theWrappedObject, QFo
   return ( theWrappedObject->testOption(option));
 }
 
-
+#endif
 
 QFontInfo* PythonQtWrapper_QFontInfo::new_QFontInfo(const QFont&  arg__1)
 { 
@@ -12299,7 +12231,7 @@ qreal  PythonQtWrapper_QFontMetricsF::xHeight(QFontMetricsF* theWrappedObject) c
   return ( theWrappedObject->xHeight());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QFormLayout::~PythonQtShell_QFormLayout() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -14136,7 +14068,7 @@ void PythonQtWrapper_QGesture::unsetHotSpot(QGesture* theWrappedObject)
   ( theWrappedObject->unsetHotSpot());
 }
 
-
+#endif
 
 QGradient* PythonQtWrapper_QGradient::new_QGradient()
 { 
@@ -14192,7 +14124,7 @@ QGradient::Type  PythonQtWrapper_QGradient::type(QGradient* theWrappedObject) co
   return ( theWrappedObject->type());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 void PythonQtWrapper_QGraphicsAnchor::setSizePolicy(QGraphicsAnchor* theWrappedObject, QSizePolicy::Policy  policy)
 {
@@ -14639,4 +14571,4 @@ void PythonQtWrapper_QGraphicsBlurEffect::draw(QGraphicsBlurEffect* theWrappedOb
   ( ((PythonQtPublicPromoter_QGraphicsBlurEffect*)theWrappedObject)->promoted_draw(painter));
 }
 
-
+#endif

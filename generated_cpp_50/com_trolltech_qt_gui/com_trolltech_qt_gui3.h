@@ -1,4 +1,5 @@
 #include <PythonQt.h>
+
 #include <QColor>
 #include <QIconEngine>
 #include <QImage>
@@ -10,14 +11,8 @@
 #include <QTextCursor>
 #include <QVarLengthArray>
 #include <QVariant>
-#include <qabstractanimation.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qabstractstate.h>
-#include <qaction.h>
+
 #include <qbitmap.h>
-#include <qboxlayout.h>
 #include <qbrush.h>
 #include <qbytearray.h>
 #include <qclipboard.h>
@@ -27,33 +22,14 @@
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsitem.h>
-#include <qgraphicslayout.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicsscene.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicstransform.h>
-#include <qgraphicsview.h>
-#include <qgraphicswidget.h>
-#include <qgridlayout.h>
-#include <qgroupbox.h>
 #include <qguiapplication.h>
-#include <qheaderview.h>
 #include <qimage.h>
 #include <qimageiohandler.h>
 #include <qimagereader.h>
 #include <qimagewriter.h>
-#include <qinputdialog.h>
 #include <qiodevice.h>
-#include <qitemdelegate.h>
-#include <qitemeditorfactory.h>
 #include <qitemselectionmodel.h>
-#include <qkeyeventtransition.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
@@ -71,24 +47,54 @@
 #include <qpolygon.h>
 #include <qrect.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsessionmanager.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstate.h>
 #include <qstatemachine.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qtextcursor.h>
-#include <qtextdocument.h>
 #include <qtransform.h>
 #include <qtranslator.h>
 #include <qvalidator.h>
 #include <qvector.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <qabstractanimation.h>
+#include <qabstractitemdelegate.h>
+#include <qabstractitemmodel.h>
+#include <qabstractitemview.h>
+#include <qabstractstate.h>
+#include <qaction.h>
+#include <qboxlayout.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsitem.h>
+#include <qgraphicslayout.h>
+#include <qgraphicslayoutitem.h>
+#include <qgraphicsproxywidget.h>
+#include <qgraphicsscene.h>
+#include <qgraphicssceneevent.h>
+#include <qgraphicstransform.h>
+#include <qgraphicsview.h>
+#include <qgraphicswidget.h>
+#include <qgridlayout.h>
+#include <qgroupbox.h>
+#include <qheaderview.h>
+#include <qinputdialog.h>
+#include <qitemdelegate.h>
+#include <qitemeditorfactory.h>
+#include <qkeyeventtransition.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qscrollbar.h>
+#include <qsizepolicy.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
+#include <qtextdocument.h>
 #include <qwidget.h>
+#endif
 
 
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtWrapper_QGraphicsSceneWheelEvent : public QObject
 { Q_OBJECT
@@ -819,7 +825,7 @@ void delete_QGroupBox(QGroupBox* obj) { delete obj; }
     QString  title(QGroupBox* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -888,7 +894,7 @@ void delete_QGuiApplication(QGuiApplication* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QHBoxLayout : public QHBoxLayout
 {
@@ -1145,7 +1151,7 @@ void delete_QHeaderView(QHeaderView* obj) { delete obj; }
     QRegion  visualRegionForSelection(QHeaderView* theWrappedObject, const QItemSelection&  selection) const;
 };
 
-
+#endif
 
 
 
@@ -1414,7 +1420,7 @@ void delete_QImageWriter(QImageWriter* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QInputDialog : public QInputDialog
 {
@@ -1543,7 +1549,7 @@ void delete_QInputDialog(QInputDialog* obj) { delete obj; }
     QString  textValue(QInputDialog* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1619,7 +1625,7 @@ void delete_QIntValidator(QIntValidator* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QItemDelegate : public QItemDelegate
 {
@@ -1925,7 +1931,7 @@ void delete_QItemSelectionRange(QItemSelectionRange* obj) { delete obj; }
     QString py_toString(QItemSelectionRange*);
 };
 
-
+#endif
 
 
 
@@ -1961,7 +1967,7 @@ void delete_QKeyEvent(QKeyEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QKeyEventTransition : public QKeyEventTransition
 {
@@ -2003,4 +2009,4 @@ void delete_QKeyEventTransition(QKeyEventTransition* obj) { delete obj; }
     void setModifierMask(QKeyEventTransition* theWrappedObject, Qt::KeyboardModifiers  modifiers);
 };
 
-
+#endif

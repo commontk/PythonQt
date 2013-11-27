@@ -1,78 +1,8 @@
 #include "com_trolltech_qt_gui5.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QAbstractTextDocumentLayout>
-#include <QIconEngine>
-#include <QPrinterInfo>
-#include <QTextEdit>
-#include <QVariant>
-#include <qabstractprintdialog.h>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbuttongroup.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qdialog.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qiodevice.h>
-#include <qkeysequence.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmatrix.h>
-#include <qmenu.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpair.h>
-#include <qpalette.h>
-#include <qpicture.h>
-#include <qpixmap.h>
-#include <qpixmapcache.h>
-#include <qplaintextedit.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qprintengine.h>
-#include <qprinter.h>
-#include <qprogressbar.h>
-#include <qprogressdialog.h>
-#include <qpushbutton.h>
-#include <qquaternion.h>
-#include <qradiobutton.h>
-#include <qrect.h>
-#include <qregexp.h>
-#include <qregion.h>
-#include <qscrollarea.h>
-#include <qscrollbar.h>
-#include <qsize.h>
-#include <qsizegrip.h>
-#include <qsizepolicy.h>
-#include <qslider.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtextcursor.h>
-#include <qtextdocument.h>
-#include <qtextformat.h>
-#include <qtextobject.h>
-#include <qtransform.h>
-#include <qurl.h>
-#include <qvalidator.h>
-#include <qvector.h>
-#include <qvector3d.h>
-#include <qvector4d.h>
-#include <qwidget.h>
 
 PythonQtShell_QPicture::~PythonQtShell_QPicture() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -760,7 +690,7 @@ bool  PythonQtWrapper_QPixmapCache_Key::__eq__(QPixmapCache::Key* theWrappedObje
   return ( (*theWrappedObject)== key);
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QPlainTextDocumentLayout::~PythonQtShell_QPlainTextDocumentLayout() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -2263,7 +2193,7 @@ QTextOption::WrapMode  PythonQtWrapper_QPlainTextEdit::wordWrapMode(QPlainTextEd
   return ( theWrappedObject->wordWrapMode());
 }
 
-
+#endif
 
 QPolygonF* PythonQtWrapper_QPolygonF::new_QPolygonF()
 { 
@@ -2551,7 +2481,7 @@ QString PythonQtWrapper_QPolygonF::py_toString(QPolygonF* obj) {
   return result;
 }
 
-
+#if defined(QT_PRINTSUPPORT_LIB)
 
 PythonQtShell_QPrintDialog::~PythonQtShell_QPrintDialog() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -5975,7 +5905,9 @@ int  PythonQtWrapper_QPrinter::toPage(QPrinter* theWrappedObject) const
   return ( theWrappedObject->toPage());
 }
 
+#endif
 
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QProgressBar::~PythonQtShell_QProgressBar() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -9011,7 +8943,7 @@ QSize  PythonQtWrapper_QPushButton::sizeHint(QPushButton* theWrappedObject) cons
   return ( theWrappedObject->sizeHint());
 }
 
-
+#endif
 
 QQuaternion* PythonQtWrapper_QQuaternion::new_QQuaternion()
 { 
@@ -9301,7 +9233,7 @@ void PythonQtWrapper_QRadialGradient::setRadius(QRadialGradient* theWrappedObjec
   ( theWrappedObject->setRadius(radius));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QRadioButton::~PythonQtShell_QRadioButton() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10253,7 +10185,7 @@ QSize  PythonQtWrapper_QRadioButton::sizeHint(QRadioButton* theWrappedObject) co
   return ( theWrappedObject->sizeHint());
 }
 
-
+#endif
 
 PythonQtShell_QRegExpValidator::~PythonQtShell_QRegExpValidator() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10454,7 +10386,7 @@ const QSize*  PythonQtWrapper_QResizeEvent::size(QResizeEvent* theWrappedObject)
   return &( theWrappedObject->size());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QRubberBand::~PythonQtShell_QRubberBand() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -13385,7 +13317,7 @@ void PythonQtWrapper_QScrollBar::wheelEvent(QScrollBar* theWrappedObject, QWheel
   ( ((PythonQtPublicPromoter_QScrollBar*)theWrappedObject)->promoted_wheelEvent(arg__1));
 }
 
-
+#endif
 
 bool  PythonQtWrapper_QSessionManager::allowsErrorInteraction(QSessionManager* theWrappedObject)
 {
@@ -13467,7 +13399,7 @@ void PythonQtWrapper_QSessionManager::setRestartHint(QSessionManager* theWrapped
   ( theWrappedObject->setRestartHint(arg__1));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QShortcut::~PythonQtShell_QShortcut() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -13653,7 +13585,7 @@ QString  PythonQtWrapper_QShortcut::whatsThis(QShortcut* theWrappedObject) const
   return ( theWrappedObject->whatsThis());
 }
 
-
+#endif
 
 PythonQtShell_QShortcutEvent::~PythonQtShell_QShortcutEvent() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -13684,7 +13616,7 @@ QShowEvent* PythonQtWrapper_QShowEvent::new_QShowEvent()
 { 
 return new QShowEvent(); }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QSizeGrip::~PythonQtShell_QSizeGrip() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -15538,4 +15470,4 @@ QSlider::TickPosition  PythonQtWrapper_QSlider::tickPosition(QSlider* theWrapped
   return ( theWrappedObject->tickPosition());
 }
 
-
+#endif

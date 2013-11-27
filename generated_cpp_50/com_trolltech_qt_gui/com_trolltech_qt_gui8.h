@@ -1,44 +1,33 @@
 #include <PythonQt.h>
+
 #include <QIconEngine>
 #include <QObject>
 #include <QTextBlock>
 #include <QTextCursor>
-#include <QTextEdit>
 #include <QTextFormat>
 #include <QTextFrame>
 #include <QTextLayout>
 #include <QVariant>
-#include <qabstractitemdelegate.h>
+
 #include <qabstractitemmodel.h>
 #include <qabstracttextdocumentlayout.h>
-#include <qaction.h>
 #include <qbitmap.h>
 #include <qbrush.h>
-#include <qbuttongroup.h>
 #include <qbytearray.h>
-#include <qcalendarwidget.h>
 #include <qcolor.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
 #include <qdatetime.h>
-#include <qdatetimeedit.h>
-#include <qdrawutil.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qheaderview.h>
 #include <qiodevice.h>
 #include <qitemselectionmodel.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
 #include <qline.h>
-#include <qlineedit.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
 #include <qmatrix.h>
-#include <qmenu.h>
 #include <qmimedata.h>
 #include <qobject.h>
 #include <qpaintdevice.h>
@@ -53,35 +42,50 @@
 #include <qrect.h>
 #include <qregexp.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qtextcodec.h>
 #include <qtextcursor.h>
 #include <qtextdocument.h>
 #include <qtextdocumentfragment.h>
 #include <qtextdocumentwriter.h>
-#include <qtextedit.h>
 #include <qtextformat.h>
 #include <qtextlayout.h>
 #include <qtextlist.h>
 #include <qtextobject.h>
 #include <qtexttable.h>
+#include <qtransform.h>
+#include <qurl.h>
+#include <qvector.h>
+#include <qvector2d.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <QTextEdit>
+
+#include <qabstractitemdelegate.h>
+#include <qaction.h>
+#include <qbuttongroup.h>
+#include <qcalendarwidget.h>
+#include <qdatetimeedit.h>
+#include <qdrawutil.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qheaderview.h>
+#include <qlayout.h>
+#include <qlineedit.h>
+#include <qmenu.h>
+#include <qscrollbar.h>
+#include <qsizepolicy.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
+#include <qtextedit.h>
 #include <qtoolbar.h>
 #include <qtoolbox.h>
 #include <qtoolbutton.h>
 #include <qtooltip.h>
-#include <qtransform.h>
 #include <qtreeview.h>
-#include <qurl.h>
-#include <qvector.h>
-#include <qvector2d.h>
 #include <qwidget.h>
-
-
+#endif
 
 class PythonQtShell_QTextDocument : public QTextDocument
 {
@@ -250,7 +254,7 @@ void delete_QTextDocumentWriter(QTextDocumentWriter* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QTextEdit : public QTextEdit
 {
@@ -478,7 +482,7 @@ void py_set_cursor(QTextEdit::ExtraSelection* theWrappedObject, QTextCursor  cur
 QTextCursor  py_get_cursor(QTextEdit::ExtraSelection* theWrappedObject){ return theWrappedObject->cursor; }
 };
 
-
+#endif
 
 
 
@@ -1013,7 +1017,7 @@ void delete_QTextTableFormat(QTextTableFormat* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QTileRules : public QTileRules
 {
@@ -1474,7 +1478,7 @@ void delete_QToolTip(QToolTip* obj) { delete obj; }
     QString  static_QToolTip_text();
 };
 
-
+#endif
 
 
 
@@ -1630,7 +1634,7 @@ void delete_QTransform(QTransform* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QTreeView : public QTreeView
 {
@@ -1851,4 +1855,4 @@ void delete_QTreeView(QTreeView* obj) { delete obj; }
     bool  wordWrap(QTreeView* theWrappedObject) const;
 };
 
-
+#endif

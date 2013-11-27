@@ -1,84 +1,8 @@
 #include "com_trolltech_qt_gui8.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QIconEngine>
-#include <QTextBlock>
-#include <QTextCursor>
-#include <QTextEdit>
-#include <QTextFormat>
-#include <QTextFrame>
-#include <QTextLayout>
-#include <QVariant>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstracttextdocumentlayout.h>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbuttongroup.h>
-#include <qbytearray.h>
-#include <qcalendarwidget.h>
-#include <qcolor.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qdatetime.h>
-#include <qdatetimeedit.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qheaderview.h>
-#include <qiodevice.h>
-#include <qitemselectionmodel.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qline.h>
-#include <qlineedit.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmatrix.h>
-#include <qmenu.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpalette.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qrect.h>
-#include <qregexp.h>
-#include <qregion.h>
-#include <qscrollbar.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtextcodec.h>
-#include <qtextcursor.h>
-#include <qtextdocument.h>
-#include <qtextdocumentfragment.h>
-#include <qtextdocumentwriter.h>
-#include <qtextedit.h>
-#include <qtextformat.h>
-#include <qtextlist.h>
-#include <qtextobject.h>
-#include <qtexttable.h>
-#include <qtoolbar.h>
-#include <qtoolbox.h>
-#include <qtoolbutton.h>
-#include <qtransform.h>
-#include <qtreeview.h>
-#include <qurl.h>
-#include <qvector.h>
-#include <qvector2d.h>
-#include <qwidget.h>
 
 PythonQtShell_QTextDocument::~PythonQtShell_QTextDocument() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -749,7 +673,7 @@ bool  PythonQtWrapper_QTextDocumentWriter::write(QTextDocumentWriter* theWrapped
   return ( theWrappedObject->write(fragment));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QTextEdit::~PythonQtShell_QTextEdit() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -2252,7 +2176,7 @@ QTextEdit::ExtraSelection* PythonQtWrapper_QTextEdit_ExtraSelection::new_QTextEd
 { 
 return new PythonQtShell_QTextEdit_ExtraSelection(); }
 
-
+#endif
 
 QTextFragment* PythonQtWrapper_QTextFragment::new_QTextFragment()
 { 
@@ -3764,7 +3688,7 @@ void PythonQtWrapper_QTextTableFormat::setHeaderRowCount(QTextTableFormat* theWr
   ( theWrappedObject->setHeaderRowCount(count));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QTileRules::~PythonQtShell_QTileRules() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -7981,7 +7905,7 @@ QString  PythonQtWrapper_QToolTip::static_QToolTip_text()
   return (QToolTip::text());
 }
 
-
+#endif
 
 void PythonQtWrapper_QTouchEvent::setTarget(QTouchEvent* theWrappedObject, QObject*  atarget)
 {
@@ -8553,7 +8477,7 @@ QString PythonQtWrapper_QTransform::py_toString(QTransform* obj) {
   return result;
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QTreeView::~PythonQtShell_QTreeView() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10669,4 +10593,4 @@ bool  PythonQtWrapper_QTreeView::wordWrap(QTreeView* theWrappedObject) const
   return ( theWrappedObject->wordWrap());
 }
 
-
+#endif

@@ -41,15 +41,6 @@
 
 #include "PythonQtTests.h"
 
-// qVariantValue was removed in Qt5 ... Let's resurect it only for the tests!
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-template<typename T>
-inline T qVariantValue(const QVariant &variant)
-{
-  return qvariant_cast<T>(variant);
-}
-#endif
-
 void PythonQtTestSlotCalling::initTestCase()
 {
   _helper = new PythonQtTestSlotCallingHelper(this);

@@ -20,8 +20,10 @@ PythonQt::priv()->registerCPPClass("QPixmap", "", "QtGui", PythonQtCreateObject<
 PythonQt::self()->addParentClass("QPixmap", "QPaintDevice",PythonQtUpcastingOffset<QPixmap,QPaintDevice>());
 PythonQt::priv()->registerCPPClass("QPolygon", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QPolygon>, NULL, module, PythonQt::Type_Add|PythonQt::Type_Multiply|PythonQt::Type_RichCompare);
 PythonQt::priv()->registerCPPClass("QRegion", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QRegion>, NULL, module, PythonQt::Type_InplaceAnd|PythonQt::Type_Subtract|PythonQt::Type_InplaceOr|PythonQt::Type_Add|PythonQt::Type_Xor|PythonQt::Type_Multiply|PythonQt::Type_InplaceSubtract|PythonQt::Type_And|PythonQt::Type_Or|PythonQt::Type_RichCompare|PythonQt::Type_InplaceAdd|PythonQt::Type_InplaceXor|PythonQt::Type_NonZero);
-PythonQt::priv()->registerCPPClass("QSizePolicy", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QSizePolicy>, NULL, module, PythonQt::Type_RichCompare);
 PythonQt::priv()->registerCPPClass("QTextFormat", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QTextFormat>, NULL, module, PythonQt::Type_RichCompare);
 PythonQt::priv()->registerCPPClass("QTextLength", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QTextLength>, NULL, module, PythonQt::Type_RichCompare);
 
+#if defined(QT_WIDGETS_LIB)
+PythonQt::priv()->registerCPPClass("QSizePolicy", "", "QtGui", PythonQtCreateObject<PythonQtWrapper_QSizePolicy>, NULL, module, PythonQt::Type_RichCompare);
+#endif
 }

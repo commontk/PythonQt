@@ -1,80 +1,10 @@
 #include "com_trolltech_qt_gui7.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QIcon>
-#include <QIconEngine>
-#include <QTextBlock>
-#include <QTextDocumentFragment>
-#include <QTextEdit>
-#include <QVariant>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qheaderview.h>
-#include <qimage.h>
-#include <qitemeditorfactory.h>
-#include <qitemselectionmodel.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qline.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmatrix.h>
-#include <qmenu.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpalette.h>
-#include <qpen.h>
-#include <qpicture.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qscrollbar.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleditemdelegate.h>
-#include <qstyleoption.h>
-#include <qstylepainter.h>
-#include <qsyntaxhighlighter.h>
-#include <qsystemtrayicon.h>
-#include <qtabbar.h>
-#include <qtableview.h>
-#include <qtablewidget.h>
-#include <qtabwidget.h>
-#include <qtextbrowser.h>
-#include <qtextcursor.h>
-#include <qtextdocument.h>
-#include <qtextdocumentfragment.h>
-#include <qtextformat.h>
-#include <qtextlayout.h>
-#include <qtextlist.h>
-#include <qtextobject.h>
-#include <qtexttable.h>
-#include <qtransform.h>
-#include <qurl.h>
-#include <qvector.h>
-#include <qwidget.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QStyleOptionSlider::~PythonQtShell_QStyleOptionSlider() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -997,7 +927,7 @@ QSwipeGesture::SwipeDirection  PythonQtWrapper_QSwipeGesture::verticalDirection(
   return ( theWrappedObject->verticalDirection());
 }
 
-
+#endif
 
 PythonQtShell_QSyntaxHighlighter::~PythonQtShell_QSyntaxHighlighter() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -1145,7 +1075,7 @@ void PythonQtWrapper_QSyntaxHighlighter::setDocument(QSyntaxHighlighter* theWrap
   ( theWrappedObject->setDocument(doc));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QSystemTrayIcon::~PythonQtShell_QSystemTrayIcon() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -8139,7 +8069,7 @@ int  PythonQtWrapper_QTableWidgetSelectionRange::topRow(QTableWidgetSelectionRan
   return ( theWrappedObject->topRow());
 }
 
-
+#endif
 
 PythonQtShell_QTabletEvent::~PythonQtShell_QTabletEvent() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -8748,7 +8678,7 @@ QTextBlockUserData* PythonQtWrapper_QTextBlockUserData::new_QTextBlockUserData()
 { 
 return new PythonQtShell_QTextBlockUserData(); }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QTextBrowser::~PythonQtShell_QTextBrowser() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10037,7 +9967,7 @@ QUrl  PythonQtWrapper_QTextBrowser::source(QTextBrowser* theWrappedObject) const
   return ( theWrappedObject->source());
 }
 
-
+#endif
 
 PythonQtShell_QTextCharFormat::~PythonQtShell_QTextCharFormat() {
   PythonQtPrivate* priv = PythonQt::priv();

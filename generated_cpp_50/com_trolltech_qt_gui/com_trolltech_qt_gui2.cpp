@@ -1,57 +1,10 @@
 #include "com_trolltech_qt_gui2.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QGesture>
-#include <QPair>
-#include <QVarLengthArray>
-#include <QVariant>
-#include <qaction.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qcolor.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsgridlayout.h>
-#include <qgraphicsitem.h>
-#include <qgraphicsitemanimation.h>
-#include <qgraphicslayout.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicslinearlayout.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicsscene.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicstransform.h>
-#include <qgraphicsview.h>
-#include <qgraphicswidget.h>
-#include <qkeysequence.h>
-#include <qline.h>
-#include <qlist.h>
-#include <qmatrix.h>
-#include <qmatrix4x4.h>
-#include <qmimedata.h>
-#include <qobject.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpair.h>
-#include <qpalette.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtimeline.h>
-#include <qtransform.h>
-#include <qvector3d.h>
-#include <qwidget.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QGraphicsColorizeEffect::~PythonQtShell_QGraphicsColorizeEffect() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10205,4 +10158,4 @@ void PythonQtWrapper_QGraphicsSceneResizeEvent::setOldSize(QGraphicsSceneResizeE
   ( theWrappedObject->setOldSize(size));
 }
 
-
+#endif

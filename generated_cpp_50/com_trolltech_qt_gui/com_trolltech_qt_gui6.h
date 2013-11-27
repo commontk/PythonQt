@@ -1,12 +1,12 @@
 #include <PythonQt.h>
+
 #include <QIconEngine>
 #include <QObject>
 #include <QSize>
 #include <QStringList>
 #include <QVariant>
+
 #include <qabstractitemmodel.h>
-#include <qaction.h>
-#include <qapplication.h>
 #include <qbitmap.h>
 #include <qbrush.h>
 #include <qbytearray.h>
@@ -15,12 +15,7 @@
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlineedit.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
@@ -35,25 +30,35 @@
 #include <qrect.h>
 #include <qregion.h>
 #include <qsize.h>
+#include <qstandarditemmodel.h>
+#include <qstringlist.h>
+#include <qstringlistmodel.h>
+#include <qtextstream.h>
+#include <qtransform.h>
+#include <qvector.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <qaction.h>
+#include <qapplication.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qlineedit.h>
 #include <qsizepolicy.h>
 #include <qspinbox.h>
 #include <qsplashscreen.h>
 #include <qsplitter.h>
 #include <qstackedlayout.h>
 #include <qstackedwidget.h>
-#include <qstandarditemmodel.h>
 #include <qstatusbar.h>
-#include <qstringlist.h>
-#include <qstringlistmodel.h>
 #include <qstyle.h>
 #include <qstylefactory.h>
 #include <qstyleoption.h>
-#include <qtextstream.h>
-#include <qtransform.h>
-#include <qvector.h>
 #include <qwidget.h>
+#endif
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QSpacerItem : public QSpacerItem
 {
@@ -641,7 +646,7 @@ void delete_QStackedWidget(QStackedWidget* obj) { delete obj; }
     QWidget*  widget(QStackedWidget* theWrappedObject, int  arg__1) const;
 };
 
-
+#endif
 
 
 
@@ -912,7 +917,7 @@ void delete_QStandardItemModel(QStandardItemModel* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QStatusBar : public QStatusBar
 {
@@ -997,7 +1002,7 @@ void delete_QStatusBar(QStatusBar* obj) { delete obj; }
     void showEvent(QStatusBar* theWrappedObject, QShowEvent*  arg__1);
 };
 
-
+#endif
 
 
 
@@ -1097,7 +1102,7 @@ void delete_QStringListModel(QStringListModel* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QStyle : public QStyle
 {
@@ -1880,4 +1885,4 @@ void py_set_corner(QStyleOptionSizeGrip* theWrappedObject, Qt::Corner  corner){ 
 Qt::Corner  py_get_corner(QStyleOptionSizeGrip* theWrappedObject){ return theWrappedObject->corner; }
 };
 
-
+#endif

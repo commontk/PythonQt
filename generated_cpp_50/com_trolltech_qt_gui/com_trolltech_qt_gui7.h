@@ -1,15 +1,13 @@
 #include <PythonQt.h>
+
 #include <QIcon>
 #include <QIconEngine>
 #include <QObject>
 #include <QTextBlock>
 #include <QTextDocumentFragment>
-#include <QTextEdit>
 #include <QVariant>
-#include <qabstractitemdelegate.h>
+
 #include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qaction.h>
 #include <qbitmap.h>
 #include <qbrush.h>
 #include <qbytearray.h>
@@ -18,21 +16,13 @@
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgesture.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qheaderview.h>
 #include <qimage.h>
-#include <qitemeditorfactory.h>
-#include <qitemselectionmodel.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
 #include <qline.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
 #include <qmatrix.h>
-#include <qmenu.h>
 #include <qmimedata.h>
 #include <qobject.h>
 #include <qpaintdevice.h>
@@ -47,22 +37,9 @@
 #include <qpolygon.h>
 #include <qrect.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleditemdelegate.h>
-#include <qstyleoption.h>
-#include <qstylepainter.h>
-#include <qstyleplugin.h>
 #include <qsyntaxhighlighter.h>
-#include <qsystemtrayicon.h>
-#include <qtabbar.h>
-#include <qtableview.h>
-#include <qtablewidget.h>
-#include <qtabwidget.h>
-#include <qtextbrowser.h>
 #include <qtextcursor.h>
 #include <qtextdocument.h>
 #include <qtextdocumentfragment.h>
@@ -74,9 +51,38 @@
 #include <qtransform.h>
 #include <qurl.h>
 #include <qvector.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <QTextEdit>
+
+#include <qabstractitemdelegate.h>
+#include <qabstractitemview.h>
+#include <qaction.h>
+#include <qgesture.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qheaderview.h>
+#include <qitemeditorfactory.h>
+#include <qitemselectionmodel.h>
+#include <qlayout.h>
+#include <qmenu.h>
+#include <qscrollbar.h>
+#include <qsizepolicy.h>
+#include <qstyle.h>
+#include <qstyleditemdelegate.h>
+#include <qstyleoption.h>
+#include <qstylepainter.h>
+#include <qstyleplugin.h>
+#include <qsystemtrayicon.h>
+#include <qtabbar.h>
+#include <qtableview.h>
+#include <qtablewidget.h>
+#include <qtabwidget.h>
+#include <qtextbrowser.h>
 #include <qwidget.h>
+#endif
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QStyleOptionSlider : public QStyleOptionSlider
 {
@@ -714,7 +720,7 @@ void delete_QSwipeGesture(QSwipeGesture* obj) { delete obj; }
     QSwipeGesture::SwipeDirection  verticalDirection(QSwipeGesture* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -749,7 +755,7 @@ void delete_QSyntaxHighlighter(QSyntaxHighlighter* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QSystemTrayIcon : public QSystemTrayIcon
 {
@@ -1542,7 +1548,7 @@ void delete_QTableWidgetSelectionRange(QTableWidgetSelectionRange* obj) { delete
     int  topRow(QTableWidgetSelectionRange* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -1756,7 +1762,7 @@ void delete_QTextBlockUserData(QTextBlockUserData* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QTextBrowser : public QTextBrowser
 {
@@ -1879,7 +1885,7 @@ void delete_QTextBrowser(QTextBrowser* obj) { delete obj; }
     QUrl  source(QTextBrowser* theWrappedObject) const;
 };
 
-
+#endif
 
 
 

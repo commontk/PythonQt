@@ -1,10 +1,10 @@
 #include <PythonQt.h>
-#include <QGesture>
+
 #include <QObject>
 #include <QPair>
 #include <QVarLengthArray>
 #include <QVariant>
-#include <qaction.h>
+
 #include <qbrush.h>
 #include <qbytearray.h>
 #include <qcolor.h>
@@ -12,19 +12,6 @@
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsgridlayout.h>
-#include <qgraphicsitem.h>
-#include <qgraphicsitemanimation.h>
-#include <qgraphicslayout.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicslinearlayout.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicsscene.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicstransform.h>
-#include <qgraphicsview.h>
-#include <qgraphicswidget.h>
 #include <qkeysequence.h>
 #include <qline.h>
 #include <qlist.h>
@@ -43,15 +30,33 @@
 #include <qrect.h>
 #include <qregion.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qtimeline.h>
 #include <qtransform.h>
 #include <qvector3d.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <QGesture>
+#include <qaction.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsgridlayout.h>
+#include <qgraphicsitem.h>
+#include <qgraphicsitemanimation.h>
+#include <qgraphicslayout.h>
+#include <qgraphicslayoutitem.h>
+#include <qgraphicslinearlayout.h>
+#include <qgraphicsproxywidget.h>
+#include <qgraphicsscene.h>
+#include <qgraphicssceneevent.h>
+#include <qgraphicstransform.h>
+#include <qgraphicsview.h>
+#include <qgraphicswidget.h>
+#include <qsizepolicy.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
 #include <qwidget.h>
+#endif
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QGraphicsColorizeEffect : public QGraphicsColorizeEffect
 {
@@ -1899,4 +1904,4 @@ void delete_QGraphicsSceneResizeEvent(QGraphicsSceneResizeEvent* obj) { delete o
     void setOldSize(QGraphicsSceneResizeEvent* theWrappedObject, const QSizeF&  size);
 };
 
-
+#endif

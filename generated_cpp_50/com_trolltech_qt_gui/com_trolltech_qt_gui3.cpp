@@ -1,93 +1,10 @@
 #include "com_trolltech_qt_gui3.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QColor>
-#include <QIconEngine>
-#include <QImage>
-#include <QPainterPath>
-#include <QRect>
-#include <QSize>
-#include <QStringList>
-#include <QTextCursor>
-#include <QVarLengthArray>
-#include <QVariant>
-#include <qabstractanimation.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qabstractstate.h>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qboxlayout.h>
-#include <qbrush.h>
-#include <qbytearray.h>
-#include <qclipboard.h>
-#include <qcolor.h>
-#include <qcoreapplication.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsitem.h>
-#include <qgraphicslayout.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicsscene.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicsview.h>
-#include <qgraphicswidget.h>
-#include <qgridlayout.h>
-#include <qgroupbox.h>
-#include <qguiapplication.h>
-#include <qheaderview.h>
-#include <qimage.h>
-#include <qimageiohandler.h>
-#include <qimagereader.h>
-#include <qimagewriter.h>
-#include <qinputdialog.h>
-#include <qiodevice.h>
-#include <qitemdelegate.h>
-#include <qitemeditorfactory.h>
-#include <qitemselectionmodel.h>
-#include <qkeyeventtransition.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmatrix.h>
-#include <qmatrix4x4.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpalette.h>
-#include <qpen.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qpolygon.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qscrollbar.h>
-#include <qsessionmanager.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstate.h>
-#include <qstatemachine.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qtextcursor.h>
-#include <qtextdocument.h>
-#include <qtransform.h>
-#include <qtranslator.h>
-#include <qvalidator.h>
-#include <qvector.h>
-#include <qwidget.h>
+
+#if defined(QT_WIDGETS_LIB)
 
 QGraphicsSceneWheelEvent* PythonQtWrapper_QGraphicsSceneWheelEvent::new_QGraphicsSceneWheelEvent(QEvent::Type  type)
 { 
@@ -4800,7 +4717,7 @@ QString  PythonQtWrapper_QGroupBox::title(QGroupBox* theWrappedObject) const
   return ( theWrappedObject->title());
 }
 
-
+#endif
 
 PythonQtShell_QGuiApplication::~PythonQtShell_QGuiApplication() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -5105,7 +5022,7 @@ void PythonQtWrapper_QGuiApplication::static_QGuiApplication_setQuitOnLastWindow
   (QGuiApplication::setQuitOnLastWindowClosed(quit));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QHBoxLayout::~PythonQtShell_QHBoxLayout() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -7727,7 +7644,7 @@ QRegion  PythonQtWrapper_QHeaderView::visualRegionForSelection(QHeaderView* theW
   return ( ((PythonQtPublicPromoter_QHeaderView*)theWrappedObject)->promoted_visualRegionForSelection(selection));
 }
 
-
+#endif
 
 QHelpEvent* PythonQtWrapper_QHelpEvent::new_QHelpEvent(QEvent::Type  type, const QPoint&  pos, const QPoint&  globalPos)
 { 
@@ -8767,7 +8684,7 @@ bool  PythonQtWrapper_QImageWriter::write(QImageWriter* theWrappedObject, const 
   return ( theWrappedObject->write(image));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QInputDialog::~PythonQtShell_QInputDialog() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -9959,7 +9876,7 @@ QString  PythonQtWrapper_QInputDialog::textValue(QInputDialog* theWrappedObject)
   return ( theWrappedObject->textValue());
 }
 
-
+#endif
 
 PythonQtShell_QInputEvent::~PythonQtShell_QInputEvent() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -10207,7 +10124,7 @@ QValidator::State  PythonQtWrapper_QIntValidator::validate(QIntValidator* theWra
   return ( ((PythonQtPublicPromoter_QIntValidator*)theWrappedObject)->promoted_validate(arg__1, arg__2));
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QItemDelegate::~PythonQtShell_QItemDelegate() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -11557,7 +11474,7 @@ QString PythonQtWrapper_QItemSelectionRange::py_toString(QItemSelectionRange* ob
   return result;
 }
 
-
+#endif
 
 PythonQtShell_QKeyEvent::~PythonQtShell_QKeyEvent() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -11616,7 +11533,7 @@ QString  PythonQtWrapper_QKeyEvent::text(QKeyEvent* theWrappedObject) const
   return ( theWrappedObject->text());
 }
 
-
+#if defined(QT_WIDGETS_LIB)
 
 PythonQtShell_QKeyEventTransition::~PythonQtShell_QKeyEventTransition() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -11812,4 +11729,4 @@ void PythonQtWrapper_QKeyEventTransition::setModifierMask(QKeyEventTransition* t
   ( theWrappedObject->setModifierMask(modifiers));
 }
 
-
+#endif

@@ -1,4 +1,5 @@
 #include <PythonQt.h>
+
 #include <QAbstractProxyModel>
 #include <QIconEngine>
 #include <QObject>
@@ -6,47 +7,20 @@
 #include <QPoint>
 #include <QUrl>
 #include <QVariant>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
-#include <qabstractitemmodel.h>
-#include <qabstractitemview.h>
-#include <qaction.h>
 #include <qbitmap.h>
 #include <qbrush.h>
 #include <qbytearray.h>
 #include <qcolor.h>
-#include <qcompleter.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
-#include <qdesktopwidget.h>
-#include <qdial.h>
-#include <qdialog.h>
-#include <qdialogbuttonbox.h>
 #include <qdir.h>
-#include <qdockwidget.h>
 #include <qdrag.h>
-#include <qerrormessage.h>
 #include <qevent.h>
-#include <qfiledialog.h>
-#include <qfileiconprovider.h>
 #include <qfileinfo.h>
-#include <qfocusframe.h>
 #include <qfont.h>
-#include <qfontcombobox.h>
-#include <qfontdialog.h>
 #include <qfontinfo.h>
 #include <qfontmetrics.h>
-#include <qformlayout.h>
-#include <qframe.h>
-#include <qgesture.h>
-#include <qgraphicsanchorlayout.h>
-#include <qgraphicseffect.h>
-#include <qgraphicslayoutitem.h>
-#include <qgraphicsproxywidget.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
-#include <qlineedit.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
@@ -59,21 +33,51 @@
 #include <qpalette.h>
 #include <qpixmap.h>
 #include <qpoint.h>
-#include <qpushbutton.h>
 #include <qrect.h>
 #include <qregion.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
-#include <qspinbox.h>
 #include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
 #include <qurl.h>
 #include <qvalidator.h>
 #include <qvector.h>
+
+#if defined(QT_WIDGETS_LIB)
+#include <qabstractbutton.h>
+#include <qabstractitemdelegate.h>
+#include <qabstractitemmodel.h>
+#include <qabstractitemview.h>
+#include <qaction.h>
+#include <qcompleter.h>
+#include <qdesktopwidget.h>
+#include <qdial.h>
+#include <qdialog.h>
+#include <qdialogbuttonbox.h>
+#include <qdockwidget.h>
+#include <qerrormessage.h>
+#include <qfiledialog.h>
+#include <qfileiconprovider.h>
+#include <qfocusframe.h>
+#include <qfontcombobox.h>
+#include <qfontdialog.h>
+#include <qformlayout.h>
+#include <qframe.h>
+#include <qgesture.h>
+#include <qgraphicsanchorlayout.h>
+#include <qgraphicseffect.h>
+#include <qgraphicslayoutitem.h>
+#include <qgraphicsproxywidget.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
+#include <qsizepolicy.h>
+#include <qspinbox.h>
+#include <qstyle.h>
+#include <qstyleoption.h>
 #include <qwidget.h>
+#endif
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QDesktopWidget : public QDesktopWidget
 {
@@ -652,7 +656,7 @@ void delete_QDoubleSpinBox(QDoubleSpinBox* obj) { delete obj; }
     double  valueFromText(QDoubleSpinBox* theWrappedObject, const QString&  text) const;
 };
 
-
+#endif
 
 
 
@@ -829,7 +833,7 @@ void delete_QDropEvent(QDropEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QErrorMessage : public QErrorMessage
 {
@@ -1084,7 +1088,7 @@ void delete_QFileIconProvider(QFileIconProvider* obj) { delete obj; }
     QString  type(QFileIconProvider* theWrappedObject, const QFileInfo&  info) const;
 };
 
-
+#endif
 
 
 
@@ -1115,7 +1119,7 @@ void delete_QFocusEvent(QFocusEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QFocusFrame : public QFocusFrame
 {
@@ -1371,7 +1375,7 @@ void delete_QFontDialog(QFontDialog* obj) { delete obj; }
     bool  testOption(QFontDialog* theWrappedObject, QFontDialog::FontDialogOption  option) const;
 };
 
-
+#endif
 
 
 
@@ -1486,7 +1490,7 @@ void delete_QFontMetricsF(QFontMetricsF* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QFormLayout : public QFormLayout
 {
@@ -1717,7 +1721,7 @@ void delete_QGesture(QGesture* obj) { delete obj; }
     void unsetHotSpot(QGesture* theWrappedObject);
 };
 
-
+#endif
 
 
 
@@ -1752,7 +1756,7 @@ void delete_QGradient(QGradient* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtWrapper_QGraphicsAnchor : public QObject
 { Q_OBJECT
@@ -1864,4 +1868,4 @@ void delete_QGraphicsBlurEffect(QGraphicsBlurEffect* obj) { delete obj; }
     void draw(QGraphicsBlurEffect* theWrappedObject, QPainter*  painter);
 };
 
-
+#endif

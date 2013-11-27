@@ -1,36 +1,23 @@
 #include <PythonQt.h>
-#include <QGesture>
+
 #include <QIcon>
 #include <QIconEngine>
-#include <QMessageBox>
 #include <QObject>
 #include <QVariant>
-#include <qabstractbutton.h>
-#include <qabstractitemdelegate.h>
+
 #include <qabstractitemmodel.h>
-#include <qaction.h>
-#include <qactiongroup.h>
 #include <qbitmap.h>
-#include <qboxlayout.h>
 #include <qbrush.h>
 #include <qbytearray.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicswidget.h>
-#include <qheaderview.h>
-#include <qitemselectionmodel.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlayoutitem.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
 #include <qmatrix4x4.h>
-#include <qmenu.h>
 #include <qmimedata.h>
 #include <qobject.h>
 #include <qpaintdevice.h>
@@ -41,27 +28,47 @@
 #include <qpoint.h>
 #include <qrect.h>
 #include <qregion.h>
-#include <qscrollbar.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
+#include <qvalidator.h>
+#include <qvector.h>
+#include <qvector2d.h>
+#include <qvector3d.h>
+#include <qvector4d.h>
+
+
+#if defined(QT_WIDGETS_LIB)
+#include <QGesture>
+#include <QMessageBox>
+
+#include <qabstractbutton.h>
+#include <qabstractitemdelegate.h>
+#include <qaction.h>
+#include <qactiongroup.h>
+#include <qboxlayout.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsproxywidget.h>
+#include <qgraphicswidget.h>
+#include <qheaderview.h>
+#include <qitemselectionmodel.h>
+#include <qlayout.h>
+#include <qlayoutitem.h>
+#include <qmenu.h>
+#include <qscrollbar.h>
+#include <qsizepolicy.h>
 #include <qstyle.h>
 #include <qstyleoption.h>
 #include <qtreewidget.h>
 #include <qundogroup.h>
 #include <qundostack.h>
 #include <qundoview.h>
-#include <qvalidator.h>
-#include <qvector.h>
-#include <qvector2d.h>
-#include <qvector3d.h>
-#include <qvector4d.h>
 #include <qwhatsthis.h>
 #include <qwidget.h>
 #include <qwidgetaction.h>
 #include <qwizard.h>
+#endif
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QTreeWidget : public QTreeWidget
 {
@@ -624,7 +631,7 @@ QVBoxLayout* new_QVBoxLayout(QWidget*  parent);
 void delete_QVBoxLayout(QVBoxLayout* obj) { delete obj; } 
 };
 
-
+#endif
 
 
 
@@ -830,7 +837,7 @@ void delete_QVector4D(QVector4D* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtWrapper_QWhatsThis : public QObject
 { Q_OBJECT
@@ -845,7 +852,7 @@ void delete_QWhatsThis(QWhatsThis* obj) { delete obj; }
     void static_QWhatsThis_showText(const QPoint&  pos, const QString&  text, QWidget*  w = 0);
 };
 
-
+#endif
 
 
 
@@ -900,7 +907,7 @@ void delete_QWheelEvent(QWheelEvent* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QWidget : public QWidget
 {
@@ -1370,7 +1377,7 @@ void delete_QWidgetItem(QWidgetItem* obj) { delete obj; }
     QWidget*  widget(QWidgetItem* theWrappedObject);
 };
 
-
+#endif
 
 
 
@@ -1386,7 +1393,7 @@ void delete_QWindowStateChangeEvent(QWindowStateChangeEvent* obj) { delete obj; 
 
 
 
-
+#if defined(QT_WIDGETS_LIB)
 
 class PythonQtShell_QWizard : public QWizard
 {
@@ -1615,4 +1622,4 @@ void delete_QWizardPage(QWizardPage* obj) { delete obj; }
     bool  validatePage(QWizardPage* theWrappedObject);
 };
 
-
+#endif
