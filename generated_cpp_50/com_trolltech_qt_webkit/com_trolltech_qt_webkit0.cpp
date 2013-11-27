@@ -1,57 +1,10 @@
 #include "com_trolltech_qt_webkit0.h"
+
 #include <PythonQtConversion.h>
 #include <PythonQtMethodInfo.h>
 #include <PythonQtSignalReceiver.h>
-#include <QIconEngine>
-#include <QVariant>
-#include <qaction.h>
-#include <qbitmap.h>
-#include <qbytearray.h>
-#include <qcoreevent.h>
-#include <qcursor.h>
-#include <qevent.h>
-#include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsitem.h>
-#include <qgraphicslayout.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicswidget.h>
-#include <qkeysequence.h>
-#include <qlayout.h>
-#include <qlist.h>
-#include <qlocale.h>
-#include <qmargins.h>
-#include <qmenu.h>
-#include <qnetworkaccessmanager.h>
-#include <qnetworkreply.h>
-#include <qnetworkrequest.h>
-#include <qobject.h>
-#include <qpaintdevice.h>
-#include <qpaintengine.h>
-#include <qpainter.h>
-#include <qpainterpath.h>
-#include <qpalette.h>
-#include <qpixmap.h>
-#include <qpoint.h>
-#include <qprinter.h>
-#include <qrect.h>
-#include <qregion.h>
-#include <qsize.h>
-#include <qsizepolicy.h>
-#include <qstringlist.h>
-#include <qstyle.h>
-#include <qstyleoption.h>
-#include <qundostack.h>
-#include <qurl.h>
-#include <qwebelement.h>
-#include <qwebframe.h>
-#include <qwebhistoryinterface.h>
-#include <qwebpage.h>
-#include <qwebpluginfactory.h>
-#include <qwebsettings.h>
-#include <qwebview.h>
-#include <qwidget.h>
+
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 PythonQtShell_QGraphicsWebView::~PythonQtShell_QGraphicsWebView() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -1225,7 +1178,7 @@ qreal  PythonQtWrapper_QGraphicsWebView::zoomFactor(QGraphicsWebView* theWrapped
   return ( theWrappedObject->zoomFactor());
 }
 
-
+#endif
 
 QWebElement* PythonQtWrapper_QWebElement::new_QWebElement()
 { 
@@ -1550,7 +1503,7 @@ QWebFrame*  PythonQtWrapper_QWebElement::webFrame(QWebElement* theWrappedObject)
   return ( theWrappedObject->webFrame());
 }
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 QUrl  PythonQtWrapper_QWebFrame::baseUrl(QWebFrame* theWrappedObject) const
 {
@@ -1762,7 +1715,7 @@ qreal  PythonQtWrapper_QWebFrame::zoomFactor(QWebFrame* theWrappedObject) const
   return ( theWrappedObject->zoomFactor());
 }
 
-
+#endif
 
 PythonQtShell_QWebHistoryInterface::~PythonQtShell_QWebHistoryInterface() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -1934,7 +1887,7 @@ void PythonQtWrapper_QWebHistoryInterface::static_QWebHistoryInterface_setDefaul
   (QWebHistoryInterface::setDefaultInterface(defaultInterface));
 }
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 QWebHitTestResult* PythonQtWrapper_QWebHitTestResult::new_QWebHitTestResult()
 { 
@@ -3731,7 +3684,7 @@ QWebPage::ExtensionReturn* PythonQtWrapper_QWebPage_ExtensionReturn::new_QWebPag
 { 
 return new PythonQtShell_QWebPage_ExtensionReturn(); }
 
-
+#endif
 
 PythonQtShell_QWebPluginFactory::~PythonQtShell_QWebPluginFactory() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -4219,7 +4172,7 @@ QPixmap  PythonQtWrapper_QWebSettings::static_QWebSettings_webGraphic(QWebSettin
   return (QWebSettings::webGraphic(type));
 }
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 PythonQtShell_QWebView::~PythonQtShell_QWebView() {
   PythonQtPrivate* priv = PythonQt::priv();
@@ -5376,4 +5329,4 @@ qreal  PythonQtWrapper_QWebView::zoomFactor(QWebView* theWrappedObject) const
   return ( theWrappedObject->zoomFactor());
 }
 
-
+#endif

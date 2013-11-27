@@ -1,27 +1,19 @@
 #include <PythonQt.h>
+
 #include <QIconEngine>
 #include <QObject>
 #include <QVariant>
-#include <qaction.h>
+
 #include <qbitmap.h>
 #include <qbytearray.h>
 #include <qcoreevent.h>
 #include <qcursor.h>
 #include <qevent.h>
 #include <qfont.h>
-#include <qgraphicseffect.h>
-#include <qgraphicsitem.h>
-#include <qgraphicslayout.h>
-#include <qgraphicsproxywidget.h>
-#include <qgraphicssceneevent.h>
-#include <qgraphicswebview.h>
-#include <qgraphicswidget.h>
 #include <qkeysequence.h>
-#include <qlayout.h>
 #include <qlist.h>
 #include <qlocale.h>
 #include <qmargins.h>
-#include <qmenu.h>
 #include <qnetworkaccessmanager.h>
 #include <qnetworkreply.h>
 #include <qnetworkrequest.h>
@@ -33,27 +25,39 @@
 #include <qpalette.h>
 #include <qpixmap.h>
 #include <qpoint.h>
-#include <qprinter.h>
 #include <qrect.h>
 #include <qregion.h>
 #include <qsize.h>
-#include <qsizepolicy.h>
 #include <qstringlist.h>
+#include <qurl.h>
+#include <qwebelement.h>
+#include <qwebhistoryinterface.h>
+#include <qwebpluginfactory.h>
+#include <qwebsettings.h>
+
+#if defined(QT_WEBKITWIDGETS_LIB)
+#include <qaction.h>
+#include <qgraphicseffect.h>
+#include <qgraphicsitem.h>
+#include <qgraphicslayout.h>
+#include <qgraphicsproxywidget.h>
+#include <qgraphicssceneevent.h>
+#include <qgraphicswebview.h>
+#include <qgraphicswidget.h>
+#include <qlayout.h>
+#include <qmenu.h>
+#include <qsizepolicy.h>
 #include <qstyle.h>
 #include <qstyleoption.h>
 #include <qundostack.h>
-#include <qurl.h>
-#include <qwebelement.h>
 #include <qwebframe.h>
-#include <qwebhistoryinterface.h>
+#include <qwidget.h>
 #include <qwebinspector.h>
 #include <qwebpage.h>
-#include <qwebpluginfactory.h>
-#include <qwebsettings.h>
 #include <qwebview.h>
-#include <qwidget.h>
+#endif
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 class PythonQtShell_QGraphicsWebView : public QGraphicsWebView
 {
@@ -202,7 +206,7 @@ void delete_QGraphicsWebView(QGraphicsWebView* obj) { delete obj; }
     qreal  zoomFactor(QGraphicsWebView* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -284,7 +288,7 @@ void delete_QWebElement(QWebElement* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 class PythonQtPublicPromoter_QWebFrame : public QWebFrame
 { public:
@@ -342,7 +346,7 @@ public slots:
     qreal  zoomFactor(QWebFrame* theWrappedObject) const;
 };
 
-
+#endif
 
 
 
@@ -376,7 +380,7 @@ void delete_QWebHistoryInterface(QWebHistoryInterface* obj) { delete obj; }
 
 
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 class PythonQtWrapper_QWebHitTestResult : public QObject
 { Q_OBJECT
@@ -774,7 +778,7 @@ QWebPage::ExtensionReturn* new_QWebPage_ExtensionReturn();
 void delete_QWebPage_ExtensionReturn(QWebPage::ExtensionReturn* obj) { delete obj; } 
 };
 
-
+#endif
 
 
 
@@ -988,7 +992,7 @@ public slots:
 
 
 
-
+#if defined(QT_WEBKITWIDGETS_LIB)
 
 class PythonQtShell_QWebView : public QWebView
 {
@@ -1128,4 +1132,4 @@ void delete_QWebView(QWebView* obj) { delete obj; }
     qreal  zoomFactor(QWebView* theWrappedObject) const;
 };
 
-
+#endif
