@@ -89,6 +89,12 @@ if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAK
         include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
         add_definitions(${Qt5${qtlib}_DEFINITIONS})
         list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
+        foreach(dep ${_Qt5${qtlib}_MODULE_DEPENDENCIES})
+          if (NOT ${PythonQt_Wrap_Qt${dep}})
+            set(PythonQt_Wrap_Qt${dep} ON CACHE BOOL "Make all of Qt${dep} available in python" FORCE)
+            message(STATUS "Module Qt${dep} has been activated (Required to wrap the module ${qtlib}).")
+          endif()
+        endforeach()
       endif()
     endforeach()
     
