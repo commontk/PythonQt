@@ -154,7 +154,11 @@ foreach(qtlib ${qtlibs})
     message(STATUS " - ${qtlib} ... No")
   endif()
 endforeach()
-message(STATUS "\nIMPORTANT: In case you reconfigure and regenerate the project to wrap new modules,\nit is clearly advised to clean first the build. Otherwise you could have lots of\nlinker errors as the moc files will not be regenerated. This issue is related to\nthe way the module QtWidgets, QtPrintSupport and QtWebKitWidgets are integrated in\nthe sources of PythonQt.\n")
+if (PythonQt_QT_VERSION VERSION_GREATER "4")
+  message(STATUS "\nIMPORTANT: In case you reconfigure and regenerate the project to wrap new modules,\nit is clearly advised to clean first the build. Otherwise you could have lots of\nlinker errors as the moc files will not be regenerated. This issue is related to\nthe way the module QtWidgets, QtPrintSupport and QtWebKitWidgets are integrated in\nthe sources of PythonQt.\n")
+else()
+  message(STATUS "\n")
+endif()
 
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers 
