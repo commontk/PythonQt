@@ -175,7 +175,9 @@ PyObject* PythonQtConv::ConvertQtValueToPythonInternal(int type, const void* dat
   case PythonQtMethodInfo::Variant:
     return PythonQtConv::QVariantToPyObject(*((QVariant*)data));
   case QMetaType::QObjectStar:
+#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
   case QMetaType::QWidgetStar:
+#endif
     return PythonQt::priv()->wrapQObject(*((QObject**)data));
 
   default:
@@ -187,7 +189,11 @@ PyObject* PythonQtConv::ConvertQtValueToPythonInternal(int type, const void* dat
     } else {
       if (type > 0) {
         // if the type is known, we can construct it via QMetaType::construct
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        void* newCPPObject = QMetaType::create(type, data);
+#else
         void* newCPPObject = QMetaType::construct(type, data);
+#endif
         // XXX this could be optimized by using metatypeid directly
         PythonQtInstanceWrapper* wrap = (PythonQtInstanceWrapper*)PythonQt::priv()->wrapPtr(newCPPObject, QMetaType::typeName(type));
         wrap->_ownedByPythonQt = true;
@@ -277,6 +283,8 @@ return Py_None;
 
 void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, void* alreadyAllocatedCPPObject)
 {
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
   void* ptr = alreadyAllocatedCPPObject;
 
   static int penId = QMetaType::type("QPen");
@@ -345,6 +353,11 @@ void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, vo
       return ptr;
     }
   }
+#else
+  Q_UNUSED(typeId);
+  Q_UNUSED(obj);
+  Q_UNUSED(alreadyAllocatedCPPObject);
+#endif
   return NULL;
 }
 
@@ -399,7 +412,7 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
            bytes = str.toUtf8();
            if (ok) {
              void* ptr2 = NULL;
-             PythonQtValueStorage_ADD_VALUE_IF_NEEDED(NULL,global_variantStorage, QVariant, QVariant(bytes), ptr2);
+             PythonQtValueStorage_ADD_VALUE_IF_NEEDED(false,global_variantStorage, QVariant, QVariant(bytes), ptr2);
              PythonQtValueStorage_ADD_VALUE_IF_NEEDED(alreadyAllocatedCPPObject,global_ptrStorage, void*, (((QByteArray*)((QVariant*)ptr2)->constData())->data()), ptr);
            }
          }
@@ -411,7 +424,7 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
        QString str = PyObjGetString(obj, strict, ok);
        if (ok) {
          void* ptr2 = NULL;
-         PythonQtValueStorage_ADD_VALUE_IF_NEEDED(NULL,global_variantStorage, QVariant, QVariant(str), ptr2);
+         PythonQtValueStorage_ADD_VALUE_IF_NEEDED(false,global_variantStorage, QVariant, QVariant(str), ptr2);
          PythonQtValueStorage_ADD_VALUE_IF_NEEDED(alreadyAllocatedCPPObject,global_ptrStorage, void*, (void*)((QVariant*)ptr2)->constData(), ptr);
        }
      } else if (info.name == "PyObject") {
@@ -1256,24 +1269,27 @@ QString PythonQtConv::CPPObjectToString(int type, const void* data) {
     case QVariant::Time: {
       const QTime* s = static_cast<const QTime*>(data);
       r = s->toString(Qt::ISODate);
-    }
+      }
       break;
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
     case QVariant::Pixmap:
-    {
+      {
       const QPixmap* s = static_cast<const QPixmap*>(data);
       r = QString("Pixmap ") + QString::number(s->width()) + ", " + QString::number(s->height());
-    }
+      }
       break;
     case QVariant::Image:
-    {
+      {
       const QImage* s = static_cast<const QImage*>(data);
       r = QString("Image ") + QString::number(s->width()) + ", " + QString::number(s->height());
-    }
+      }
       break;
+#endif
     case QVariant::Url:
       {
-        const QUrl* s = static_cast<const QUrl*>(data);
-        r = s->toString();
+      const QUrl* s = static_cast<const QUrl*>(data);
+      r = s->toString();
       }
       break;
       //TODO: add more printing for other variant types

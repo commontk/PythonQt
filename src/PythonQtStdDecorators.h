@@ -47,13 +47,6 @@
 #include "PythonQtSystem.h"
 
 #include <QObject>
-#include <QVariantList>
-#include <QTextDocument>
-#include <QColor>
-#include <QDateTime>
-#include <QDate>
-#include <QTime>
-#include <QImage>
 #include <QMetaMethod>
 #include <QMetaEnum>
 #include <QMetaProperty>

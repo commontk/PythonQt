@@ -18,7 +18,7 @@ Prerequisites
 -------------
 
 * CMake 2.8.x
-* Qt 4.6.2 or above
+* Qt 4.6.2 or above (Qt5.x also supported)
 
 Build instructions
 ------------------
@@ -36,17 +36,30 @@ make
 Additional configure options are:
 
 * `CMAKE_BUILD_TYPE`:  Debug, Release, RelWithDebInfo or MinSizeRel
+* `PythonQt_QT_VERSION`: 4, 5
 * `PythonQt_DEBUG`: Enable/Disable PythonQt debug output
 * `PythonQt_Wrap_QtAll`: Make all Qt components available in python
 * `PythonQt_Wrap_Qt<componentname>`: Build PythonQt wrapper associated with `<componentname>`. Possible `<componentname>` are `gui`, `network`, `opengl`, `sql`, `uitools`, `webkit`, `xml`, `xmlpatterns`.
+* `Qt5_CMAKE_PATH`: Path containing the Qt5* folders with inside the Qt5*Config.cmake files.
 
 Available branches
 ------------------
 
-This repository contains three branches:
-* Based on [r245](http://sourceforge.net/p/pythonqt/code/245/)
+This repository contains different branches:
+* Based on the original PythonQt source code on [sourceforge]( http://sourceforge.net/p/pythonqt/code/)
 
+### patched-5
+
+* Based on patched-4 + backported upstream: [r246](http://sourceforge.net/p/pythonqt/code/246/), [r247](http://sourceforge.net/p/pythonqt/code/247/), [r248](http://sourceforge.net/p/pythonqt/code/248/) + branch: [add-qt5-support](https://github.com/commontk/PythonQt/tree/add-qt5-support)
+* List of features
+  * Qt 5.x support:
+    * Modules QtWidgets and QtPrintSupport only wrapped if selected, but they will stay in the PythonQt.QtGui namespace for compatibily reason. 
+    * Module QtWebKitWidgets only wrapped if selected, but it stays in the PythonQt.QtWebKit namespace for compatibily reason.
+    * CMake forces the wrapping of the selected modules dependency (e.g. QtPrintSupport requires QtWidgets, QtGui and QtCore)
+  * CMake variable `PythonQt_QT_VERSION` to select the version of Qt to wrap (4 or 5)
+    
 ### patched-4
+
 * Based on patched-3 + [r245](http://sourceforge.net/p/pythonqt/code/245/)
 * List of features:
  * Add BUILD_TESTING option disabled by default to keep behavior consistent with previous version.
@@ -54,6 +67,7 @@ This repository contains three branches:
  * Ensure enums added using only Q_FLAGS without corresponding Q_ENUMS are wrapped.
 
 ### patched-3
+
 * Backported:
  * Most of the [change specific to](https://github.com/commontk/PythonQt/compare/e2dce4b...patched-2) `patched-2` branch have been backported upstream: [r241](http://sourceforge.net/p/pythonqt/code/241/), [r242](http://sourceforge.net/p/pythonqt/code/242/), [r243](http://sourceforge.net/p/pythonqt/code/243/)
 

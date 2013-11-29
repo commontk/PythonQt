@@ -4,6 +4,14 @@ cmake_minimum_required(VERSION 2.8)
 project(PythonQt)
 #-----------------------------------------------------------------------------
 
+# By default PythonQt is compiled in Release mode
+IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+ENDIF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -14,224 +22,341 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 #-----------------------------------------------------------------------------
 # Build options
 
-option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
+set(PythonQt_QT_VERSION "" CACHE STRING "Choose which version of Qt (4 or 5) you wand to wrap")
 
-set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns)
-foreach(qtlib ${qtlibs})
-  OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
-endforeach()
+if (PythonQt_QT_VERSION VERSION_GREATER "4")
+  set(Qt5_CMAKE_PATH NOTFOUND CACHE PATH "Path containing the Qt5* folders with inside the Qt5*Config.cmake files.")
+endif()
 
-# Force option if it applies
-if(PythonQt_Wrap_QtAll)
-  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(  
+if ((PythonQt_QT_VERSION AND (PythonQt_QT_VERSION VERSION_LESS "5")) OR Qt5_CMAKE_PATH)
+
+  option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
+
+  set(qtlibs Core Gui Widgets Network OpenGL PrintSupport Sql Svg UiTools WebKit WebKitWidgets Xml XmlPatterns)
+  if (PythonQt_QT_VERSION VERSION_LESS "5")
+    set(qtlibs_lower)
+    foreach(qtlib ${qtlibs})
+      string(TOLOWER ${qtlib} qtlib_lower)
+      list(APPEND qtlibs_lower ${qtlib_lower})
+    endforeach()
+    set(qtlibs ${qtlibs_lower})
+  else()
+    # Add Qt5 CMake path in CMAKE_PREFIX_PATH
+    SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Qt5_CMAKE_PATH})
+  endif()
+
   foreach(qtlib ${qtlibs})
-    if(NOT ${PythonQt_Wrap_Qt${qtlib}})
-      set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
-      message(STATUS "Enabling [PythonQt_Wrap_Qt${qtlib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
-    endif()
+    if ((PythonQt_QT_VERSION VERSION_GREATER "4") AND (${qtlib} STREQUAL "Core"))
+      # Because the macro qt5_wrap_cpp is available in Qt5Core
+      OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" TRUE)
+    else ()
+      OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" FALSE)
+    endif ()
   endforeach()
-endif()
 
-option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
-if(PythonQt_DEBUG)
-  add_definitions(-DPYTHONQT_DEBUG)
-else()
-  remove_definitions(-DPYTHONQT_DEBUG)
-endif()
+  # TODO: xmlpatterns wrapper does *NOT* build at all :(
+  list(REMOVE_ITEM qtlibs XmlPatterns)
+  list(REMOVE_ITEM qtlibs xmlpatterns)
+
+  # Force option if it applies
+  if(PythonQt_Wrap_QtAll)
+    foreach(qtlib ${qtlibs})
+      if(NOT ${PythonQt_Wrap_Qt${qtlib}})
+        set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
+        message(STATUS "Enabling [PythonQt_Wrap_Qt${qtlib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
+      endif()
+    endforeach()
+  endif()
+
+  option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
+  if(PythonQt_DEBUG)
+    add_definitions(-DPYTHONQT_DEBUG)
+  else()
+    remove_definitions(-DPYTHONQT_DEBUG)
+  endif()
 
 #-----------------------------------------------------------------------------
 # Setup Qt
 
-set(minimum_required_qt_version "4.6.2")
+  set(minimum_required_qt_version "4.6.2")
 
-find_package(Qt4)
-
-if(QT4_FOUND)
-
-  set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
-
-  if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
-      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
-  endif()
-  
-  # Enable required qt module
-  foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
-    string(TOUPPER ${qtlib} qtlib_uppercase)
-    if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
-      message(FATAL_ERROR "QT_QT${${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
+  if (PythonQt_QT_VERSION VERSION_GREATER "4")
+    
+    set(QT_LIBRARIES)
+    foreach(qtlib ${qtlibs})
+      if (${PythonQt_Wrap_Qt${qtlib}})
+        find_package(Qt5${qtlib})
+        include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
+        add_definitions(${Qt5${qtlib}_DEFINITIONS})
+        list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
+        foreach(dep ${_Qt5${qtlib}_MODULE_DEPENDENCIES})
+          if (NOT ${PythonQt_Wrap_Qt${dep}})
+            set(PythonQt_Wrap_Qt${dep} ON CACHE BOOL "Make all of Qt${dep} available in python" FORCE)
+            message(STATUS "Module Qt${dep} has been activated (Required to wrap the module ${qtlib}).")
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+    
+    if (BUILD_TESTING)
+      find_package(Qt5Test REQUIRED)
     endif()
-    set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
-  endforeach()
+    
+  else()
+    find_package(Qt4)
 
-  set(QT_USE_QTTEST ${BUILD_TESTING})
+    if(QT4_FOUND)
 
-  include(${QT_USE_FILE})
+      set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+
+      if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
+        message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
+      endif()
+
+      # Enable required qt module
+      set(qt4libs ${qtlibs})
+      list(REMOVE_ITEM qt4libs core gui widgets)
+      foreach(qtlib ${qt4libs})
+        string(TOUPPER ${qtlib} qtlib_uppercase)
+        if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
+          message(FATAL_ERROR "QT_QT${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
+        endif()
+        set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
+      endforeach()
+      
+      # Enable QtTest in Qt4 is the option BUILD_TESTING was activated
+      set(QT_USE_QTTEST ${BUILD_TESTING})
+      
+      include(${QT_USE_FILE})
+    else()
+      message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+    endif()
+
+  endif()
+
+#-----------------------------------------------------------------------------
+# Print a summary of the wrapped module
+message(STATUS "\nQt modules wrapped" )
+message(STATUS "==================")
+foreach(qtlib ${qtlibs})
+  if (${PythonQt_Wrap_Qt${qtlib}})
+    string(TOLOWER ${qtlib} qtlib_lower)
+    if ("${qtlib_lower}" STREQUAL "widgets")
+      message(STATUS " - ${qtlib} ... Yes (included in PythonQt.QtGui namespace)")
+    elseif ("${qtlib_lower}" STREQUAL "printsupport")
+      message(STATUS " - ${qtlib} ... Yes (included in PythonQt.QtGui namespace)")
+    elseif ("${qtlib_lower}" STREQUAL "webkitwidgets")
+      message(STATUS " - ${qtlib} ... Yes (included in PythonQt.QtWebKit namespace)")
+    else()
+      message(STATUS " - ${qtlib} ... Yes")
+    endif()
+  else()
+    message(STATUS " - ${qtlib} ... No")
+  endif()
+endforeach()
+if (PythonQt_QT_VERSION VERSION_GREATER "4")
+  message(STATUS "\nIMPORTANT: In case you reconfigure and regenerate the project to wrap new modules,\nit is clearly advised to clean first the build. Otherwise you could have lots of\nlinker errors as the moc files will not be regenerated. This issue is related to\nthe way the module QtWidgets, QtPrintSupport and QtWebKitWidgets are integrated in\nthe sources of PythonQt.\n")
 else()
-  message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+  message(STATUS "\n")
 endif()
 
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers 
 # associated with the Qt version being used.
-set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
-if("${generated_cpp_suffix}" STREQUAL "_48")
   set(generated_cpp_suffix "")
-endif()
-if("${generated_cpp_suffix}" STREQUAL "_46")
-  set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
-endif()
+  if (PythonQt_QT_VERSION VERSION_GREATER "4")
+    set(generated_cpp_suffix "_${Qt5Core_VERSION_MAJOR}${Qt5Core_VERSION_MINOR}")
+  else()
+    set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
+  endif()
+
+  if(("${generated_cpp_suffix}" STREQUAL "_51") OR ("${generated_cpp_suffix}" STREQUAL "_52"))
+    set(generated_cpp_suffix "_50")
+  endif()
+  if("${generated_cpp_suffix}" STREQUAL "_48")
+    set(generated_cpp_suffix "")
+  endif()
+  if("${generated_cpp_suffix}" STREQUAL "_46")
+    set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
+  endif()
 
 #-----------------------------------------------------------------------------
 # Sources
 
-set(sources
-    src/PythonQtClassInfo.cpp
-    src/PythonQtClassWrapper.cpp
-    src/PythonQtConversion.cpp
-    src/PythonQt.cpp
-    src/PythonQtImporter.cpp
-    src/PythonQtInstanceWrapper.cpp
-    src/PythonQtMethodInfo.cpp
-    src/PythonQtMisc.cpp
-    src/PythonQtObjectPtr.cpp
-    src/PythonQtQFileImporter.cpp
-    src/PythonQtSignalReceiver.cpp
-    src/PythonQtSlot.cpp
-    src/PythonQtSignal.cpp
-    src/PythonQtStdDecorators.cpp
-    src/PythonQtStdIn.cpp
-    src/PythonQtStdOut.cpp
-    src/gui/PythonQtScriptingConsole.cpp
-    
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
-
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
-)
+  set(sources
+      src/PythonQtClassInfo.cpp
+      src/PythonQtClassWrapper.cpp
+      src/PythonQtConversion.cpp
+      src/PythonQt.cpp
+      src/PythonQtImporter.cpp
+      src/PythonQtInstanceWrapper.cpp
+      src/PythonQtMethodInfo.cpp
+      src/PythonQtMisc.cpp
+      src/PythonQtObjectPtr.cpp
+      src/PythonQtQFileImporter.cpp
+      src/PythonQtSignalReceiver.cpp
+      src/PythonQtSlot.cpp
+      src/PythonQtSignal.cpp
+      src/PythonQtStdDecorators.cpp
+      src/PythonQtStdIn.cpp
+      src/PythonQtStdOut.cpp
+      generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
+  )
+  
+  if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
+    set(sources
+      ${sources}
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
+    )
+  endif()
+  
+  if (PythonQt_Wrap_QtWidgets OR PythonQt_Wrap_Qtwidgets)
+    set(sources
+      ${sources}
+      src/gui/PythonQtScriptingConsole.cpp
+    )
+  endif()
 
 #-----------------------------------------------------------------------------
 # List headers.  This is list is used for the install command.
 
-set(headers
-    src/PythonQtClassInfo.h
-    src/PythonQtClassWrapper.h
-    src/PythonQtConversion.h
-    src/PythonQtCppWrapperFactory.h
-    src/PythonQtDoc.h
-    src/PythonQt.h
-    src/PythonQtImporter.h
-    src/PythonQtImportFileInterface.h
-    src/PythonQtInstanceWrapper.h
-    src/PythonQtMethodInfo.h
-    src/PythonQtMisc.h
-    src/PythonQtObjectPtr.h
-    src/PythonQtQFileImporter.h
-    src/PythonQtSignalReceiver.h
-    src/PythonQtSlot.h
-    src/PythonQtSignal.h
-    src/PythonQtStdDecorators.h
-    src/PythonQtStdIn.h
-    src/PythonQtStdOut.h
-    src/PythonQtSystem.h
-    src/PythonQtVariants.h
-    src/PythonQtPythonInclude.h
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
-)
+  set(headers
+      src/PythonQtClassInfo.h
+      src/PythonQtClassWrapper.h
+      src/PythonQtConversion.h
+      src/PythonQtCppWrapperFactory.h
+      src/PythonQtDoc.h
+      src/PythonQt.h
+      src/PythonQtImporter.h
+      src/PythonQtImportFileInterface.h
+      src/PythonQtInstanceWrapper.h
+      src/PythonQtMethodInfo.h
+      src/PythonQtMisc.h
+      src/PythonQtObjectPtr.h
+      src/PythonQtQFileImporter.h
+      src/PythonQtSignalReceiver.h
+      src/PythonQtSlot.h
+      src/PythonQtSignal.h
+      src/PythonQtStdDecorators.h
+      src/PythonQtStdIn.h
+      src/PythonQtStdOut.h
+      src/PythonQtSystem.h
+      src/PythonQtVariants.h
+      src/PythonQtPythonInclude.h
+      generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
+  )
 
 #-----------------------------------------------------------------------------
 # Headers that should run through moc
 
-set(moc_sources
-    src/PythonQt.h
-    src/PythonQtSignalReceiver.h
-    src/PythonQtStdDecorators.h
-    src/gui/PythonQtScriptingConsole.h
-
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
-)
+  set(moc_sources
+      src/PythonQt.h
+      src/PythonQtSignalReceiver.h
+      src/PythonQtStdDecorators.h
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
+  )
+  
+  if (PythonQt_Wrap_QtGui OR PythonQt_Wrap_Qtgui)
+    set(moc_sources
+      ${moc_sources}
+      generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
+    )
+  endif()
+  
+  if (PythonQt_Wrap_QtWidgets OR PythonQt_Wrap_Qtwidgets)
+    set(moc_sources
+      ${moc_sources}
+      src/gui/PythonQtScriptingConsole.h
+    )
+  endif()
 
 #-----------------------------------------------------------------------------
 # Add extra sources
-foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
-  
-  if (${PythonQt_Wrap_Qt${qtlib}})
+  foreach(qtlib ${qtlibs})
+    if (${PythonQt_Wrap_Qt${qtlib}})
     
-    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
-    
-    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
-    
-    foreach(index RANGE 0 11)
-    
-      # Source files
-      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
-        list(APPEND sources ${file_prefix}${index}.cpp)
-      endif()
+      ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
+      string(TOLOWER ${qtlib} qtlib_lower)
       
-      # Headers that should run through moc
-      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
-        list(APPEND moc_sources ${file_prefix}${index}.h)
+      # NOTE: Gui is currently including Widgets and PrintSupport files. However, both modules must be selected in CMake to include their classes in gui
+      # NOTE: WebKit is currently including WebKitWidgets files. However, it must be selected in CMake to include its classes in WebKit.
+      if ((NOT "${qtlib_lower}" STREQUAL "widgets")
+          AND (NOT "${qtlib_lower}" STREQUAL "printsupport")
+          AND (NOT "${qtlib_lower}" STREQUAL "webkitwidgets"))
+         
+        set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib_lower}/com_trolltech_qt_${qtlib_lower})
+
+        foreach(index RANGE 0 11)
+        
+          # Source files
+          if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
+            list(APPEND sources ${file_prefix}${index}.cpp)
+          endif()
+        
+          # Headers that should run through moc
+          if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
+            list(APPEND moc_sources ${file_prefix}${index}.h)
+          endif()
+        
+        endforeach()
+
+        list(APPEND sources ${file_prefix}_init.cpp)
+        
       endif()
-      
-    endforeach()
-    
-    list(APPEND sources ${file_prefix}_init.cpp)
 
-  endif()
-endforeach()
-
-#-----------------------------------------------------------------------------
-# UI files
-set(ui_sources )
-
-#-----------------------------------------------------------------------------
-# Resources
-set(qrc_sources )
+    endif()
+  endforeach()
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-qt4_wrap_cpp(gen_moc_sources ${moc_sources})
-qt4_wrap_ui(gen_ui_sources ${ui_sources})
-qt4_add_resources(gen_qrc_sources ${qrc_sources})
+  if (PythonQt_QT_VERSION VERSION_GREATER "4")
+    qt5_wrap_cpp(gen_moc_sources ${moc_sources})
+  else()
+    qt4_wrap_cpp(gen_moc_sources ${moc_sources})
+  endif()
 
 #-----------------------------------------------------------------------------
 # Build the library
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  )
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
   
-add_library(PythonQt SHARED
-            ${sources}
-            ${gen_moc_sources}
-            ${gen_ui_sources}
-            ${gen_qrc_sources}
-  )
-set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
+  add_library(PythonQt SHARED
+              ${sources}
+              ${gen_moc_sources}
+              ${gen_ui_sources}
+              ${gen_qrc_sources}
+    )
+  set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
 #
 # That should solve linkage error on Mac when the project is used in a superbuild setup
 # See http://blog.onesadcookie.com/2008/01/installname-magic.html
 #
-set_target_properties(PythonQt  PROPERTIES
-  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
-  )
+  set_target_properties(PythonQt  PROPERTIES
+    INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+    )
 
-target_link_libraries(PythonQt
-              ${PYTHON_LIBRARY}
-              ${QT_LIBRARIES}
-  )
+  target_link_libraries(PythonQt
+                ${PYTHON_LIBRARY}
+                ${QT_LIBRARIES}
+    )
 
 #-----------------------------------------------------------------------------
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
-install(TARGETS PythonQt
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-install(FILES ${headers} DESTINATION include/PythonQt)
+  install(TARGETS PythonQt
+          RUNTIME DESTINATION bin
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib)
+  install(FILES ${headers} DESTINATION include/PythonQt)
+
+
+endif()
 
 #-----------------------------------------------------------------------------
 # Testing
@@ -249,18 +374,20 @@ if(BUILD_TESTING)
     tests/PythonQtTests.h
     )
 
-  QT4_WRAP_CPP(test_sources
-    tests/PythonQtTests.h
-    )
+  if (PythonQt_QT_VERSION VERSION_GREATER "4")
+    QT5_WRAP_CPP(test_sources tests/PythonQtTests.h)
+  else()
+    QT4_WRAP_CPP(test_sources tests/PythonQtTests.h)
+  endif()    
 
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
   
   add_executable(PythonQtCppTests ${test_sources})
-  target_link_libraries(PythonQtCppTests PythonQt)
+  target_link_libraries(PythonQtCppTests PythonQt ${Qt5Test_LIBRARIES})
   
   add_test(
     NAME tests_PythonQtTestMain
-    COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
+    COMMAND PythonQtCppTests tests/PythonQtTestMain
     )
 endif()
 

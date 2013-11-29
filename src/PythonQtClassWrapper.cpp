@@ -179,13 +179,13 @@ static void initializeSlots(PythonQtClassWrapper* wrap)
     }
 
     if (typeSlots & PythonQt::Type_InplaceAdd) {
-      wrap->_base.as_number.nb_add = (binaryfunc)PythonQtInstanceWrapper_iadd;
+      wrap->_base.as_number.nb_inplace_add = (binaryfunc)PythonQtInstanceWrapper_iadd;
     }
     if (typeSlots & PythonQt::Type_InplaceSubtract) {
-      wrap->_base.as_number.nb_subtract = (binaryfunc)PythonQtInstanceWrapper_isub;
+      wrap->_base.as_number.nb_inplace_subtract = (binaryfunc)PythonQtInstanceWrapper_isub;
     }
     if (typeSlots & PythonQt::Type_InplaceMultiply) {
-      wrap->_base.as_number.nb_multiply = (binaryfunc)PythonQtInstanceWrapper_imul;
+      wrap->_base.as_number.nb_inplace_multiply = (binaryfunc)PythonQtInstanceWrapper_imul;
     }
     if (typeSlots & PythonQt::Type_InplaceDivide) {
       wrap->_base.as_number.nb_inplace_divide = (binaryfunc)PythonQtInstanceWrapper_idiv;
@@ -244,6 +244,16 @@ static int PythonQtClassWrapper_init(PythonQtClassWrapper* self, PyObject* args,
   // if we have no CPP class information, try our base class
   if (!self->classInfo()) {
     PyTypeObject*  superType = ((PyTypeObject *)self)->tp_base;
+
+    // recursively search for PythonQtClassWrapper superclass,
+    // this is needed for multiple levels of inheritance in python,
+    // e.g.
+    // class MyWidgetBase(QWidget):
+    //  ...
+    // class MyWidget(MyWidgetBase):
+    //  ...
+    while( superType && superType->ob_type != &PythonQtClassWrapper_Type )
+        superType = superType->tp_base;
 
     if (!superType || (superType->ob_type != &PythonQtClassWrapper_Type)) {
       PyErr_Format(PyExc_TypeError, "type %s is not derived from PythonQtClassWrapper", ((PyTypeObject*)self)->tp_name);

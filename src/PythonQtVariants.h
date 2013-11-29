@@ -56,23 +56,30 @@
 #include <QPointF>
 #include <QRegExp>
 
-#include <QFont>
-#include <QBitmap>
-#include <QBrush>
-#include <QColor>
-#include <QPalette>
-#include <QIcon>
-#include <QImage>
-#include <QPolygon>
-#include <QRegion>
-#include <QBitmap>
-#include <QCursor>
-#include <QSizePolicy>
-#include <QKeySequence>
-#include <QPen>
-#include <QTextLength>
-#include <QTextFormat>
-#include <QMatrix>
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
+  #include <QFont>
+  #include <QBitmap>
+  #include <QBrush>
+  #include <QColor>
+  #include <QPalette>
+  #include <QIcon>
+  #include <QImage>
+  #include <QPolygon>
+  #include <QRegion>
+  #include <QBitmap>
+  #include <QCursor>
+  #include <QKeySequence>
+  #include <QPen>
+  #include <QTextLength>
+  #include <QTextFormat>
+  #include <QMatrix>
+#endif
+
+// Only included if QtWidgets is wrapped
+#if defined(QT_WIDGETS_LIB)
+  #include <QSizePolicy>
+#endif
 
 #endif
 

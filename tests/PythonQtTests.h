@@ -42,16 +42,31 @@
 */
 //----------------------------------------------------------------------------------
 
+#ifndef PythonQtTests_h
+#define PythonQtTests_h
+
 #include "PythonQt.h"
 #include <QtTest/QtTest>
 #include <QVariant>
 #include "PythonQtImportFileInterface.h"
 #include "PythonQtCppWrapperFactory.h"
 
+// Only included if QtGui is wrapped
+#if defined(QT_GUI_LIB)
 #include <QPen>
 #include <QColor>
 #include <QBrush>
 #include <QCursor>
+#endif
+
+// qVariantValue was removed in Qt5 ... Let's resurect it only for the tests!
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+template<typename T>
+inline T qVariantValue(const QVariant &variant)
+{
+  return qvariant_cast<T>(variant);
+}
+#endif
 
 class PythonQtTestSlotCallingHelper;
 class PythonQtTestApiHelper;
@@ -410,12 +425,14 @@ public slots:
   QVariant getQVariant(const QVariant& var) { _called = true;  return var; }
 
   // QColor as representative for C++ value classes
+#if defined(QT_GUI_LIB)
   QColor  getQColor1(const QColor& var) { _called = true;  return var; }
   QColor  getQColor2(QColor& var) { _called = true;  return var; }
   QColor  getQColor3(QColor* col) { _called = true;  return *col; }
   QColor  getQColor4(const QVariant& color) { _called = true;  return qVariantValue<QColor>(color); }
   QColor* getQColor5() { _called = true; static QColor c(1,2,3); return &c; }
-
+#endif
+  
   PyObject* getPyObject(PyObject* obj) { _called = true; return obj; }
   PyObject* getPyObjectFromVariant(const QVariant& val) { _called = true; return PythonQtObjectPtr(val); };
   QVariant  getPyObjectFromVariant2(const QVariant& val) { _called = true; return val; };
@@ -467,11 +484,13 @@ public slots:
   ClassA* createClassDAsA() { _called = true; return new ClassD; }
   ClassB* createClassDAsB() { _called = true; return new ClassD; }
 
+#if defined(QT_GUI_LIB)
   QColor  setAutoConvertColor(const QColor& color) { _called = true; return color; };
   QBrush  setAutoConvertBrush(const QBrush& brush) { _called = true; return brush; };
   QPen    setAutoConvertPen(const QPen& pen) { _called = true; return pen; };
   QCursor setAutoConvertCursor(const QCursor& cursor) { _called = true; return cursor; };
-  
+#endif
+    
 private:
   bool _passed;
   bool _called;
@@ -542,4 +561,5 @@ private:
   PythonQtTestSignalHandler* _test;
 };
 
+#endif
 #endif

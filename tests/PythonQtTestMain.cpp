@@ -44,8 +44,12 @@
 
 int main( int argc, char **argv )
 {
-  QApplication qapp(argc, argv);
-
+#if defined(QT_GUI_LIB)
+  QGuiApplication qapp(argc, argv);
+#else
+  QCoreApplication qapp(argc, argv);
+#endif
+  
   PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut);
 
   int failCount = 0;
