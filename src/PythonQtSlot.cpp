@@ -84,9 +84,7 @@ bool PythonQtCallSlot(PythonQtClassInfo* classInfo, QObject* objectToCall, PyObj
   argList[0] = NULL;
 
   bool ok = true;
-  bool skipFirst = false;
   if (info->isInstanceDecorator()) {
-    skipFirst = true;
 
     // for decorators on CPP objects, we take the cpp ptr, for QObjects we take the QObject pointer
     void* arg1 = firstArgument;
