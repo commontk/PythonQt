@@ -46,7 +46,7 @@ endforeach()
 
 # Force option if it applies
 if(PythonQt_Wrap_QtAll)
-  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(  
+  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(
   foreach(qtlib ${qtlibs})
     if(NOT ${PythonQt_Wrap_Qt${qtlib}})
       set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
@@ -76,7 +76,7 @@ if(QT4_FOUND)
   if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
       message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
   endif()
-  
+
   # Enable required qt module
   foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
     string(TOUPPER ${qtlib} qtlib_uppercase)
@@ -94,7 +94,7 @@ else()
 endif()
 
 #-----------------------------------------------------------------------------
-# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers 
+# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
 # associated with the Qt version being used.
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 if("${generated_cpp_suffix}" STREQUAL "_46")
@@ -123,7 +123,7 @@ set(sources
     src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
     src/gui/PythonQtScriptingConsole.cpp
-    
+
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
 
     generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
@@ -178,27 +178,27 @@ set(moc_sources
 #-----------------------------------------------------------------------------
 # Add extra sources
 foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
-  
+
   if (${PythonQt_Wrap_Qt${qtlib}})
-    
+
     ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
-    
+
     set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
-    
+
     foreach(index RANGE 0 11)
-    
+
       # Source files
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
         list(APPEND sources ${file_prefix}${index}.cpp)
       endif()
-      
+
       # Headers that should run through moc
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
         list(APPEND moc_sources ${file_prefix}${index}.h)
       endif()
-      
+
     endforeach()
-    
+
     list(APPEND sources ${file_prefix}_init.cpp)
 
   endif()
@@ -224,7 +224,7 @@ qt4_add_resources(gen_qrc_sources ${qrc_sources})
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
-  
+
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
@@ -276,10 +276,10 @@ if(BUILD_TESTING)
     )
 
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
-  
+
   add_executable(PythonQtCppTests ${test_sources})
   target_link_libraries(PythonQtCppTests PythonQt)
-  
+
   add_test(
     NAME tests_PythonQtTestMain
     COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
