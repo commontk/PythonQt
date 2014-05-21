@@ -21,6 +21,22 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 #-----------------------------------------------------------------------------
 # Build options
 
+if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
+  set(PythonQt_INSTALL_RUNTIME_DIR bin)
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_LIBRARY_DIR)
+  set(PythonQt_INSTALL_LIBRARY_DIR lib${LIB_SUFFIX})
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_ARCHIVE_DIR)
+  set(PythonQt_INSTALL_ARCHIVE_DIR lib${LIB_SUFFIX})
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
+  set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
+endif()
+
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 
 set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns)
@@ -234,10 +250,10 @@ target_link_libraries(PythonQt
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
 install(TARGETS PythonQt
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-install(FILES ${headers} DESTINATION include/PythonQt)
+        RUNTIME DESTINATION ${PythonQt_INSTALL_RUNTIME_DIR}
+        LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
+        ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
+install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
 
 #-----------------------------------------------------------------------------
 # Testing
