@@ -341,6 +341,7 @@ void delete_QWebElementCollection(QWebElementCollection* obj) { delete obj; }
 class PythonQtPublicPromoter_QWebFrame : public QWebFrame
 { public:
 inline bool  promoted_event(QEvent*  arg__1) { return QWebFrame::event(arg__1); }
+private: ~PythonQtPublicPromoter_QWebFrame();
 };
 
 class PythonQtWrapper_QWebFrame : public QObject
