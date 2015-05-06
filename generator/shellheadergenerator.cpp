@@ -64,15 +64,37 @@ void ShellHeaderGenerator::writeFieldAccessors(QTextStream &s, const AbstractMet
   if (field->enclosingClass()->name()=="QUuid" &&  setter->name()=="data4") return;
   if (field->enclosingClass()->name()=="QIPv6Address") return;
 
-  if (!field->type()->isConstant()) {
+  bool isInventorField = field->type()->name().startsWith("So");
+
+  if (!isInventorField && !field->type()->isConstant()) {
     writeFunctionSignature(s, setter, 0, QString(),
                            Option(ConvertReferenceToPtr | FirstArgIsWrappedObject| IncludeDefaultExpression | ShowStatic | UnderscoreSpaces));
     s << "{ theWrappedObject->" << field->name() << " = " << setter->arguments()[0]->argumentName() << "; }\n";
   }
   
+  bool addIndirection = false;
+  if (isInventorField && getter->type()->indirections() == 0) {
+    // make it a field ptr:
+    getter->type()->setIndirections(1);
+    addIndirection = true;
+  }
   writeFunctionSignature(s, getter, 0, QString(),
                          Option(ConvertReferenceToPtr | FirstArgIsWrappedObject| IncludeDefaultExpression | OriginalName | ShowStatic | UnderscoreSpaces));
-  s << "{ return theWrappedObject->" << field->name() << "; }\n";
+  s << "{ return ";
+  if (addIndirection) {
+    s << "&";
+  }
+  s << "theWrappedObject->" << field->name() << "; }\n";
+}
+
+static bool enum_lessThan(const AbstractMetaEnum *a, const AbstractMetaEnum *b)
+{
+  return a->name() < b->name();
+}
+
+static bool field_lessThan(const AbstractMetaField *a, const AbstractMetaField *b)
+{
+  return a->name() < b->name();
 }
 
 void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_class)
@@ -109,7 +131,7 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
   }
 
   // Shell-------------------------------------------------------------------
-  if (meta_class->generateShellClass()) {
+  if (meta_class->generateShellClass() && !ctors.isEmpty()) {
 
     AbstractMetaFunctionList virtualsForShell = getVirtualFunctionsForShell(meta_class);
 
@@ -128,10 +150,13 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
           s << ", ";
         s << args.at(i)->argumentName();
       }
-      s << "),_wrapper(NULL) {};" << endl;
+      s << "),_wrapper(NULL) {";
+      writeInjectedCode(s, meta_class, TypeSystem::PyInheritShellConstructorCode, true);
+      s << "};" << endl;
     }
     s << endl;
     s << "   ~" << shellClassName(meta_class) << "();" << endl;
+    s << endl;
 
     foreach(AbstractMetaFunction* fun, virtualsForShell) {
       s << "virtual ";
@@ -140,31 +165,68 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
       s << ";" << endl;
     }
     s << endl;
+    writeInjectedCode(s, meta_class, TypeSystem::PyShellDeclaration);
+    writeInjectedCode(s, meta_class, TypeSystem::PyInheritShellDeclaration, true);
     s << "  PythonQtInstanceWrapper* _wrapper; " << endl;
 
     s << "};" << endl << endl;
   }
 
   // Promoter-------------------------------------------------------------------
-  AbstractMetaFunctionList promoteFunctions = getProtectedFunctionsThatNeedPromotion(meta_class);
+  AbstractMetaFunctionList promoteFunctions;
+  if (meta_class->typeEntry()->shouldCreatePromoter()) {
+    promoteFunctions = getProtectedFunctionsThatNeedPromotion(meta_class);
+  }
   if (!promoteFunctions.isEmpty()) {
     s << "class " << promoterClassName(meta_class)
       << " : public " << meta_class->qualifiedCppName() << endl << "{ public:" << endl;
 
+    AbstractMetaEnumList enums1 = meta_class->enums();
+    qSort(enums1.begin(), enums1.end(), enum_lessThan);
+    foreach(AbstractMetaEnum* enum1, enums1) {
+      if (enum1->wasProtected()) {
+        s << "enum " << enum1->name() << "{" << endl;
+        bool first = true;
+        QString scope = meta_class->qualifiedCppName();
+        foreach(AbstractMetaEnumValue* value, enum1->values()) {
+          if (first) { first = false; }
+          else { s << ", "; }
+          s << "  " << value->name() << " = " << scope << "::" << value->name();
+        }
+        s << "};" << endl;
+      }
+    }
+    
     foreach(AbstractMetaFunction* fun, promoteFunctions) {
+      if (fun->isStatic()) {
+        s << "static ";
+      }
       s << "inline ";
       writeFunctionSignature(s, fun, 0, "promoted_",
-        Option(IncludeDefaultExpression | OriginalName | ShowStatic | UnderscoreSpaces));
+        Option(IncludeDefaultExpression | OriginalName | UnderscoreSpaces | ProtectedEnumAsInts));
       s << " { ";
       QString scriptFunctionName = fun->originalName();
       AbstractMetaArgumentList args = fun->arguments();
-      if (fun->type())
+      if (fun->type()) {
         s << "return ";
-      s << meta_class->qualifiedCppName() << "::";
+      }
+      if (!fun->isAbstract()) {
+        s << meta_class->qualifiedCppName() << "::";
+      }
+      else {
+        s << "this->";
+      }
       s << fun->originalName() << "(";
       for (int i = 0; i < args.size(); ++i) {
-        if (i > 0)
+        if (i > 0) {
           s << ", ";
+        }
+        if (args.at(i)->type()->isEnum()) {
+          AbstractMetaEnum* enumType = m_classes.findEnum((EnumTypeEntry *)args.at(i)->type()->typeEntry());
+          if (enumType && enumType->wasProtected()) {
+            s << "(" << enumType->typeEntry()->qualifiedCppName() << ")";
+          }
+        }
         s << args.at(i)->argumentName();
       }
       s << "); }" << endl;
@@ -182,11 +244,12 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
   s << "public:" << endl;
 
   AbstractMetaEnumList enums1 = meta_class->enums();
+  qSort(enums1.begin(), enums1.end(), enum_lessThan);
   AbstractMetaEnumList enums;
   QList<FlagsTypeEntry*> flags;
   foreach(AbstractMetaEnum* enum1, enums1) {
     // catch gadgets and enums that are not exported on QObjects...
-    if (enum1->wasPublic() && (!meta_class->isQObject() || !enum1->hasQEnumsDeclaration())) {
+    if ((enum1->wasProtected() || enum1->wasPublic()) && (!meta_class->isQObject() || !enum1->hasQEnumsDeclaration())) {
       enums << enum1;
       if (enum1->typeEntry()->flags()) {
         flags << enum1->typeEntry()->flags();
@@ -216,10 +279,12 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
     foreach(AbstractMetaEnum* enum1, enums) {
       s << "enum " << enum1->name() << "{" << endl;
       bool first = true;
+      QString scope = enum1->wasProtected() ? promoterClassName(meta_class) : meta_class->qualifiedCppName();
+
       foreach(AbstractMetaEnumValue* value, enum1->values()) {
         if (first) { first = false; }
         else { s << ", "; }
-        s << "  " << value->name() << " = " << meta_class->qualifiedCppName() << "::" << value->name();
+        s << "  " << value->name() << " = " << scope << "::" << value->name();
       }
       s << "};" << endl;
     }
@@ -242,10 +307,11 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
     bool copyConstructorSeen = false;
     bool defaultConstructorSeen = false;
     foreach (const AbstractMetaFunction *fun, ctors) {
-      if (!fun->isPublic() || fun->isAbstract()) { continue; }
+      if (fun->isAbstract() || (!meta_class->generateShellClass() && !fun->isPublic())) { continue; }
+
       s << meta_class->qualifiedCppName() << "* ";
       writeFunctionSignature(s, fun, 0, "new_",
-        Option(IncludeDefaultExpression | OriginalName | ShowStatic));
+        Option(IncludeDefaultExpression | OriginalName | ShowStatic | AddOwnershipTemplates));
       s << ";" << endl;
       if (fun->arguments().size()==1 && meta_class->qualifiedCppName() == fun->arguments().at(0)->type()->typeEntry()->qualifiedCppName()) {
         copyConstructorSeen = true;
@@ -273,9 +339,13 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
 
   foreach (const AbstractMetaFunction *function, functions) {
     if (!function->isSlot() || function->isVirtual()) {
+      
+      // for debugging:
+      //functionHasNonConstReferences(function);
+      
       s << "   ";
       writeFunctionSignature(s, function, 0, QString(),
-        Option(ConvertReferenceToPtr | FirstArgIsWrappedObject| IncludeDefaultExpression | OriginalName | ShowStatic | UnderscoreSpaces));
+        Option(AddOwnershipTemplates | ConvertReferenceToPtr | FirstArgIsWrappedObject | IncludeDefaultExpression | OriginalName | ShowStatic | UnderscoreSpaces | ProtectedEnumAsInts));
       s << ";" << endl;
     }
   }
@@ -286,14 +356,18 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
     s << "    bool __nonzero__(" << meta_class->qualifiedCppName() << "* obj) { return !obj->isNull(); }" << endl; 
   }
 
+  AbstractMetaFieldList fields = meta_class->fields();
+  qSort(fields.begin(), fields.end(), field_lessThan);
+
+  // TODO: move "So" check to typesystem, e.g. allow star in rejection...
   // Field accessors
-  foreach (const AbstractMetaField *field, meta_class->fields()) {
+  foreach (const AbstractMetaField *field, fields ) {
     if (field->isPublic()) {
       writeFieldAccessors(s, field);
     }
   }
 
-  writeInjectedCode(s, meta_class);
+  writeInjectedCode(s, meta_class, TypeSystem::PyWrapperDeclaration);
 
   
   s  << "};" << endl << endl;
@@ -306,12 +380,16 @@ void ShellHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *meta_c
 
 }
 
-void ShellHeaderGenerator::writeInjectedCode(QTextStream &s, const AbstractMetaClass *meta_class)
+void ShellHeaderGenerator::writeInjectedCode(QTextStream &s, const AbstractMetaClass *meta_class, int type, bool recursive)
 {
-  CodeSnipList code_snips = meta_class->typeEntry()->codeSnips();
-  foreach (const CodeSnip &cs, code_snips) {
-    if (cs.language == TypeSystem::PyWrapperDeclaration) {
-      s << cs.code() << endl;
+  const AbstractMetaClass *cls = meta_class;
+  do {
+    CodeSnipList code_snips = cls->typeEntry()->codeSnips();
+    foreach(const CodeSnip &cs, code_snips) {
+      if (cs.language == type) {
+        s << cs.code() << endl;
+      }
     }
-  }
+    cls = cls->baseClass();
+  } while (recursive && cls);
 }

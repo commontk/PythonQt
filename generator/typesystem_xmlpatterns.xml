@@ -24,15 +24,14 @@
   <rejection class="QAbstractXmlNodeModel" function-name="copyNodeTo"/>
   <rejection class="QAbstractXmlNodeModel" function-name="type"/>
   <object-type name="QAbstractXmlNodeModel">
-    <modify-function signature="QAbstractXmlNodeModel()" remove="all"/>
     <modify-function signature="namespaceForPrefix(QXmlNodeModelIndex,short) const" remove="all"/>
     <modify-function signature="isDeepEqual(QXmlNodeModelIndex,QXmlNodeModelIndex) const" remove="all"/>
   </object-type>
 
   <rejection class="QAbstractXmlReceiver" function-name="item"/>
   <rejection class="QAbstractXmlReceiver" function-name="sendAsNode"/>
-  <value-type name="QAbstractXmlReceiver">
-  </value-type>
+  <object-type name="QAbstractXmlReceiver">
+  </object-type>
 
   <object-type name="QSimpleXmlNodeModel"/>
 
@@ -41,7 +40,7 @@
   </value-type>
  <value-type name="QXmlSchema"/>
  <object-type name="QXmlSchemaValidator"/>
-
+  <rejection class="QXmlSchemaValidator" function-name="schema"/>
   <rejection class="QXmlFormatter" function-name="item"/>
   <object-type name="QXmlFormatter">
     <modify-function signature="startFormattingContent()" remove="all"/>
@@ -53,12 +52,6 @@
 
   <value-type name="QXmlName">
     <modify-function signature="QXmlName(QXmlNamePool&amp;,QString,QString,QString)" access="private">
-      <modify-argument index="3">
-    <remove-default-expression/>
-      </modify-argument>
-      <modify-argument index="4">
-    <remove-default-expression/>
-      </modify-argument>
     </modify-function>
 
     <modify-function signature="operator=(QXmlName)" remove="all"/>
@@ -103,33 +96,8 @@
   <value-type name="QXmlSerializerPointer"/>
 
   <object-type name="QXmlQuery">
-    <modify-function signature="setFocus(QIODevice*)">
-        <modify-argument index="1"> 
-            <reference-count action="set" variable-name="__rcFocusDevice"/>
-        </modify-argument>
-    </modify-function>
-    <modify-function signature="setNetworkAccessManager(QNetworkAccessManager*)">
-        <modify-argument index="1">
-            <reference-count action="set" variable-name="__rcNetworkAccessManager"/>
-        </modify-argument>
-    </modify-function>
     <modify-function signature="evaluateTo(QAbstractXmlReceiver *)const" remove="all"/>
     <modify-function signature="evaluateTo(QStringList&lt;QString&gt;*)const" remove="all"/>
-    <modify-function signature="setMessageHandler(QAbstractMessageHandler*)">
-      <modify-argument index="1">
-    <reference-count action="set" variable-name="__rcMessageHandler"/>
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setQuery(QIODevice*, QUrl)">
-      <modify-argument index="1">
-    <reference-count action="ignore"/> <!-- Data from IODevice is readAll()'d immediately and the pointer is not stored -->
-      </modify-argument>
-    </modify-function>
-    <modify-function signature="setUriResolver(const QAbstractUriResolver*)">
-      <modify-argument index="1">
-    <reference-count action="set" variable-name="__rcUriResolver"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QXmlResultItems"/>
 
@@ -143,11 +111,6 @@
     <modify-function signature="write(QXmlName)" remove="all"/>
     <modify-function signature="write(const char *)" remove="all"/>
     <modify-function signature="isBindingInScope(QXmlName)const" remove="all"/>
-    <modify-function signature="setCodec(const QTextCodec *)">
-      <modify-argument index="1">
-    <reference-count action="set" variable-name="__rcCodec"/>
-      </modify-argument>
-    </modify-function>
   </object-type>
 
 

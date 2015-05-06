@@ -103,7 +103,12 @@ namespace TypeSystem {
         Interface           = 0x0080,
         PyWrapperCode       = 0x0100,
         PyWrapperDeclaration = 0x0200,
-
+        PyWrapperOperators = 0x0400,
+        PyShellDeclaration = 0x0800,
+        PyInheritShellDeclaration = 0x1000,
+        PyInitSource      = 0x2000,
+        PySetWrapperFunc  = 0x4000,
+        PyInheritShellConstructorCode = 0x8000,
         // masks
         All                 = TargetLangCode
                               | NativeCode
@@ -122,8 +127,12 @@ namespace TypeSystem {
         InvalidOwnership,
         DefaultOwnership,
         TargetLangOwnership,
-        CppOwnership
+        CppOwnership,
+        TargetLangThisOwnership
     };
+
+    //! A better normalized signature, which takes care of PODs with the same name
+    QByteArray normalizedSignature(const char* signature);
 };
 
 struct ReferenceCount
@@ -747,11 +756,13 @@ public:
     typedef QFlags<TypeFlag> TypeFlags;
 
     ComplexTypeEntry(const QString &name, Type t)
-        : TypeEntry(QString(name).replace("::", "_"), t),
+        : TypeEntry(QString(name).replace("::", "__"), t),
           m_qualified_cpp_name(name),
           m_qobject(false),
           m_polymorphic_base(false),
           m_generic_class(false),
+          m_createShell(false),
+          m_createPromoter(false),
           m_type_flags(0)
     {
         Include inc;
@@ -849,6 +860,18 @@ public:
     }
     bool isPolymorphicBase() const { return m_polymorphic_base; }
 
+    void setCreateShell(bool on)
+    {
+      m_createShell = on;
+    }
+    bool shouldCreateShell() const { return m_createShell; }
+
+    void setCreatePromoter(bool on)
+    {
+      m_createPromoter = on;
+    }
+    bool shouldCreatePromoter() const { return m_createPromoter; }
+
     void setPolymorphicIdValue(const QString &value)
     {
         m_polymorphic_id_value = value;
@@ -885,6 +908,8 @@ private:
     uint m_qobject : 1;
     uint m_polymorphic_base : 1;
     uint m_generic_class : 1;
+    uint m_createShell : 1;
+    uint m_createPromoter : 1;
 
     QString m_polymorphic_id_value;
     QString m_lookup_name;
@@ -1052,18 +1077,6 @@ class CustomTypeEntry : public ComplexTypeEntry
 {
 public:
     CustomTypeEntry(const QString &name) : ComplexTypeEntry(name, CustomType) { }
-
-    virtual void generateCppJavaToQt(QTextStream &s,
-                                     const AbstractMetaType *java_type,
-                                     const QString &env_name,
-                                     const QString &qt_name,
-                                     const QString &java_name) const = 0;
-
-    virtual void generateCppQtToJava(QTextStream &s,
-                                     const AbstractMetaType *java_type,
-                                     const QString &env_name,
-                                     const QString &qt_name,
-                                     const QString &java_name) const = 0;
 };
 
 struct TypeRejection

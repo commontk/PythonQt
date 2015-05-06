@@ -1,8 +1,17 @@
+#-----------------------------------------------------------------------------
+# NOTE: The CMake files have been contributed to PythonQt and have not been tested with the current
+# PythonQt version. They have not yet been updated to support Qt 5 and/or Python 3.
+#
+# If you are not a CMake expert, you should better use the provided qmake profiles.
+#-----------------------------------------------------------------------------
+
 cmake_minimum_required(VERSION 2.8)
 
 #-----------------------------------------------------------------------------
 project(PythonQt)
 #-----------------------------------------------------------------------------
+
+include(CTestUseLaunchers OPTIONAL)
 
 #-----------------------------------------------------------------------------
 # Python libraries
@@ -62,9 +71,7 @@ if(QT4_FOUND)
     endif()
     set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
   endforeach()
-
-  set(QT_USE_QTTEST ${BUILD_TESTING})
-
+  
   include(${QT_USE_FILE})
 else()
   message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
@@ -74,9 +81,6 @@ endif()
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers 
 # associated with the Qt version being used.
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
-if("${generated_cpp_suffix}" STREQUAL "_48")
-  set(generated_cpp_suffix "")
-endif()
 if("${generated_cpp_suffix}" STREQUAL "_46")
   set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
 endif()
@@ -85,6 +89,7 @@ endif()
 # Sources
 
 set(sources
+    src/PythonQtBoolResult.cpp
     src/PythonQtClassInfo.cpp
     src/PythonQtClassWrapper.cpp
     src/PythonQtConversion.cpp
@@ -115,6 +120,7 @@ set(sources
 # List headers.  This is list is used for the install command.
 
 set(headers
+    src/PythonQtBoolResult.h
     src/PythonQtClassInfo.h
     src/PythonQtClassWrapper.h
     src/PythonQtConversion.h
@@ -232,35 +238,3 @@ install(TARGETS PythonQt
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 install(FILES ${headers} DESTINATION include/PythonQt)
-
-#-----------------------------------------------------------------------------
-# Testing
-
-option(BUILD_TESTING "Build the testing tree." OFF)
-include(CTest)
-
-if(BUILD_TESTING)
-  create_test_sourcelist(test_sources PythonQtCppTests.cpp
-    tests/PythonQtTestMain.cpp
-    )
-
-  list(APPEND test_sources
-    tests/PythonQtTests.cpp
-    tests/PythonQtTests.h
-    )
-
-  QT4_WRAP_CPP(test_sources
-    tests/PythonQtTests.h
-    )
-
-  set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
-  
-  add_executable(PythonQtCppTests ${test_sources})
-  target_link_libraries(PythonQtCppTests PythonQt)
-  
-  add_test(
-    NAME tests_PythonQtTestMain
-    COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
-    )
-endif()
-

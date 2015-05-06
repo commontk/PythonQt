@@ -44,7 +44,6 @@
 #include "reporthandler.h"
 #include "fileout.h"
 
-//#define Q_SCRIPT_LAZY_GENERATOR
 
 void SetupGenerator::addClass(const QString& package, const AbstractMetaClass *cls)
 {
@@ -109,13 +108,104 @@ static QStringList getOperatorCodes(const AbstractMetaClass* cls) {
   if (cls->hasDefaultIsNull()) {
     r.insert("PythonQt::Type_NonZero");
   }
+
+  {
+    CodeSnipList code_snips = cls->typeEntry()->codeSnips();
+    foreach(const CodeSnip &cs, code_snips) {
+      if (cs.language == TypeSystem::PyWrapperOperators) {
+        QStringList values = cs.code().split(" ", QString::SkipEmptyParts);
+        foreach(QString value, values) {
+          r.insert(value);
+        }
+      }
+    }
+  }
+
+
   QStringList result = r.toList();
+  qSort(result);
   return result;
 }
 
 static bool class_less_than(const AbstractMetaClass *a, const AbstractMetaClass *b)
 {
   return a->name() < b->name();
+}
+
+static QSet<QString> _builtinListTypes = QSet<QString>() << "QByteArray"
+<< "QDate"
+<< "QTime"
+<< "QDateTime"
+<< "QUrl"
+<< "QLocale"
+<< "QRect"
+<< "QRectF"
+<< "QSize"
+<< "QSizeF"
+<< "QLine"
+<< "QLineF"
+<< "QPoint"
+<< "QPointF"
+<< "QRegExp"
+<< "QFont"
+<< "QPixmap"
+<< "QBrush"
+<< "QColor"
+<< "QPalette"
+<< "QIcon"
+<< "QImage"
+<< "QPolygon"
+<< "QRegion"
+<< "QBitmap"
+<< "QCursor"
+<< "QSizePolicy"
+<< "QKeySequence"
+<< "QPen"
+<< "QTextLength"
+<< "QTextFormat"
+<< "QMatrix"
+<< "QVariant";
+
+static void addListRegistration(AbstractMetaType* type, QSet<QString>& output) {
+  if (type->instantiations().size() > 0) {
+    QList<AbstractMetaType *> args = type->instantiations();
+    
+    /*
+    QString debugStr;
+    Q_FOREACH(AbstractMetaType* arg, args) {
+      debugStr += QString(arg->typeEntry()->isEnum()?"ENUM ":"") + arg->typeEntry()->qualifiedCppName() + ",";
+      if (arg->typeEntry()->qualifiedCppName() == "QPair") {
+        debugStr += "(" + arg->instantiations().at(0)->typeEntry()->qualifiedCppName() + ",";
+        debugStr += arg->instantiations().at(1)->typeEntry()->qualifiedCppName() + ")";
+      }
+    }
+    output.insert(QString("// TEMPLATEARG: ") + type->typeEntry()->qualifiedCppName() + " " + debugStr);
+    */
+
+    if (args.count() == 1) {
+      if (args.at(0)->indirections() > 0) {
+        return;
+      }
+      QString typeName = type->typeEntry()->qualifiedCppName();
+      QString innerName = args.at(0)->typeEntry()->qualifiedCppName();
+
+      if (typeName == "QStringList") {
+        return;
+      }
+      if (typeName.startsWith("QVector") || typeName.startsWith("QList")) {
+        if (args.at(0)->isEnum()) {
+          output.insert(QString("PythonQtMethodInfo::addParameterTypeAlias(\"") + typeName + "<" + innerName + ">\", \"" + typeName + "<int>\");");
+        } else if (args.at(0)->instantiations().isEmpty() && innerName.startsWith("Q") && !_builtinListTypes.contains(innerName)) {
+          QString result = "PythonQtRegisterListTemplateConverterForKnownClass(" + typeName + ", " + innerName + ");";
+          output.insert(result);
+        }
+        if (!innerName.startsWith("Q")) {
+          // for debugging:
+          //output.insert(QString("// POD: ") + typeName + " " + innerName);
+        }
+      }
+    }
+  }
 }
 
 void SetupGenerator::generate()
@@ -177,6 +267,7 @@ void SetupGenerator::generate()
       QTextStream &s = initFile.stream;
 
       s << "#include <PythonQt.h>" << endl;
+      s << "#include <PythonQtConversion.h>" << endl;
 
       for (int i=0; i<(list.count()+MAX_CLASSES_PER_FILE-1) / MAX_CLASSES_PER_FILE; i++) {
         s << "#include \"" << packKey << QString::number(i) << ".h\"" << endl;
@@ -188,7 +279,38 @@ void SetupGenerator::generate()
         polymorphicHandlers = writePolymorphicHandler(s, list.at(0)->package(), classes_with_polymorphic_id, list);
         s << endl;
       }
-      
+
+      QSet<QString> listRegistration;
+      QSet<QString> snips;
+      foreach(const AbstractMetaClass *cls, list) {
+        Q_FOREACH(const AbstractMetaFunction* func, cls->functions()) {
+          if (func->type() && func->type()->isContainer()) {
+            addListRegistration(func->type(), listRegistration);
+          }
+          Q_FOREACH(const AbstractMetaArgument* arg, func->arguments()) {
+            if (arg->type() && arg->type()->isContainer()) {
+              addListRegistration(arg->type(), listRegistration);
+            }
+          }
+        }
+        {
+          while (cls) {
+            CodeSnipList code_snips = cls->typeEntry()->codeSnips();
+            foreach(const CodeSnip &cs, code_snips) {
+              if (cs.language == TypeSystem::PyInitSource) {
+                snips.insert(cs.code());
+              }
+            }
+            cls = cls->baseClass();
+          }
+        }
+      }
+
+      foreach(QString snip, snips) {
+        s << snip;
+      }
+      s << endl;
+
       // declare individual class creation functions
       s << "void PythonQt_init_" << shortPackName << "(PyObject* module) {" << endl;
 
@@ -196,14 +318,31 @@ void SetupGenerator::generate()
         shortPackName = shortPackName.mid(0, shortPackName.length()-strlen("builtin"));
       }
 
-      QStringList cppClassNames;
       foreach (const AbstractMetaClass *cls, list) {
         if (cls->qualifiedCppName().contains("Ssl")) {
           s << "#ifndef QT_NO_OPENSSL"  << endl;
         }
+        AbstractMetaFunctionList ctors = cls->queryFunctions(AbstractMetaClass::Constructors
+          | AbstractMetaClass::WasVisible
+          | AbstractMetaClass::NotRemovedFromTargetLang);
+
         QString shellCreator;
-        if (cls->generateShellClass()) {
-          shellCreator = ", PythonQtSetInstanceWrapperOnShell<" + ShellGenerator::shellClassName(cls) + ">";
+        if (cls->generateShellClass() && !ctors.isEmpty()) {
+          QString setInstanceFunc = "PythonQtSetInstanceWrapperOnShell";
+          {
+            const AbstractMetaClass* theclass = cls;
+            while (theclass) {
+              CodeSnipList code_snips = theclass->typeEntry()->codeSnips();
+              foreach(const CodeSnip &cs, code_snips) {
+                if (cs.language == TypeSystem::PySetWrapperFunc) {
+                  setInstanceFunc = cs.code();
+                  break;
+                }
+              }
+              theclass = theclass->baseClass();
+            }
+          }
+          shellCreator = ", " + setInstanceFunc + "<" + ShellGenerator::shellClassName(cls) + ">";
         } else {
           shellCreator = ", NULL";
         }
@@ -230,6 +369,19 @@ void SetupGenerator::generate()
       s << endl;
       foreach (QString handler, polymorphicHandlers) {
         s << "PythonQt::self()->addPolymorphicHandler(\""<< handler << "\", polymorphichandler_" << handler << ");" << endl;
+      }
+      s << endl;
+
+      QStringList list = listRegistration.toList();
+      list.sort();
+      Q_FOREACH(QString name, list) {
+        if (name.contains("Ssl")) {
+          s << "#ifndef QT_NO_OPENSSL" << endl;
+        }
+        s << name << endl;
+        if (name.contains("Ssl")) {
+          s << "#endif" << endl;
+        }
       }
 
       s << "}";

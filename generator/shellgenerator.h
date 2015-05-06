@@ -58,19 +58,24 @@ public:
         return "generated_cpp/" + cls->package().replace(".", "_") + "/";
     }
 
-    static void writeTypeInfo(QTextStream &s, const AbstractMetaType *type, Option option = NoOption);
-    static void writeFunctionSignature(QTextStream &s, const AbstractMetaFunction *meta_function,
+    void writeTypeInfo(QTextStream &s, const AbstractMetaType *type, Option option = NoOption, TypeSystem::Ownership ownership = TypeSystem::InvalidOwnership);
+    void writeFunctionSignature(QTextStream &s, const AbstractMetaFunction *meta_function,
                                 const AbstractMetaClass *implementor = 0,
                                 const QString &name_prefix = QString(),
                                 Option option = NoOption,
                                 const QString &classname_prefix = QString(),
                                 const QStringList &extra_arguments = QStringList(),
                                 int numArguments = -1);
-    static void writeFunctionArguments(QTextStream &s, const AbstractMetaClass* owner, const AbstractMetaArgumentList &arguments,
+
+    TypeSystem::Ownership writeOwnershipTemplate(QTextStream & s, const AbstractMetaFunction * meta_function, int argumentIndex);
+
+    void writeFunctionArguments(QTextStream &s, const AbstractMetaFunction *meta_function,
                                 Option option = NoOption,
                                 int numArguments = -1);
 
     bool shouldGenerate(const AbstractMetaClass *meta_class) const;
+
+    bool functionHasNonConstReferences(const AbstractMetaFunction* func);
 
     static QString shellClassName(const AbstractMetaClass *meta_class) {
       return "PythonQtShell_" + meta_class->name();
@@ -82,9 +87,9 @@ public:
       return "PythonQtPublicPromoter_" + meta_class->name();
     }
 
-    static AbstractMetaFunctionList getFunctionsToWrap(const AbstractMetaClass* cls);
-    static AbstractMetaFunctionList getVirtualFunctionsForShell(const AbstractMetaClass* cls);
-    static AbstractMetaFunctionList getProtectedFunctionsThatNeedPromotion(const AbstractMetaClass* cls);
+    AbstractMetaFunctionList getFunctionsToWrap(const AbstractMetaClass* cls);
+    AbstractMetaFunctionList getVirtualFunctionsForShell(const AbstractMetaClass* cls);
+    AbstractMetaFunctionList getProtectedFunctionsThatNeedPromotion(const AbstractMetaClass* cls);
 
     // PythonQt builtins..., dont put them in pri files and dont register them, but generate the code
     static bool isBuiltIn(const QString& name);

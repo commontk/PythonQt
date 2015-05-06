@@ -588,7 +588,6 @@ bool AbstractMetaBuilder::build()
     }
 
     figureOutEnumValues();
-    figureOutDefaultEnumArguments();
     checkFunctionModifications();
 
     foreach (AbstractMetaClass *cls, m_meta_classes) {
@@ -788,12 +787,14 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
                 matched = true;
 
             } else {
+              /*
                 if (meta_enum)
                     ReportHandler::warning("unhandled enum value: " + s + " in "
                                            + meta_enum->enclosingClass()->name() + "::"
                                            + meta_enum->name());
                 else
                     ReportHandler::warning("unhandled enum value: Unknown enum");
+                    */
             }
         }
 
@@ -802,6 +803,7 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
     }
 
     if (!matched) {
+        /* not helpful...
         QString warn = QString("unmatched enum %1").arg(stringValue);
 
         if (meta_function != 0) {
@@ -811,6 +813,7 @@ int AbstractMetaBuilder::figureOutEnumValue(const QString &stringValue,
         }
 
         ReportHandler::warning(warn);
+        */
         returnValue = oldValuevalue;
     }
 
@@ -854,6 +857,7 @@ void AbstractMetaBuilder::figureOutEnumValuesForClass(AbstractMetaClass *meta_cl
                 if (current) {
                     bool currentRejected = ete->isEnumValueRejected(current->name());
                     if (!currentRejected && !vRejected) {
+                        /* Removed because I don't see the sense of rejecting duplicate values...
                         ReportHandler::warning(
                             QString("duplicate enum values: %1::%2, %3 and %4 are %5, already rejected: (%6)")
                             .arg(meta_class->name())
@@ -863,6 +867,7 @@ void AbstractMetaBuilder::figureOutEnumValuesForClass(AbstractMetaClass *meta_cl
                             .arg(v->value())
                             .arg(ete->enumValueRejections().join(", ")));
                         continue;
+                        */
                     }
                 }
 
@@ -903,99 +908,6 @@ void AbstractMetaBuilder::figureOutEnumValues()
     QSet<AbstractMetaClass *> classes;
     foreach (AbstractMetaClass *c, m_meta_classes) {
         figureOutEnumValuesForClass(c, &classes);
-    }
-}
-
-void AbstractMetaBuilder::figureOutDefaultEnumArguments()
-{
-    foreach (AbstractMetaClass *meta_class, m_meta_classes) {
-        foreach (AbstractMetaFunction *meta_function, meta_class->functions()) {
-            foreach (AbstractMetaArgument *arg, meta_function->arguments()) {
-
-                QString expr = arg->defaultValueExpression();
-                if (expr.isEmpty())
-                    continue;
-
-                if (!meta_function->replacedDefaultExpression(meta_function->implementingClass(),
-                    arg->argumentIndex()+1).isEmpty()) {
-                    continue;
-                }
-
-                QString new_expr = expr;
-                if (arg->type()->isEnum()) {
-                    QStringList lst = expr.split(QLatin1String("::"));
-                    if (lst.size() == 1) {
-                        QVector<AbstractMetaClass *> classes(1, meta_class);
-                        AbstractMetaEnum *e = 0;
-                        while (!classes.isEmpty() && e == 0) {
-                            if (classes.front() != 0) {
-                                classes << classes.front()->baseClass();
-
-                                AbstractMetaClassList interfaces = classes.front()->interfaces();
-                                foreach (AbstractMetaClass *interface, interfaces)
-                                    classes << interface->primaryInterfaceImplementor();
-
-                                e = classes.front()->findEnumForValue(expr);
-                            }
-
-                            classes.pop_front();
-                        }
-
-                        if (e != 0) {
-                            new_expr = QString("%1.%2")
-                                    .arg(e->typeEntry()->qualifiedTargetLangName())
-                                    .arg(expr);
-                        } else {
-                            ReportHandler::warning("Cannot find enum constant for value '" + expr + "' in '" + meta_class->name() + "' or any of its super classes");
-                        }
-                    } else if (lst.size() == 2) {
-                        AbstractMetaClass *cl = m_meta_classes.findClass(lst.at(0));
-                        if (!cl) {
-                            ReportHandler::warning("missing required class for enums: " + lst.at(0));
-                            continue;
-                        }
-                        new_expr = QString("%1.%2.%3")
-                                   .arg(cl->typeEntry()->qualifiedTargetLangName())
-                                   .arg(arg->type()->name())
-                                   .arg(lst.at(1));
-                    } else {
-                        ReportHandler::warning("bad default value passed to enum " + expr);
-                    }
-
-                } else if(arg->type()->isFlags()) {
-                    const FlagsTypeEntry *flagsEntry =
-                        static_cast<const FlagsTypeEntry *>(arg->type()->typeEntry());
-                    EnumTypeEntry *enumEntry = flagsEntry->originator();
-                    AbstractMetaEnum *meta_enum = m_meta_classes.findEnum(enumEntry);
-                    if (!meta_enum) {
-                        ReportHandler::warning("unknown required enum " + enumEntry->qualifiedCppName());
-                        continue;
-                    }
-
-                    int value = figureOutEnumValue(expr, 0, meta_enum, meta_function);
-                    new_expr = QString::number(value);
-
-                } else if (arg->type()->isPrimitive()) {
-                    AbstractMetaEnumValue *value = 0;
-                    if (expr.contains("::"))
-                        value = m_meta_classes.findEnumValue(expr);
-                    if (!value)
-                        value = meta_class->findEnumValue(expr, 0);
-
-                    if (value) {
-                        new_expr = QString::number(value->value());
-                    } else if (expr.contains(QLatin1Char('+'))) {
-                        new_expr = QString::number(figureOutEnumValue(expr, 0, 0));
-
-                    }
-
-
-
-                }
-
-                arg->setDefaultValueExpression(new_expr);
-            }
-        }
     }
 }
 
@@ -1371,9 +1283,9 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scope_item, AbstractM
                 setupFunctionDefaults(meta_function, meta_class);
 
                 if (meta_function->isSignal() && meta_class->hasSignal(meta_function)) {
-                    QString warn = QString("signal '%1' in class '%2' is overloaded.")
-                        .arg(meta_function->name()).arg(meta_class->name());
-                    ReportHandler::warning(warn);
+//                    QString warn = QString("signal '%1' in class '%2' is overloaded.")
+//                        .arg(meta_function->name()).arg(meta_class->name());
+//                    ReportHandler::warning(warn);
                 }
 
                 if (meta_function->isSignal() && !meta_class->isQObject()) {
@@ -1383,8 +1295,11 @@ void AbstractMetaBuilder::traverseFunctions(ScopeModelItem scope_item, AbstractM
                 }
 
                 meta_class->addFunction(meta_function);
-            } else if (meta_function->isDestructor() && !meta_function->isPublic()) {
-                meta_class->setHasPublicDestructor(false);
+            } else if (meta_function->isDestructor()) {
+                meta_class->setDestructorException(meta_function->exception());
+                if (!meta_function->isPublic()) {
+                  meta_class->setHasPublicDestructor(false);
+                }
             }
         }
     }
@@ -1564,6 +1479,7 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
 
     AbstractMetaFunction *meta_function = createMetaFunction();
     meta_function->setConstant(function_item->isConstant());
+    meta_function->setException(function_item->exception());
 
     ReportHandler::debugMedium(QString(" - %2()").arg(function_name));
 
@@ -1625,8 +1541,10 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
                                    .arg(class_name)
                                    .arg(function_item->name())
                                    .arg(function_item->type().toString()));
-            m_rejected_functions[class_name + "::" + function_name] =
+            if (!function_item->type().toString().contains("Private")) {
+              m_rejected_functions[class_name + "::" + function_name + " " + function_item->type().toString()] =
                 UnmatchedReturnType;
+            }
             meta_function->setInvalid(true);
             return meta_function;
         }
@@ -1653,8 +1571,10 @@ AbstractMetaFunction *AbstractMetaBuilder::traverseFunction(FunctionModelItem fu
                                    .arg(class_name)
                                    .arg(function_item->name())
                                    .arg(arg->type().toString()));
-            m_rejected_functions[class_name + "::" + function_name] =
+            if (!arg->type().toString().contains("Private")) {
+              m_rejected_functions[class_name + "::" + function_name + " " + arg->type().toString()] =
                 UnmatchedArgumentType;
+            }
             meta_function->setInvalid(true);
             return meta_function;
         }
@@ -1851,7 +1771,7 @@ AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei, boo
                 return t;
 
             ClassModelItem item = m_dom->findClass(contexts.at(0));
-            if (item != 0)
+            if (item)
                 contexts += item->baseClasses();
             contexts.pop_front();
 
@@ -2027,70 +1947,7 @@ QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, Abstr
     if (!replaced_expression.isEmpty())
         return replaced_expression;
 
-    QString expr = item->defaultValueExpression();
-    if (type != 0 && type->isPrimitive()) {
-        if (type->name() == "boolean") {
-            if (expr == "false" || expr=="true") {
-                return expr;
-            } else {
-                bool ok = false;
-                int number = expr.toInt(&ok);
-                if (ok && number)
-                    return "true";
-                else
-                    return "false";
-            }
-        } else if (expr == "ULONG_MAX") {
-            return "Long.MAX_VALUE";
-        } else if (expr == "QVariant::Invalid") {
-            return QString::number(QVariant::Invalid);
-        } else {
-            // This can be an enum or flag so I need to delay the
-            // translation untill all namespaces are completly
-            // processed. This is done in figureOutEnumValues()
-            return expr;
-        }
-    } else if (type != 0 && (type->isFlags() || type->isEnum())) {
-        // Same as with enum explanation above...
-        return expr;
-
-    } else {
-
-        // constructor or functioncall can be a bit tricky...
-        if (expr == "QVariant()" || expr == "QModelIndex()") {
-            return "null";
-        } else if (expr == "QString()") {
-            return "null";
-        } else if (expr.endsWith(")") && expr.contains("::")) {
-            TypeEntry *typeEntry = TypeDatabase::instance()->findType(expr.left(expr.indexOf("::")));
-            if (typeEntry)
-                return typeEntry->qualifiedTargetLangName() + "." + expr.right(expr.length() - expr.indexOf("::") - 2);
-        } else if (expr.endsWith(")") && type != 0 && type->isValue()) {
-            int pos = expr.indexOf("(");
-
-            TypeEntry *typeEntry = TypeDatabase::instance()->findType(expr.left(pos));
-            if (typeEntry)
-                return "new " + typeEntry->qualifiedTargetLangName() + expr.right(expr.length() - pos);
-            else
-                return expr;
-        } else if (expr == "0") {
-            return "null";
-        } else if (type != 0 && (type->isObject() || type->isValue() || expr.contains("::"))) { // like Qt::black passed to a QColor
-            TypeEntry *typeEntry = TypeDatabase::instance()->findType(expr.left(expr.indexOf("::")));
-
-            expr = expr.right(expr.length() - expr.indexOf("::") - 2);
-            if (typeEntry) {
-                return "new " + type->typeEntry()->qualifiedTargetLangName() +
-                       "(" + typeEntry->qualifiedTargetLangName() + "." + expr + ")";
-            }
-        }
-    }
-
-    QString warn = QString("unsupported default value '%3' of argument in function '%1', class '%2'")
-        .arg(function_name).arg(class_name).arg(item->defaultValueExpression());
-    ReportHandler::warning(warn);
-
-    return QString();
+    return item->defaultValueExpression();
 }
 
 

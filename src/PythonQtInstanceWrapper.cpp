@@ -46,13 +46,7 @@
 #include "PythonQtSignal.h"
 #include "PythonQtClassInfo.h"
 #include "PythonQtConversion.h"
-#include "PythonQtClassWrapper.h"
 
-PythonQtClassInfo* PythonQtInstanceWrapperStruct::classInfo()
-{
-  // take the class info from our type object
-  return ((PythonQtClassWrapper*)ob_type)->_classInfo;
-}
 
 static void PythonQtInstanceWrapper_deleteObject(PythonQtInstanceWrapper* self, bool force = false) {
 
@@ -64,7 +58,14 @@ static void PythonQtInstanceWrapper_deleteObject(PythonQtInstanceWrapper* self, 
     // we own our qobject, so we delete it now:
     delete self->_obj;
     self->_obj = NULL;
-    if (force || self->_ownedByPythonQt) {
+
+    // if this object is reference counted, we just unref it:
+    PythonQtVoidPtrCB* unrefCB = self->classInfo()->referenceCountingUnrefCB();
+    if (unrefCB) {
+      (*unrefCB)(self->_wrappedPtr);
+      self->_wrappedPtr = NULL;
+    }
+    else if (force || self->_ownedByPythonQt) {
       int type = self->classInfo()->metaTypeId();
       if (self->_useQMetaTypeDestroy && type>=0) {
         // use QMetaType to destroy the object
@@ -93,6 +94,13 @@ static void PythonQtInstanceWrapper_deleteObject(PythonQtInstanceWrapper* self, 
       PythonQt::priv()->removeWrapperPointer(self->_objPointerCopy);
     }
     if (self->_obj) {
+      if (self->_isShellInstance) {
+        PythonQtShellSetInstanceWrapperCB* cb = self->classInfo()->shellSetInstanceWrapperCB();
+        if (cb) {
+          // remove the pointer to the Python wrapper from the C++ object:
+          (*cb)(self->_obj, NULL);
+        }
+      }
       if (force || self->_ownedByPythonQt) {
         if (force || !self->_obj->parent()) {
           delete self->_obj;
@@ -112,7 +120,7 @@ static void PythonQtInstanceWrapper_dealloc(PythonQtInstanceWrapper* self)
 {
   PythonQtInstanceWrapper_deleteObject(self);
   self->_obj.~QPointer<QObject>();
-  self->ob_type->tp_free((PyObject*)self);
+  Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 static PyObject* PythonQtInstanceWrapper_new(PyTypeObject *type, PyObject * /*args*/, PyObject * /*kwds*/)
@@ -132,6 +140,7 @@ static PyObject* PythonQtInstanceWrapper_new(PyTypeObject *type, PyObject * /*ar
     self->_ownedByPythonQt = false;
     self->_useQMetaTypeDestroy = false;
     self->_isShellInstance = false;
+    self->_shellInstanceRefCountsWrapper = false;
   }
   return (PyObject *)self;
 }
@@ -146,15 +155,22 @@ int PythonQtInstanceWrapper_init(PythonQtInstanceWrapper * self, PyObject * args
   // we are called from python, try to construct our object
   if (self->classInfo()->constructors()) {
     void* directCPPPointer = NULL;
-    PythonQtSlotFunction_CallImpl(self->classInfo(), NULL, self->classInfo()->constructors(), args, kwds, NULL, &directCPPPointer);
+    PythonQtPassThisOwnershipType ownership;
+    PythonQtSlotFunction_CallImpl(self->classInfo(), NULL, self->classInfo()->constructors(), args, kwds, NULL, &directCPPPointer, &ownership);
     if (PyErr_Occurred()) {
       return -1;
     }
     if (directCPPPointer) {
-      // change ownershipflag to be owned by PythonQt
+      // if this object is reference counted, we ref it:
+      PythonQtVoidPtrCB* refCB = self->classInfo()->referenceCountingRefCB();
+      if (refCB) {
+        (*refCB)(directCPPPointer);
+      }
+      // change ownership flag to be owned by PythonQt
       self->_ownedByPythonQt = true;
       self->_useQMetaTypeDestroy = false;
-      if (self->classInfo()->isCPPWrapper()) {
+      bool isQObject = !self->classInfo()->isCPPWrapper();
+      if (!isQObject) {
         self->_wrappedPtr = directCPPPointer;
         // TODO xxx: if there is a wrapper factory, we might want to generate a wrapper for our class?!
       } else {
@@ -174,6 +190,16 @@ int PythonQtInstanceWrapper_init(PythonQtInstanceWrapper * self, PyObject * args
           (*cb)(directCPPPointer, self);
           self->_isShellInstance = true;
         }
+      }
+      // if the constructor has a PythonQtPassThisOwnership parameter and that owner is not NULL,
+      // this wrapper is immediately owned by CPP
+      // (Example: QGraphicsItem(QGraphicsItem* parent), if parent != NULL, ownership needs to be passed
+      //  to C++ immediately)
+      // Alternatively, if it is a QObject and the object already has a parent when it is constructed,
+      // the ownership should be moved to C++ as well, so that the shell instance stays alive.
+      if (ownership == PassOwnershipToCPP ||
+          (isQObject && self->_obj && self->_obj->parent())) {
+        self->passOwnershipToCPP();
       }
     }
   } else {
@@ -275,6 +301,18 @@ static PyObject *PythonQtInstanceWrapper_richcompare(PythonQtInstanceWrapper* wr
     PyTuple_SET_ITEM(args, 0, other);
     PyObject* result = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, opSlot._slot, args, NULL, wrapper->_wrappedPtr);
     Py_DECREF(args);
+    if (result == NULL) {
+      // special handling of EQ and NE, if call fails we just return EQ == false / NE == true.
+      if (code == Py_EQ) {
+        PyErr_Clear();
+        Py_INCREF(Py_False);
+        return Py_False;
+      } else if (code == Py_NE) {
+        PyErr_Clear();
+        Py_INCREF(Py_True);
+        return Py_True;
+      }
+    }
     return result;
   } else {
     // not implemented, let python try something else!
@@ -286,7 +324,7 @@ static PyObject *PythonQtInstanceWrapper_richcompare(PythonQtInstanceWrapper* wr
 
 static PyObject *PythonQtInstanceWrapper_classname(PythonQtInstanceWrapper* obj)
 {
-  return PyString_FromString(obj->ob_type->tp_name);
+  return PyString_FromString(Py_TYPE(obj)->tp_name);
 }
 
 PyObject *PythonQtInstanceWrapper_inherits(PythonQtInstanceWrapper* obj, PyObject *args)
@@ -342,10 +380,9 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
     dict = PyDict_Copy(dict);
 
     if (wrapper->_obj) {
-      // only the properties are missing, the rest is already available from
-      // PythonQtClassWrapper...
+      // we need to replace the properties with their real values...
       QStringList l = wrapper->classInfo()->propertyList();
-      foreach (QString name, l) {
+      Q_FOREACH (QString name, l) {
         PyObject* o = PyObject_GetAttrString(obj, name.toLatin1().data());
         if (o) {
           PyDict_SetItemString(dict, name.toLatin1().data(), o);
@@ -356,7 +393,7 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
       }
 
       QList<QByteArray> dynamicProps = wrapper->_obj->dynamicPropertyNames();
-      foreach (QByteArray name, dynamicProps) {
+      Q_FOREACH (QByteArray name, dynamicProps) {
         PyObject* o = PyObject_GetAttrString(obj, name.data());
         if (o) {
           PyDict_SetItemString(dict, name.data(), o);
@@ -366,6 +403,25 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
         }
       }
     }
+
+    {
+      static const QByteArray dynamicDictString("py_dynamic_dict");
+      // check for a dynamic dict getter slot
+      PythonQtMemberInfo member = wrapper->classInfo()->member(dynamicDictString);
+      if (member._type == PythonQtMemberInfo::Slot) {
+        PyObject* args = PyTuple_New(0);
+        PyObject* result = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, member._slot, args, NULL, wrapper->_wrappedPtr);
+        Py_DECREF(args);
+        if (result) {
+          if (PyDict_Check(result)) {
+            PyDict_Merge(dict, result, false);
+          } else {
+            std::cerr << "py_dynamic_dict() should return a dictionary!" << std::endl; 
+          }
+        }
+      }
+    }
+
     // Note: we do not put children into the dict, is would look confusing?!
     return dict;
   }
@@ -387,16 +443,16 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
 
         PythonQt::ProfilingCB* profilingCB = PythonQt::priv()->profilingCB();
         if (profilingCB) {
-          QString methodName = "getProperty(";
+          QString methodName = "getProperty('";
           methodName += attributeName;
-          methodName += ")";
-          profilingCB(PythonQt::Enter, wrapper->_obj->metaObject()->className(), methodName.toLatin1());
+          methodName += "')";
+          profilingCB(PythonQt::Enter, wrapper->_obj->metaObject()->className(), methodName.toLatin1(), NULL);
         }
 
         PyObject* value = PythonQtConv::QVariantToPyObject(member._property.read(wrapper->_obj));
 
         if (profilingCB) {
-          profilingCB(PythonQt::Leave, NULL, NULL);
+          profilingCB(PythonQt::Leave, NULL, NULL, NULL);
         }
 
         return value;
@@ -425,8 +481,9 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
     }
     break;
   case PythonQtMemberInfo::EnumWrapper:
-    {
-      PyObject* enumWrapper = member._enumWrapper;
+  case PythonQtMemberInfo::NestedClass:
+  {
+      PyObject* enumWrapper = member._pythonType;
       Py_INCREF(enumWrapper);
       return enumWrapper;
     }
@@ -438,6 +495,26 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
       PythonQtMemberInfo member = wrapper->classInfo()->member(getterString + attributeName);
       if (member._type == PythonQtMemberInfo::Slot) {
         return PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, member._slot, NULL, NULL, wrapper->_wrappedPtr);
+      }
+
+      {
+        static const QByteArray dynamicGetterString("py_dynamic_get_attrib");
+        // check for a dynamic getter slot
+        PythonQtMemberInfo member = wrapper->classInfo()->member(dynamicGetterString);
+        if (member._type == PythonQtMemberInfo::Slot) {
+          PyObject* args = PyTuple_New(1);
+          Py_INCREF(name);
+          PyTuple_SET_ITEM(args, 0, name);
+          PyObject* result = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, member._slot, args, NULL, wrapper->_wrappedPtr);
+          Py_DECREF(args);
+          if (result) {
+            return result;
+          } else {
+            // in case of result == NULL, expect that the code as thrown a std::exception
+            // and clear the Python error:
+            PyErr_Clear();
+          }
+        }
       }
 
       // handle dynamic properties
@@ -455,7 +532,11 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
   }
 
   // look for the internal methods (className(), help())
+#ifdef PY3K
+  PyObject* internalMethod = PyObject_GenericGetAttr(obj, name);
+#else
   PyObject* internalMethod = Py_FindMethod( PythonQtInstanceWrapper_methods, obj, (char*)attributeName);
+#endif
   if (internalMethod) {
     return internalMethod;
   }
@@ -509,16 +590,16 @@ static int PythonQtInstanceWrapper_setattro(PyObject *obj,PyObject *name,PyObjec
       if (v.isValid()) {
         PythonQt::ProfilingCB* profilingCB = PythonQt::priv()->profilingCB();
         if (profilingCB) {
-          QString methodName = "setProperty(";
+          QString methodName = "setProperty('";
           methodName += attributeName;
-          methodName += ")";
-          profilingCB(PythonQt::Enter, wrapper->_obj->metaObject()->className(), methodName.toLatin1());
+          methodName += "')";
+          profilingCB(PythonQt::Enter, wrapper->_obj->metaObject()->className(), methodName.toLatin1(), NULL);
         }
 
         success = prop.write(wrapper->_obj, v);
 
         if (profilingCB) {
-          profilingCB(PythonQt::Leave, NULL, NULL);
+          profilingCB(PythonQt::Leave, NULL, NULL, NULL);
         }
       }
       if (success) {
@@ -539,7 +620,10 @@ static int PythonQtInstanceWrapper_setattro(PyObject *obj,PyObject *name,PyObjec
     error = QString("EnumValue '") + attributeName + "' can not be overwritten on " + obj->ob_type->tp_name + " object";
   } else if (member._type == PythonQtMemberInfo::EnumWrapper) {
     error = QString("Enum '") + attributeName + "' can not be overwritten on " + obj->ob_type->tp_name + " object";
-  } else if (member._type == PythonQtMemberInfo::NotFound) {
+  } else if (member._type == PythonQtMemberInfo::NestedClass) {
+    error = QString("Nested class '") + attributeName + "' can not be overwritten on " + obj->ob_type->tp_name + " object";
+  }
+  else if (member._type == PythonQtMemberInfo::NotFound) {
     // check for a setter slot
     static const QByteArray setterString("py_set_");
     PythonQtMemberInfo setter = wrapper->classInfo()->member(setterString + attributeName);
@@ -618,11 +702,22 @@ static PyObject * PythonQtInstanceWrapper_str(PyObject * obj)
   // QByteArray should be directly returned as a str
   if (wrapper->classInfo()->metaTypeId()==QVariant::ByteArray) {
     QByteArray* b = (QByteArray*) wrapper->_wrappedPtr;
+#ifdef PY3K
+    // Note: In Python 2, this was used to access the data() of a byte array.
+    // Since in Python 3 str() will return a unicode, this is no longer possible.
+    // The user needs to call .data() to get access to the data as bytes.
+    if (b->data()) {
+      return PyUnicode_FromStringAndSize(b->data(), b->size());
+    } else {
+      return PyUnicode_New(0, 0);
+    }
+#else
     if (b->data()) {
       return PyString_FromStringAndSize(b->data(), b->size());
     } else {
       return PyString_FromString("");
     }
+#endif
   }
 
   const char* typeName = obj->ob_type->tp_name;
@@ -663,7 +758,7 @@ static PyObject * PythonQtInstanceWrapper_repr(PyObject * obj)
       return PyString_FromFormat("%s (C++ object at: %p)", typeName, wrapper->_wrappedPtr);
     }
   } else {
-    return PyString_FromFormat("%s (%s at: %p)", typeName, wrapper->classInfo()->className(), qobj);
+    return PyString_FromFormat("%s (%s at: %p)", typeName, wrapper->classInfo()->className().constData(), qobj);
   }
 }
 
@@ -691,30 +786,38 @@ static PyNumberMethods PythonQtInstanceWrapper_as_number = {
   0,      /* nb_add */
     0,      /* nb_subtract */
     0,      /* nb_multiply */
+#ifndef PY3K
     0,      /* nb_divide */
+#endif
     0,      /* nb_remainder */
     0,      /* nb_divmod */
     0,      /* nb_power */
     0,      /* nb_negative */
     0,      /* nb_positive */
     0,      /* nb_absolute */
-    PythonQtInstanceWrapper_builtin_nonzero,      /* nb_nonzero */
+    PythonQtInstanceWrapper_builtin_nonzero,      /* nb_nonzero / nb_bool in Py3K */
     0,      /* nb_invert */
     0,      /* nb_lshift */
     0,      /* nb_rshift */
     0,    /* nb_and */
     0,    /* nb_xor */
     0,    /* nb_or */
+#ifndef PY3K
     0,      /* nb_coerce */
+#endif
     0,      /* nb_int */
-    0,      /* nb_long */
+    0,      /* nb_long  / nb_reserved in Py3K */
     0,      /* nb_float */
+#ifndef PY3K
     0,      /* nb_oct */
     0,      /* nb_hex */
+#endif
     0,      /* nb_inplace_add */
     0,      /* nb_inplace_subtract */
     0,      /* nb_inplace_multiply */
+#ifndef PY3K
     0,      /* nb_inplace_divide */
+#endif
     0,      /* nb_inplace_remainder */
     0,      /* nb_inplace_power */
     0,      /* nb_inplace_lshift */
@@ -726,11 +829,13 @@ static PyNumberMethods PythonQtInstanceWrapper_as_number = {
     0,      /* nb_true_divide */
     0,      /* nb_inplace_floor_divide */
     0,      /* nb_inplace_true_divide */
+#ifdef PY3K
+    0,      /* nb_index in Py3K */
+#endif
 };
 
 PyTypeObject PythonQtInstanceWrapper_Type = {
-    PyObject_HEAD_INIT(&PythonQtClassWrapper_Type)
-    0,                         /*ob_size*/
+    PyVarObject_HEAD_INIT(&PythonQtClassWrapper_Type, 0)
     "PythonQt.PythonQtInstanceWrapper",             /*tp_name*/
     sizeof(PythonQtInstanceWrapper),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -749,7 +854,11 @@ PyTypeObject PythonQtInstanceWrapper_Type = {
     PythonQtInstanceWrapper_getattro,                         /*tp_getattro*/
     PythonQtInstanceWrapper_setattro,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES, /*tp_flags*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
+#ifndef PY3K
+    | Py_TPFLAGS_CHECKTYPES
+#endif
+    , /*tp_flags*/
     "PythonQtInstanceWrapper object",           /* tp_doc */
     0,                   /* tp_traverse */
     0,                   /* tp_clear */
@@ -757,7 +866,11 @@ PyTypeObject PythonQtInstanceWrapper_Type = {
     0,                   /* tp_weaklistoffset */
     0,                   /* tp_iter */
     0,                   /* tp_iternext */
+#ifdef PY3K
+    PythonQtInstanceWrapper_methods,
+#else
     0,             /* tp_methods */
+#endif
     0,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */

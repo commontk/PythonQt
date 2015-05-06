@@ -4,12 +4,16 @@
     <include file-name="qssl.h" location="global"/>
   </namespace-type>
 
+  <enum-type name="QSsl::AlternativeNameEntryType"/>
+  <enum-type name="QSslConfiguration::NextProtocolNegotiationStatus"/>
   <enum-type name="QNetworkProxy::Capability" flags="QNetworkProxy::Capabilities"/>
   <enum-type name="QAbstractSocket::NetworkLayerProtocol"/>
   <enum-type name="QAbstractSocket::SocketError"/>
   <enum-type name="QAbstractSocket::SocketState"/>
   <enum-type name="QAbstractSocket::SocketType"/>
   <enum-type name="QAbstractSocket::SocketOption"/>
+  <enum-type name="QAbstractSocket::PauseMode" flags="QAbstractSocket::PauseModes"/>
+  <enum-type name="QAbstractSocket::BindFlag" flags="QAbstractSocket::BindMode"/>
   <enum-type name="QFtp::Command"/>
   <enum-type name="QFtp::Error"/>
   <enum-type name="QFtp::State"/>
@@ -47,31 +51,18 @@
   <object-type name="QHttpPart"/>
   <object-type name="QAbstractNetworkCache"/>
   <object-type name="QNetworkDiskCache">
-    <modify-function signature="insert(QIODevice*)">
-        <modify-argument index="1">
-            <reference-count action="ignore"/> <!-- function only has effect on devices retrieved using prepare() -->
-        </modify-argument>
-    </modify-function>
   </object-type>
   <value-type name="QNetworkCacheMetaData">
     <modify-function signature="operator=(QNetworkCacheMetaData)" remove="all"/>
   </value-type>
 
   <object-type name="QNetworkProxyFactory">
-    <modify-function signature="setApplicationProxyFactory(QNetworkProxyFactory*)">
-        <modify-argument index="1">
-            <define-ownership class="java" owner="c++"/>
-        </modify-argument>
-    </modify-function>
   </object-type>
   <value-type name="QNetworkProxyQuery">
     <modify-function signature="operator=(QNetworkProxyQuery)" remove="all"/>
   </value-type>
 
-  <object-type name="QAbstractSocket">
-    <modify-function signature="setSocketOption(QAbstractSocket::SocketOption, const QVariant)" remove="all"/>
-    <modify-function signature="socketOption(QAbstractSocket::SocketOption)" remove="all"/>
-  </object-type>
+  <object-type name="QAbstractSocket"/>
   <object-type name="QFtp"/>
 
   <object-type name="QHttp">
@@ -103,21 +94,6 @@
   </object-type>
   <object-type name="QLocalSocket"/>
   <object-type name="QNetworkAccessManager">
-    <modify-function signature="setCookieJar(QNetworkCookieJar*)">
-        <modify-argument index="1">
-            <define-ownership class="java" owner="c++"/>
-        </modify-argument>
-    </modify-function>
-    <modify-function signature="setCache(QAbstractNetworkCache*)">
-        <modify-argument index="1">
-            <reference-count action="ignore"/>
-        </modify-argument>
-    </modify-function>
-    <modify-function signature="setProxyFactory(QNetworkProxyFactory*)">
-        <modify-argument index="1">
-            <define-ownership class="java" owner="c++"/>
-        </modify-argument>
-    </modify-function>
   </object-type>
   <object-type name="QNetworkCookieJar"/>
   <object-type name="QNetworkReply">
@@ -136,15 +112,6 @@
   <value-type name="QHostInfo">
         <modify-function signature="operator=(QHostInfo)" remove="all"/>
         <modify-function signature="lookupHost(QString,QObject*,const char*)" access="private"/>
-  
-    <modify-function signature="lookupHost(QString,QObject*,const char*)">
-      <modify-argument index="3">
-        <replace-type modified-type="QString"/>
-        <conversion-rule class="native">
-          <insert-template name="core.convert_string_arg_to_char*"/>
-        </conversion-rule>            
-      </modify-argument>
-    </modify-function>
   </value-type>
 
   <value-type name="QHttpRequestHeader">
@@ -213,8 +180,23 @@
 
   <object-type name="QSslSocket"/>
 
-  <suppress-warning text="*unmatched parameter type 'sockaddr const*"/>
+  <enum-type name="QNetworkSession::State"/>
+  <enum-type name="QNetworkSession::UsagePolicy" flags="QNetworkSession::UsagePolicies"/>
+  <enum-type name="QNetworkSession::SessionError"/>
 
+  <enum-type name="QNetworkConfiguration::BearerType"/>
+  <enum-type name="QNetworkConfiguration::Purpose"/>
+  <enum-type name="QNetworkConfiguration::Type"/>
+  <enum-type name="QNetworkConfiguration::StateFlag" flags="QNetworkConfiguration::StateFlags"/>
+
+  <enum-type name="QNetworkConfigurationManager::Capability" flags="QNetworkConfigurationManager::Capabilities"/>
+
+  <object-type name="QNetworkSession"/>
+  <object-type name="QNetworkConfiguration"/>
+  <object-type name="QNetworkConfigurationManager"/>
+
+  
+  <suppress-warning text="*unmatched parameter type 'sockaddr const*"/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QUrlInfo' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QNetworkCacheMetaData' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QNetworkProxyQuery' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
@@ -223,8 +205,6 @@
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QNetworkProxy' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QNetworkRequest' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QAuthenticator' has equals operators but no qHash() function. Hashcode of objects will consistently be 0."/>
-
-  <!-- For people building without SSL support -->
   <suppress-warning text="WARNING(MetaJavaBuilder) :: namespace 'com.trolltech.qt.network.QSslSocket' for enum 'SslMode' is not declared"/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: type 'QSslError' is specified in typesystem, but not defined. This could potentially lead to compilation errors."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: type 'QSslCipher' is specified in typesystem, but not defined. This could potentially lead to compilation errors."/>
@@ -235,6 +215,5 @@
   <suppress-warning text="WARNING(MetaJavaBuilder) :: namespace 'com.trolltech.qt.network.QSslCertificate' for enum 'SubjectInfo' is not declared"/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: type 'QSslConfiguration' is specified in typesystem, but not defined. This could potentially lead to compilation errors."/>
   <suppress-warning text="WARNING(MetaJavaBuilder) :: type 'QSslSocket' is specified in typesystem, but not defined. This could potentially lead to compilation errors."/>
-  <!-- -->
 
 </typesystem>

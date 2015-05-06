@@ -494,6 +494,8 @@ bool Handler::startElement(const QString &, const QString &n,
             attributes["expense-cost"] = "1";
             attributes["expense-limit"] = "none";
             attributes["polymorphic-base"] = QString("no");
+            attributes["create-shell"] = QString("yes");
+            attributes["create-promoter"] = QString("yes");
             attributes["generate"] = QString("yes");
             attributes["target-type"] = QString();
             attributes["generic-class"] = QString("no");
@@ -642,6 +644,8 @@ bool Handler::startElement(const QString &, const QString &n,
                     ep.cost = attributes["expense-cost"];
                     ctype->setExpensePolicy(ep);
                 }
+                ctype->setCreateShell(convertBoolean(attributes["create-shell"], "create-shell", false));
+                ctype->setCreatePromoter(convertBoolean(attributes["create-promoter"], "create-promoter", false));
 
                 ctype->setIsPolymorphicBase(convertBoolean(attributes["polymorphic-base"], "polymorphic-base", false));
                 ctype->setPolymorphicIdValue(attributes["polymorphic-id-expression"]);
@@ -956,9 +960,10 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 static QHash<QString, TypeSystem::Ownership> ownershipNames;
                 if (ownershipNames.isEmpty()) {
-                    ownershipNames["java"] = TypeSystem::TargetLangOwnership;
+                    ownershipNames["python"] = TypeSystem::TargetLangOwnership;
                     ownershipNames["c++"] = TypeSystem::CppOwnership;
                     ownershipNames["default"] = TypeSystem::DefaultOwnership;
+                    ownershipNames["new-owner-of-this"] = TypeSystem::TargetLangThisOwnership;
                 }
 
                 QString ownershipAttribute = attributes["owner"].toLower();
@@ -1126,7 +1131,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 }
                 QString signature = attributes["signature"];
 
-                signature = QMetaObject::normalizedSignature(signature.toLocal8Bit().constData());
+                signature = TypeSystem::normalizedSignature(signature.toLocal8Bit().constData());
                 if (signature.isEmpty()) {
                     m_error = "No signature for modified function";
                     return false;
@@ -1280,6 +1285,12 @@ bool Handler::startElement(const QString &, const QString &n,
                     languageNames["interface"] = TypeSystem::Interface;
                   languageNames["pywrap-cpp"] = TypeSystem::PyWrapperCode;
                   languageNames["pywrap-h"] = TypeSystem::PyWrapperDeclaration;
+                  languageNames["pywrap-operators"] = TypeSystem::PyWrapperOperators;
+                  languageNames["pyshell-h"] = TypeSystem::PyShellDeclaration;
+                  languageNames["pyinheritshell-h"] = TypeSystem::PyInheritShellDeclaration;
+                  languageNames["pyinheritshell-constructor-code"] = TypeSystem::PyInheritShellConstructorCode;
+                  languageNames["pyinit-cpp"] = TypeSystem::PyInitSource;
+                  languageNames["pysetwrapperfunc"] = TypeSystem::PySetWrapperFunc;
                 }
 
                 QString className = attributes["class"].toLower();
@@ -1469,10 +1480,6 @@ TypeDatabase::TypeDatabase() : m_suppressWarnings(true)
     addType(new ContainerTypeEntry("QPair", ContainerTypeEntry::PairContainer));
     addType(new ContainerTypeEntry("QQueue", ContainerTypeEntry::QueueContainer));
     addType(new ContainerTypeEntry("QMultiMap", ContainerTypeEntry::MultiMapContainer));
-
-    // Custom types...
-    // ### QtScript: no custom handling of QModelIndex for now
-//    addType(new QModelIndexTypeEntry());
 
     addRemoveFunctionToTemplates(this);
 }
@@ -1894,7 +1901,7 @@ QString FunctionModification::toString() const
 static void removeFunction(ComplexTypeEntry *e, const char *signature)
 {
     FunctionModification mod;
-    mod.signature = QMetaObject::normalizedSignature(signature);
+    mod.signature = TypeSystem::normalizedSignature(signature);
     mod.removal = TypeSystem::All;
 
     e->addFunctionModification(mod);
@@ -1915,7 +1922,7 @@ static void injectCode(ComplexTypeEntry *e,
     snip.argumentMap = args;
 
     FunctionModification mod;
-    mod.signature = QMetaObject::normalizedSignature(signature);
+    mod.signature = TypeSystem::normalizedSignature(signature);
     mod.snips << snip;
     mod.modifiers = Modification::CodeInjection;
     e->addFunctionModification(mod);
@@ -2010,4 +2017,18 @@ static void addRemoveFunctionToTemplates(TypeDatabase *db)
         injectCode(qlist, "takeAt(int)", code_with_return, args1);
     }
 
+}
+
+QByteArray TypeSystem::normalizedSignature(const char* signature)
+{
+  QByteArray result = QMetaObject::normalizedSignature(signature);
+  result.replace("unsigned ", "u");
+  result.replace("qreal", "double");
+  result.replace("long long", "longlong");
+  result.replace("qlonglong", "longlong");
+  result.replace("qulonglong", "ulonglong");
+  result.replace("qint64", "longlong");
+  result.replace("quint64", "ulonglong");
+  result.replace("QStringList<QString>", "QStringList");
+  return result;
 }
