@@ -11,6 +11,16 @@ cmake_minimum_required(VERSION 2.8)
 project(PythonQt)
 #-----------------------------------------------------------------------------
 
+include(CTestUseLaunchers OPTIONAL)
+
+#----------------------------------------------------------------------------
+# Qt version
+
+set(DESIRED_QT_VERSION 5 CACHE STRING "Pick a version of Qt to use: 4 or 5")
+
+set(minimum_required_qt5_version "5.3.0")
+set(minimum_required_qt4_version "4.6.2")
+
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -20,7 +30,13 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 
 #-----------------------------------------------------------------------------
 # Build options
+option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 
+if(DESIRED_QT_VERSION MATCHES 4)
+  set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns locale)
+else()
+  set(qtlibs Core Network OpenGL Sql Svg Widgets WebKitWidgets Xml XmlPatterns UiTools)
+endif()
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
 endif()
@@ -46,7 +62,7 @@ endforeach()
 
 # Force option if it applies
 if(PythonQt_Wrap_QtAll)
-  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(
+  list(REMOVE_ITEM qtlibs XmlPatterns) # xmlpatterns wrapper does *NOT* build at all :(
   foreach(qtlib ${qtlibs})
     if(NOT ${PythonQt_Wrap_Qt${qtlib}})
       set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
@@ -65,42 +81,72 @@ endif()
 #-----------------------------------------------------------------------------
 # Setup Qt
 
-set(minimum_required_qt_version "4.6.2")
+if(DESIRED_QT_VERSION MATCHES 5)
+  find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS ${qtlibs} REQUIRED)
 
-find_package(Qt4)
-
-if(QT4_FOUND)
-
-  set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
-
-  if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
-      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
+  if(Qt5_DIR)
+    get_filename_component(_Qt5_DIR "${Qt5_DIR}/../../../" ABSOLUTE)
+    list(FIND CMAKE_PREFIX_PATH "${_Qt5_DIR}" _result)
+    if(_result LESS 0)
+      set(CMAKE_PREFIX_PATH "${_Qt5_DIR};${CMAKE_PREFIX_PATH}" CACHE PATH "" FORCE)
+    endif()
   endif()
 
-  # Enable required qt module
-  foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
-    string(TOUPPER ${qtlib} qtlib_uppercase)
-    if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
-      message(FATAL_ERROR "QT_QT${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
-    endif()
-    set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
-  endforeach()
+  get_target_property(_qmake_exec Qt5::qmake LOCATION)
+  execute_process(COMMAND ${_qmake_exec} -query QT_INSTALL_BINS
+    RESULT_VARIABLE _result
+    OUTPUT_VARIABLE QT_BINARY_DIR
+    ERROR_VARIABLE _error
+    )
+  string(STRIP "${QT_BINARY_DIR}" QT_BINARY_DIR)
+  if(_result OR NOT EXISTS "${QT_BINARY_DIR}")
+    message(FATAL_ERROR "Could not determine Qt binary directory: ${_result} ${QT_BINARY_DIR} ${_error}")
+  endif()
 
-  set(QT_USE_QTTEST ${BUILD_TESTING})
+  #-----------------------------------------------------------------------------
+  # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
+  # associated with the Qt version being used.
+  set(generated_cpp_suffix "_${Qt5Core_VERSION_MAJOR}${Qt5Core_VERSION_MINOR}")
 
-  include(${QT_USE_FILE})
 else()
-  message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
-endif()
+  #-----------------------------------------------------------------------------
+  # Setup Qt4
 
-#-----------------------------------------------------------------------------
-# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
-# associated with the Qt version being used.
-set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
-if("${generated_cpp_suffix}" STREQUAL "_46")
-  set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
-endif()
+  find_package(Qt4)
 
+  if(QT4_FOUND)
+
+    set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+
+    if(${found_qt_version} VERSION_LESS ${minimum_required_qt4_version})
+      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt4_version} -- you cannot use Qt ${found_qt_version}.")
+    endif()
+
+    # Enable required qt module
+    foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
+      string(TOUPPER ${qtlib} qtlib_uppercase)
+      if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
+        message(FATAL_ERROR "QT_QT${${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
+      endif()
+      set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
+    endforeach()
+
+    include(${QT_USE_FILE})
+  else()
+    message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+  endif()
+
+  #-----------------------------------------------------------------------------
+  # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
+  # associated with the Qt version being used.
+  set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
+
+  # TODO: generated headers for Qt4.8 contains several strange locales that are not available out of the box
+  #       force 4.7
+  if("${generated_cpp_suffix}" STREQUAL "_46" OR "${generated_cpp_suffix}" STREQUAL "_48")
+    set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
+   endif()
+endif()
 #-----------------------------------------------------------------------------
 # Sources
 
@@ -123,8 +169,6 @@ set(sources
     src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
     src/gui/PythonQtScriptingConsole.cpp
-
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
 
     generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
     generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
@@ -157,12 +201,14 @@ set(headers
     src/PythonQtStdIn.h
     src/PythonQtStdOut.h
     src/PythonQtSystem.h
-    src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
+    src/PythonQtUtils.h
 )
-
+if(DESIRED_QT_VERSION MATCHES 4)
+  set(sources ${sources} generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp)
+  set(headers ${headers} generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h)
+endif()
 #-----------------------------------------------------------------------------
 # Headers that should run through moc
 
@@ -179,27 +225,27 @@ set(moc_sources
 #-----------------------------------------------------------------------------
 # Add extra sources
 foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
-
+  
   if (${PythonQt_Wrap_Qt${qtlib}})
-
+    
     ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
-
+    
     set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
-
+    
     foreach(index RANGE 0 11)
-
+    
       # Source files
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
         list(APPEND sources ${file_prefix}${index}.cpp)
       endif()
-
+      
       # Headers that should run through moc
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
         list(APPEND moc_sources ${file_prefix}${index}.h)
       endif()
-
+      
     endforeach()
-
+    
     list(APPEND sources ${file_prefix}_init.cpp)
 
   endif()
@@ -215,17 +261,33 @@ set(qrc_sources )
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-qt4_wrap_cpp(gen_moc_sources ${moc_sources})
-qt4_wrap_ui(gen_ui_sources ${ui_sources})
-qt4_add_resources(gen_qrc_sources ${qrc_sources})
+if(DESIRED_QT_VERSION MATCHES 4)
+  qt4_wrap_cpp(gen_moc_sources ${moc_sources})
+  qt4_wrap_ui(gen_ui_sources ${ui_sources})
+  qt4_add_resources(gen_qrc_sources ${qrc_sources})
+else()
+  qt5_wrap_cpp(gen_moc_sources ${moc_sources})
+  qt5_wrap_ui(gen_ui_sources ${ui_sources})
+  qt5_add_resources(gen_qrc_sources ${qrc_sources})
 
+  include_directories(${Qt5Core_INCLUDE_DIRS})
+  include_directories(${Qt5Widgets_INCLUDE_DIRS})
+  include_directories(${Network_INCLUDE_DIRS})
+  include_directories(${OpenGL_INCLUDE_DIRS})
+  include_directories(${Sql_INCLUDE_DIRS})
+  include_directories(${Svg_INCLUDE_DIRS})
+  include_directories(${WebKitWidgets_INCLUDE_DIRS})
+  include_directories(${Xml_INCLUDE_DIRS})
+  include_directories(${XmlPatterns_INCLUDE_DIRS})
+  include_directories(${UiTools_INCLUDE_DIRS})
+endif()
 #-----------------------------------------------------------------------------
 # Build the library
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
-
+  
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
