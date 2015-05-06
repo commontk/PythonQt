@@ -72,7 +72,7 @@ struct Preprocess
         includes << QString(".");
 
 #if defined(Q_OS_WIN32)
-        char *path_splitter = ";";
+        const char *path_splitter = ";";
 #else
         const char *path_splitter = ":";
 #endif
@@ -80,11 +80,11 @@ struct Preprocess
         // Environment INCLUDE
         QString includePath = getenv("INCLUDE");
         if (!includePath.isEmpty())
-            includes += includePath.split(path_splitter);        
+            includes += includePath.split(path_splitter);
 
         // Includes from the command line
         if (!commandLineIncludes.isEmpty())
-            includes += commandLineIncludes.split(path_splitter);        
+            includes += commandLineIncludes.split(path_splitter);
 
         // Include Qt
         QString qtdir = getenv ("QTDIR");
@@ -102,6 +102,9 @@ struct Preprocess
             qWarning("QTDIR environment variable not set. This may cause problems with finding the necessary include files.");
 #endif
         } else {
+            std::cout << "-------------------------------------------------------------" << std::endl;
+            std::cout << "Using QT at: " << qtdir.toLocal8Bit().constData() << std::endl;
+            std::cout << "-------------------------------------------------------------" << std::endl;
             qtdir += "/include";
             includes << (qtdir + "/QtXml");
             includes << (qtdir + "/QtNetwork");
@@ -110,13 +113,13 @@ struct Preprocess
             includes << (qtdir + "/QtOpenGL");
             includes << qtdir;
         }
-
-        foreach (QString include, includes)
-            preprocess.push_include_path(QDir::convertSeparators(include).toStdString());        
+        foreach (QString include, includes) {
+            preprocess.push_include_path(QDir::toNativeSeparators(include).toStdString());
+        }
 
         QString currentDir = QDir::current().absolutePath();
         QFileInfo sourceInfo(sourceFile);
-        QDir::setCurrent(sourceInfo.absolutePath());        
+        QDir::setCurrent(sourceInfo.absolutePath());
 
         std::string result;
         result.reserve (20 * 1024); // 20K

@@ -42,6 +42,8 @@
 #include "PythonQtStdDecorators.h"
 #include "PythonQt.h"
 #include "PythonQtClassInfo.h"
+#include "PythonQtConversion.h"
+
 #include <QCoreApplication>
 
 bool PythonQtStdDecorators::connect(QObject* sender, const QByteArray& signal, PyObject* callable)
@@ -143,7 +145,7 @@ QObject* PythonQtStdDecorators::parent(QObject* o) {
   return o->parent();
 }
 
-void PythonQtStdDecorators::setParent(QObject* o, QObject* parent)
+void PythonQtStdDecorators::setParent(QObject* o, PythonQtNewOwnerOfThis<QObject*> parent)
 {
   o->setParent(parent);
 }
@@ -165,24 +167,29 @@ QVariant PythonQtStdDecorators::property(QObject* o, const char* name)
 
 QString PythonQtStdDecorators::tr(QObject* obj, const QByteArray& text, const QByteArray& ambig, int n)
 {
+#if( QT_VERSION >= QT_VERSION_CHECK(5,0,0) )
+  return QCoreApplication::translate(obj->metaObject()->className(), text.constData(), ambig.constData(), n);
+#else
   return QCoreApplication::translate(obj->metaObject()->className(), text.constData(), ambig.constData(), QCoreApplication::CodecForTr, n);
+#endif
 }
 
 QObject* PythonQtStdDecorators::findChild(QObject* parent, PyObject* type, const QString& name)
 {
   const QMetaObject* meta = NULL;
-  const char* typeName = NULL;
+  QByteArray typeName;
 
   if (PyObject_TypeCheck(type, &PythonQtClassWrapper_Type)) {
     meta = ((PythonQtClassWrapper*)type)->classInfo()->metaObject();
   } else if (PyObject_TypeCheck(type, &PythonQtInstanceWrapper_Type)) {
     meta = ((PythonQtInstanceWrapper*)type)->classInfo()->metaObject();
-  } else if (PyString_Check(type)) {
-    typeName = PyString_AsString(type);
+  } else if (PyBytes_Check(type) || PyUnicode_Check(type)) {
+    typeName = PythonQtConv::PyObjGetString(type).toUtf8();
   }
 
-  if (!typeName && !meta)
+  if (typeName.isEmpty() && !meta) {
     return NULL;
+  }
 
   return findChild(parent, typeName, meta, name);
 }
@@ -190,20 +197,23 @@ QObject* PythonQtStdDecorators::findChild(QObject* parent, PyObject* type, const
 QList<QObject*> PythonQtStdDecorators::findChildren(QObject* parent, PyObject* type, const QString& name)
 {
   const QMetaObject* meta = NULL;
-  const char* typeName = NULL;
+  QByteArray typeName;
 
   if (PyObject_TypeCheck(type, &PythonQtClassWrapper_Type)) {
     meta = ((PythonQtClassWrapper*)type)->classInfo()->metaObject();
   } else if (PyObject_TypeCheck(type, &PythonQtInstanceWrapper_Type)) {
     meta = ((PythonQtInstanceWrapper*)type)->classInfo()->metaObject();
-  } else if (PyString_Check(type)) {
-    typeName = PyString_AsString(type);
   }
+  else if (PyBytes_Check(type) || PyUnicode_Check(type)) {
+    typeName = PythonQtConv::PyObjGetString(type).toUtf8();
+  }
+
 
   QList<QObject*> list;
 
-  if (!typeName && !meta)
+  if (typeName.isEmpty() && !meta) {
     return list;
+  }
 
   findChildren(parent, typeName, meta, name, list);
 
@@ -213,20 +223,22 @@ QList<QObject*> PythonQtStdDecorators::findChildren(QObject* parent, PyObject* t
 QList<QObject*> PythonQtStdDecorators::findChildren(QObject* parent, PyObject* type, const QRegExp& regExp)
 {
   const QMetaObject* meta = NULL;
-  const char* typeName = NULL;
+  QByteArray typeName;
 
   if (PyObject_TypeCheck(type, &PythonQtClassWrapper_Type)) {
     meta = ((PythonQtClassWrapper*)type)->classInfo()->metaObject();
   } else if (PyObject_TypeCheck(type, &PythonQtInstanceWrapper_Type)) {
     meta = ((PythonQtInstanceWrapper*)type)->classInfo()->metaObject();
-  } else if (PyString_Check(type)) {
-    typeName = PyString_AsString(type);
+  }
+  else if (PyBytes_Check(type) || PyUnicode_Check(type)) {
+    typeName = PythonQtConv::PyObjGetString(type).toUtf8();
   }
 
   QList<QObject*> list;
 
-  if (!typeName && !meta)
+  if (typeName.isEmpty() && !meta) {
     return list;
+  }
 
   findChildren(parent, typeName, meta, regExp, list);
 
@@ -320,4 +332,61 @@ int PythonQtStdDecorators::findChildren(QObject* parent, const char* typeName, c
 const QMetaObject* PythonQtStdDecorators::metaObject( QObject* obj )
 {
   return obj->metaObject();
+}
+
+bool PythonQtDebugAPI::isOwnedByPython( PyObject* object )
+{
+  if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type)) {
+    PythonQtInstanceWrapper* wrapper = (PythonQtInstanceWrapper*)object;
+    return wrapper->_ownedByPythonQt;
+  }
+  return true;
+}
+
+bool PythonQtDebugAPI::isDerivedShellInstance( PyObject* object )
+{
+  if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type)) {
+    PythonQtInstanceWrapper* wrapper = (PythonQtInstanceWrapper*)object;
+    return wrapper->_isShellInstance;
+  }
+  return false;
+}
+
+bool PythonQtDebugAPI::hasExtraShellRefCount( PyObject* object )
+{
+  if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type)) {
+    PythonQtInstanceWrapper* wrapper = (PythonQtInstanceWrapper*)object;
+    return wrapper->_shellInstanceRefCountsWrapper;
+  }
+  return false;
+}
+
+bool PythonQtDebugAPI::passOwnershipToCPP( PyObject* object )
+{
+  if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type)) {
+    PythonQtInstanceWrapper* wrapper = (PythonQtInstanceWrapper*)object;
+    wrapper->passOwnershipToCPP();
+    return true;
+  }
+  return false;
+}
+
+bool PythonQtDebugAPI::passOwnershipToPython( PyObject* object )
+{
+  if (PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type)) {
+    PythonQtInstanceWrapper* wrapper = (PythonQtInstanceWrapper*)object;
+    wrapper->passOwnershipToPython();
+    return true;
+  }
+  return false;
+}
+
+bool PythonQtDebugAPI::isPythonQtInstanceWrapper( PyObject* object )
+{
+  return PyObject_TypeCheck(object, &PythonQtInstanceWrapper_Type) != 0;
+}
+
+bool PythonQtDebugAPI::isPythonQtClassWrapper( PyObject* object )
+{
+  return PyObject_TypeCheck(object, &PythonQtClassWrapper_Type) != 0;
 }

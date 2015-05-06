@@ -108,7 +108,7 @@ PythonQtImport::ModuleInfo PythonQtImport::getModuleInfo(PythonQtImporter* self,
     }
   }
   // test if it is a shared library
-  foreach(const QString& suffix, PythonQt::priv()->sharedLibrarySuffixes()) {
+  Q_FOREACH(const QString& suffix, PythonQt::priv()->sharedLibrarySuffixes()) {
     test = path+suffix;
     if (PythonQt::importInterface()->exists(test)) {
       info.fullPath = test;
@@ -136,7 +136,7 @@ int PythonQtImporter_init(PythonQtImporter *self, PyObject *args, PyObject * /*k
   QString path(cpath);
   if (PythonQt::importInterface()->exists(path)) {
     const QStringList& ignorePaths = PythonQt::self()->getImporterIgnorePaths();
-    foreach(QString ignorePath, ignorePaths) {
+    Q_FOREACH(QString ignorePath, ignorePaths) {
       if (path.startsWith(ignorePath)) {
         PyErr_SetString(PythonQtImportError,
           "path ignored");
@@ -159,7 +159,7 @@ PythonQtImporter_dealloc(PythonQtImporter *self)
   // free the stored path
   if (self->_path) delete self->_path;
   // free ourself
-  self->ob_type->tp_free((PyObject *)self);
+  Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
 
@@ -186,6 +186,26 @@ PythonQtImporter_find_module(PyObject *obj, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
   }
+}
+
+PyObject *
+PythonQtImporter_iter_modules(PyObject *obj, PyObject *args)
+{
+  // The pkgutil.iter_modules expects an importer to implement
+  // "iter_modules"... We use the generic ImpImporter to handle that.
+  // This is needed for import completion of the jedi library.
+  const char* prefix;
+  if (!PyArg_ParseTuple(args, "|s",
+    &prefix)) {
+    return NULL;
+  }
+  PythonQtImporter *self = (PythonQtImporter *)obj;
+  PythonQtObjectPtr pkgutil = PythonQt::self()->importModule("pkgutil");
+  PythonQtObjectPtr importer = pkgutil.call("ImpImporter", QVariantList() << *self->_path);
+  PythonQtObjectPtr result = importer.call("iter_modules", QVariantList() << QString::fromUtf8(prefix));
+  PyObject* o = result;
+  Py_XINCREF(o);
+  return o;
 }
 
 /* Load and return the module named by 'fullname'. */
@@ -376,11 +396,16 @@ Return the source code for the specified module. Raise PythonQtImportError\n\
 is the module couldn't be found, return None if the archive does\n\
 contain the module, but has no source for it.");
 
+PyDoc_STRVAR(doc_iter_modules,
+             "Needed for pkgutil");
+
 PyMethodDef PythonQtImporter_methods[] = {
   {"find_module", PythonQtImporter_find_module, METH_VARARGS,
    doc_find_module},
   {"load_module", PythonQtImporter_load_module, METH_VARARGS,
    doc_load_module},
+  {"iter_modules", PythonQtImporter_iter_modules, METH_VARARGS,
+  doc_iter_modules},
   {"get_data", PythonQtImporter_get_data, METH_VARARGS,
    doc_get_data},
   {"get_code", PythonQtImporter_get_code, METH_VARARGS,
@@ -400,8 +425,7 @@ Create a new PythonQtImporter instance. 'path' must be a valid path on disk/or i
 #define DEFERRED_ADDRESS(ADDR) 0
 
 PyTypeObject PythonQtImporter_Type = {
-  PyObject_HEAD_INIT(DEFERRED_ADDRESS(&PyType_Type))
-  0,
+  PyVarObject_HEAD_INIT(DEFERRED_ADDRESS(&PyType_Type), 0)
   "PythonQtImport.PythonQtImporter",
   sizeof(PythonQtImporter),
   0,          /* tp_itemsize */
@@ -766,6 +790,20 @@ PyObject* PythonQtImport::getCodeFromPyc(const QString& file)
 PyDoc_STRVAR(mlabimport_doc,
 "Imports python files into PythonQt, completely replaces internal python import");
 
+#ifdef PY3K
+static struct PyModuleDef PythonQtImport_def = {
+    PyModuleDef_HEAD_INIT,
+    "PythonQtImport",   /* m_name */
+    mlabimport_doc,     /* m_doc */
+    -1,                 /* m_size */
+    NULL,               /* m_methods */
+    NULL,               /* m_reload */
+    NULL,               /* m_traverse */
+    NULL,               /* m_clear */
+    NULL                /* m_free */
+};
+#endif
+
 void PythonQtImport::init()
 {
   static bool first = true;
@@ -794,8 +832,12 @@ void PythonQtImport::init()
     mlab_searchorder[4] = tmp;
   }
 
+#ifdef PY3K
+  mod = PyModule_Create(&PythonQtImport_def);
+#else
   mod = Py_InitModule4("PythonQtImport", NULL, mlabimport_doc,
            NULL, PYTHON_API_VERSION);
+#endif
 
   PythonQtImportError = PyErr_NewException(const_cast<char*>("PythonQtImport.PythonQtImportError"),
               PyExc_ImportError, NULL);
@@ -823,6 +865,9 @@ void PythonQtImport::init()
   PyObject* encodingsModule = PyDict_GetItemString(modules, "encodings");
   if (encodingsModule != NULL) {
     PyImport_ReloadModule(encodingsModule);
+  } else {
+    // import it now, so that the search function is registered (a previous import from the codecs module may have failed and it does not retry to import it)
+    PyImport_ImportModule("encodings");
   }
 #endif
 }

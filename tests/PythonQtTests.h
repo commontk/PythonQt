@@ -52,6 +52,7 @@
 #include <QColor>
 #include <QBrush>
 #include <QCursor>
+//#include <QGLWidget>
 
 class PythonQtTestSlotCallingHelper;
 class PythonQtTestApiHelper;
@@ -62,7 +63,7 @@ class PythonQtTestApi : public QObject
 {
   Q_OBJECT
 
-private slots:
+private Q_SLOTS:
   void initTestCase();
   void testCall();
   void testVariables();
@@ -107,7 +108,7 @@ class ClassD : public QObject, public ClassA, public ClassB {
   Q_OBJECT
 public:
   ClassD() { d = 4; }
-  public slots:
+  public Q_SLOTS:
     int getD() { return d; }
 private:
   int d;
@@ -117,28 +118,28 @@ private:
 
 class ClassAWrapper : public QObject {
   Q_OBJECT
-public slots:
+public Q_SLOTS:
   ClassA* new_ClassA() { return new ClassA; }
   int getX(ClassA* o) { return o->x; }
 };
 
 class ClassBWrapper : public QObject {
   Q_OBJECT
-public slots:
+public Q_SLOTS:
   ClassB* new_ClassB() { return new ClassB; }
   int getY(ClassB* o) { return o->y; }
 };
 
 class ClassCWrapper : public QObject {
   Q_OBJECT
-public slots:
+public Q_SLOTS:
   ClassC* new_ClassC() { return new ClassC; }
   int getZ(ClassC* o) { return o->z; }
 };
 
 class ClassDWrapper : public QObject {
   Q_OBJECT
-    public slots:
+    public Q_SLOTS:
       ClassD* new_ClassD() { return new ClassD; }
 };
 
@@ -161,7 +162,7 @@ public:
 
   virtual QDateTime lastModifiedDate(const QString& filename);
 
-public slots:
+public Q_SLOTS:
 
   //! call to set that the test has passed (from Python!)
   void setPassed() { _passed = true; }
@@ -202,7 +203,7 @@ public:
     _ptr = (PQCppObject*)ptr;
   }
 
-public slots:
+public Q_SLOTS:
   int  getHeight() { return _ptr->getHeight(); }
   void setHeight(int h) { _ptr->setHeight(h); }
 
@@ -212,7 +213,7 @@ private:
 
 class PQCppObjectDecorator : public QObject {
   Q_OBJECT
-public slots:
+public Q_SLOTS:
   int  getH(PQCppObject* obj) { return obj->getHeight(); }
 
 };
@@ -234,7 +235,7 @@ private:
 class PQCppObjectNoWrapDecorator : public QObject {
   Q_OBJECT
   
-public slots:
+public Q_SLOTS:
   PQCppObjectNoWrap* new_PQCppObjectNoWrap() {
     return new PQCppObjectNoWrap(0);
   }
@@ -277,7 +278,7 @@ public:
   
   Q_DECLARE_FLAGS(TestEnum, TestEnumFlag)
   
-  public slots:
+  public Q_SLOTS:
   PQCppObject2* new_PQCppObject2() {
     return new PQCppObject2();
   }
@@ -289,36 +290,6 @@ public:
   // with int overload
   TestEnumFlag testEnumFlag3(PQCppObject2* obj, int flag);
   TestEnumFlag testEnumFlag3(PQCppObject2* obj, TestEnumFlag flag);
-
-};
-
-typedef PQCppObject2 PQCppObjectQFlagOnly;
-
-class PQCppObjectQFlagOnlyDecorator : public QObject {
-  Q_OBJECT
-
-public:
-  Q_FLAGS(TestEnumFlag)
-
-  enum TestEnumFlag {
-    TestEnumValue1 = 0,
-    TestEnumValue2 = 1
-  };
-
-  Q_DECLARE_FLAGS(TestEnum, TestEnumFlag)
-
-  public slots:
-  PQCppObjectQFlagOnly* new_PQCppObjectQFlagOnly() {
-    return new PQCppObjectQFlagOnly();
-  }
-
-  TestEnumFlag testEnumFlag1(PQCppObjectQFlagOnly* obj, TestEnumFlag flag);
-
-  PQCppObjectQFlagOnly::TestEnumFlag testEnumFlag2(PQCppObjectQFlagOnly* obj, PQCppObjectQFlagOnly::TestEnumFlag flag);
-
-  // with int overload
-  TestEnumFlag testEnumFlag3(PQCppObjectQFlagOnly* obj, int flag);
-  TestEnumFlag testEnumFlag3(PQCppObjectQFlagOnly* obj, TestEnumFlag flag);
 
 };
 
@@ -334,12 +305,12 @@ public:
   PQUnknownButRegisteredValueObject() {};
 };
 
-//! test the calling of slots
+//! test the calling of Q_SLOTS
 class PythonQtTestSlotCalling : public QObject
 {
   Q_OBJECT
 
-private slots:
+private Q_SLOTS:
   void initTestCase();
   void init();
 
@@ -347,6 +318,8 @@ private slots:
   void testPODSlotCalls();
   void testCPPSlotCalls();
   void testQVariantSlotCalls();
+  void testQListSlotCalls();
+  void testQMapSlotCalls();
   void testObjectSlotCalls();
   void testMultiArgsSlotCall();
   void testPyObjectSlotCall();
@@ -354,6 +327,7 @@ private slots:
   void testCppFactory();
   void testInheritance();
   void testAutoConversion();
+  void testProperties();
 
 private:
   PythonQtTestSlotCallingHelper* _helper;
@@ -367,11 +341,56 @@ class PythonQtTestSlotCallingHelper : public QObject
 public:
   PythonQtTestSlotCallingHelper(PythonQtTestSlotCalling* test) {
     _test = test;
+    _qObjectProp = NULL;
   };
 
   bool runScript(const char* script, int expectedOverload = -1);
 
-public slots:
+  Q_PROPERTY(int intProp READ intProp WRITE setIntProp);
+  Q_PROPERTY(float floatProp READ floatProp WRITE setFloatProp);
+  Q_PROPERTY(QVariantList variantListProp READ variantListProp WRITE setVariantListProp);
+  Q_PROPERTY(QVariantMap  variantMapProp READ variantMapProp WRITE setVariantMapProp);
+  Q_PROPERTY(QVariant     variantProp READ variantProp WRITE setVariantProp);
+  Q_PROPERTY(QObject*     qObjectProp READ qObjectProp WRITE setQObjectProp);
+  Q_PROPERTY(QList<QObject*>  qObjectListProp READ qObjectListProp WRITE setQObjectListProp);
+
+  Q_PROPERTY(QSize sizeProp READ sizeProp WRITE setSizeProp);
+
+public:
+  int intProp() const { _called = true; return _intProp; }
+  void setIntProp(int value) { _called = true; _intProp = value; }
+  float floatProp() const { _called = true; return _floatProp; }
+  void setFloatProp(float value) { _called = true; _floatProp = value; }
+
+  QVariantList variantListProp() const { _called = true; return _variantListProp; }
+  void setVariantListProp(const QVariantList& value) { _called = true; _variantListProp = value; }
+
+  QVariantMap variantMapProp() const { _called = true; return _variantMapProp; }
+  void setVariantMapProp(const QVariantMap& value) { _called = true; _variantMapProp = value; }
+
+  QVariant variantProp() const { _called = true; return _variantProp; }
+  void setVariantProp(const QVariant& value) { _called = true; _variantProp = value; }
+
+  QObject* qObjectProp() const { _called = true; return _qObjectProp; }
+  void setQObjectProp(QObject* value) { _called = true; _qObjectProp = value; }
+
+  QObjectList qObjectListProp() const { _called = true; return _qObjectListProp; }
+  void setQObjectListProp(const QObjectList& value) { _called = true; _qObjectListProp = value; }
+
+  QSize sizeProp() const { _called = true; return _sizeProp; }
+  void setSizeProp(const QSize& value) { _called = true; _sizeProp = value; }
+
+private:
+  int   _intProp;
+  float _floatProp;
+  QVariantList _variantListProp;
+  QVariantMap _variantMapProp;
+  QVariant _variantProp;
+  QObject* _qObjectProp;
+  QObjectList _qObjectListProp;
+  QSize _sizeProp;
+
+public Q_SLOTS:
 
   //! call to set that the test has passed (from Python!)
   void setPassed() { _passed = true; }
@@ -409,11 +428,36 @@ public slots:
   QStringList getQStringList(const QStringList& l) { _called = true;  return l; }
   QVariant getQVariant(const QVariant& var) { _called = true;  return var; }
 
+  QList<int> getQListInt() { _called = true; return QList<int>() << 1 << 2 << 3; }
+  QList<unsigned int> getQListUnsignedInt() { _called = true; return QList<unsigned int>() << 1 << 2 << 3; }
+  QList<qreal> getQListqreal() { _called = true; return QList<qreal>() << 1.1 << 2.2 << 3.3; }
+  QList<float> getQListfloat() { _called = true; return QList<float>() << 1 << 2 << 3; }
+  QList<double> getQListdouble() { _called = true; return QList<double>() << 1.1 << 2.2 << 3.3; }
+  QList<quint64> getQListquint64() { _called = true; return QList<quint64>() << 1 << 2 << 3; }
+  QList<qint64> getQListqint64() { _called = true; return QList<qint64>() << 1 << 2 << 3; }
+  //QList<GLuint64> getQListGLuint64() { _called = true; return QList<GLuint64>() << 1 << 2 << 3; }
+  //QList<GLuint> getQListGLuint() { _called = true; return QList<GLuint>() << 1 << 2 << 3; }
+
+  QList<QSize> getQListQSize() { _called = true; return QList<QSize>() << QSize(1,2) << QSize(3,4); }
+  QList<QSize> getQListQSize(const QList<QSize>& list) { _called = true; return list; }
+
+  QList<Qt::DayOfWeek> getQListDayOfWeek(const QList<Qt::DayOfWeek>& days) { _called = true; return days; }
+  
+  QMap<int, QVariant> getQMapIntVariant(const QMap<int, QVariant>& map) { _called = true; return map; }
+  QMap<int, QString> getQMapIntString(const QMap<int, QString>& map) { _called = true; return map; }
+
+  QVector<QPair<double, QColor >  > getQVectorQPair1(const QVector<QPair<double, QColor >  > &list) { _called = true; return list; }
+  QVector<QPair<qreal, QColor >  > getQVectorQPair2(const QVector<QPair<qreal, QColor >  > &list) { _called = true; return list; }
+  
+  QPair<double, QColor> getQPair(const QPair<double, QColor>& pair) { _called = true; return pair; }
+
+  QPair<double, QVariant> getQPairVariant(const QPair<double, QVariant>& pair) { _called = true; return pair; }
+
   // QColor as representative for C++ value classes
   QColor  getQColor1(const QColor& var) { _called = true;  return var; }
   QColor  getQColor2(QColor& var) { _called = true;  return var; }
   QColor  getQColor3(QColor* col) { _called = true;  return *col; }
-  QColor  getQColor4(const QVariant& color) { _called = true;  return qVariantValue<QColor>(color); }
+  QColor  getQColor4(const QVariant& color) { _called = true;  return qvariant_cast<QColor>(color); }
   QColor* getQColor5() { _called = true; static QColor c(1,2,3); return &c; }
 
   PyObject* getPyObject(PyObject* obj) { _called = true; return obj; }
@@ -474,19 +518,19 @@ public slots:
   
 private:
   bool _passed;
-  bool _called;
+  mutable bool _called;
   int  _calledOverload;
   PythonQtTestSlotCalling* _test;
 };
 
 class PythonQtTestSignalHandlerHelper;
 
-//! test the connection of signals to python
+//! test the connection of Q_SIGNALS to python
 class PythonQtTestSignalHandler : public QObject
 {
   Q_OBJECT
 
-private slots:
+private Q_SLOTS:
   void initTestCase();
 
   void testSignalHandler();
@@ -507,7 +551,7 @@ public:
     _test = test;
   };
 
-public slots:
+public Q_SLOTS:
   void setPassed() { _passed = true; }
 
   bool emitIntSignal(int a) { _passed = false; emit intSignal(a); return _passed; };
@@ -524,7 +568,7 @@ public slots:
   bool emitSignal2(const QString& s) { _passed = false; emit signal2(s); return _passed; };
   bool emitSignal3(float a) { _passed = false; emit signal3(a); return _passed; };
 
-signals:
+Q_SIGNALS:
   void intSignal(int);
   void floatSignal(float);
   void variantSignal(const QVariant& v);

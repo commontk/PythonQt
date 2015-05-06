@@ -43,20 +43,17 @@
 #include "reporthandler.h"
 
 #include "metaqtscript.h"
+#include <iostream>
 
 bool ShellGenerator::shouldGenerate(const AbstractMetaClass *meta_class) const
 {
     uint cg = meta_class->typeEntry()->codeGeneration();
-    if (meta_class->name().startsWith("QtScript")) return false;
-    if (meta_class->name().startsWith("QFuture")) return false;
+    // ignore the "Global" namespace, which contains the QtMsgType enum
     if (meta_class->name().startsWith("Global")) return false;
-    if (meta_class->name().startsWith("QStyleOptionComplex")) return false;
-    if (meta_class->name().startsWith("QTextLayout")) return false;
-    if (meta_class->name().startsWith("QPersistentModelIndex")) return false;
     return ((cg & TypeEntry::GenerateCode) != 0);
 }
 
-void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type, Option options)
+void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type, Option options, TypeSystem::Ownership ownership)
 {
     if ((options & OriginalTypeDescription) && !type->originalTypeDescription().isEmpty()) {
         s << type->originalTypeDescription();
@@ -64,7 +61,7 @@ void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type,
     }
 
     if (type->isArray()) {
-        writeTypeInfo(s, type->arrayElementType(), options);
+        writeTypeInfo(s, type->arrayElementType(), options, ownership);
         if (options & ArrayAsPointer) {
             s << "*";
         } else {
@@ -75,7 +72,7 @@ void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type,
 
     const TypeEntry *te = type->typeEntry();
 
-    if (type->isConstant() && !(options & ExcludeConst))
+    if (type->isConstant() && !(options & ExcludeConst) && !(ownership!=TypeSystem::InvalidOwnership && type->isReference()) )
         s << "const ";
 
     if ((options & EnumAsInts) && (te->isEnum() || te->isFlags())) {
@@ -83,7 +80,16 @@ void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type,
     } else if (te->isFlags()) {
         s << ((FlagsTypeEntry *) te)->originalName();
     } else {
+      if (type->isEnum() && (options & ProtectedEnumAsInts)) {
+        AbstractMetaEnum* enumType = m_classes.findEnum((EnumTypeEntry *)te);
+        if (enumType && enumType->wasProtected()) {
+          s << "int";
+        } else {
+          s << fixCppTypeName(te->qualifiedCppName());
+        }
+      } else {
         s << fixCppTypeName(te->qualifiedCppName());
+      }
     }
 
     if (type->instantiations().size() > 0
@@ -105,9 +111,9 @@ void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type,
 
     s << QString(type->indirections(), '*');
 
-    if (type->isReference() && !(options & ExcludeReference) && !(options & ConvertReferenceToPtr))
+    if (type->isReference() && !(options & ExcludeReference) && !(options & ConvertReferenceToPtr) && !(ownership != TypeSystem::InvalidOwnership && type->isReference()))
         s << "&";
-  
+
     if (type->isReference() && (options & ConvertReferenceToPtr)) {
       s << "*";
     }
@@ -118,24 +124,41 @@ void ShellGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type,
 }
 
 
-void ShellGenerator::writeFunctionArguments(QTextStream &s, const AbstractMetaClass* owner,
-                                          const AbstractMetaArgumentList &arguments,
-                                          Option option,
-                                          int numArguments)
+void ShellGenerator::writeFunctionArguments(QTextStream &s,
+                                            const AbstractMetaFunction *meta_function,
+                                            Option option,
+                                            int numArguments)
 {
+  const AbstractMetaClass* owner = meta_function->ownerClass();
+  const AbstractMetaArgumentList &arguments = meta_function->arguments();
+
     if (numArguments < 0) numArguments = arguments.size();
 
     for (int i=0; i<numArguments; ++i) {
         if (i != 0)
             s << ", ";
         AbstractMetaArgument *arg = arguments.at(i);
-        writeTypeInfo(s, arg->type(), option);
-        if (!(option & SkipName))
+        TypeSystem::Ownership ownership = TypeSystem::InvalidOwnership;
+        if (option & AddOwnershipTemplates) {
+          ownership = writeOwnershipTemplate(s, meta_function, i+1);
+        }
+        writeTypeInfo(s, arg->type(), option, ownership);
+        if (ownership != TypeSystem::InvalidOwnership) {
+          s << "> ";
+        }
+
+        if (!(option & SkipName)) {
+          if (option & UseIndexedName) {
+            s << " " << arg->indexedName();
+          }
+          else {
             s << " " << arg->argumentName();
-        if ((option & IncludeDefaultExpression) && !arg->originalDefaultValueExpression().isEmpty()) {
+          }
+        }
+        if ((option & IncludeDefaultExpression) && !arg->defaultValueExpression().isEmpty()) {
             s << " = "; 
 
-          QString expr = arg->originalDefaultValueExpression();
+            QString expr = arg->defaultValueExpression();
           if (expr != "0") {
             QString qualifier;
             if (arg->type()->typeEntry()->isEnum() && expr.indexOf("::") < 0) {
@@ -147,13 +170,8 @@ void ShellGenerator::writeFunctionArguments(QTextStream &s, const AbstractMetaCl
               s << qualifier << "::";
             }
           }
-          if (expr.contains("defaultConnection")) {
-            expr.replace("defaultConnection","QSqlDatabase::defaultConnection");
-          }
-          if (expr == "MediaSource()") {
-            expr = "Phonon::MediaSource()";
-          }
-          s << expr; 
+          
+            s << expr; 
         }
     }
 }
@@ -187,8 +205,15 @@ void ShellGenerator::writeFunctionSignature(QTextStream &s,
 
     if ((option & SkipReturnType) == 0) {
         if (function_type) {
-            writeTypeInfo(s, function_type, option);
-            s << " ";
+          TypeSystem::Ownership ownership = TypeSystem::InvalidOwnership;
+          if (option & AddOwnershipTemplates) {
+            ownership = writeOwnershipTemplate(s, meta_function, 0);
+          }
+          writeTypeInfo(s, function_type, option, ownership);
+          s << " ";
+          if (ownership != TypeSystem::InvalidOwnership) {
+            s << "> ";
+          }
         } else if (!meta_function->isConstructor()) {
             s << "void ";
         }
@@ -222,9 +247,9 @@ void ShellGenerator::writeFunctionSignature(QTextStream &s,
       function_name = meta_function->name();
     }
 
-  if (meta_function->attributes() & AbstractMetaAttributes::SetterFunction)
+    if (meta_function->attributes() & AbstractMetaAttributes::SetterFunction)
     s << "py_set_";
-  else if (meta_function->attributes() & AbstractMetaAttributes::GetterFunction)
+    else if (meta_function->attributes() & AbstractMetaAttributes::GetterFunction)
     s << "py_get_";
 
   s << name_prefix << function_name;
@@ -238,7 +263,7 @@ void ShellGenerator::writeFunctionSignature(QTextStream &s,
     }
   }
   
-   writeFunctionArguments(s, meta_function->ownerClass(), meta_function->arguments(), Option(option & Option(~ConvertReferenceToPtr)), numArguments);
+   writeFunctionArguments(s, meta_function, Option(option & Option(~ConvertReferenceToPtr)), numArguments);
 
     // The extra arguments...
     for (int i=0; i<extra_arguments.size(); ++i) {
@@ -250,14 +275,32 @@ void ShellGenerator::writeFunctionSignature(QTextStream &s,
     s << ")";
     if (meta_function->isConstant())
         s << " const";
+    if (!meta_function->exception().isEmpty())
+        s << " " << meta_function->exception();
 }
-
 bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b);
+
+bool ShellGenerator::functionHasNonConstReferences(const AbstractMetaFunction* function)
+{
+  foreach(const AbstractMetaArgument* arg, function->arguments())
+  {
+    if (!arg->type()->isConstant() && arg->type()->isReference()) {
+      QString s;
+      QTextStream t(&s);
+      t << function->implementingClass()->qualifiedCppName() << "::";
+      writeFunctionSignature(t, function, 0, "",
+        Option(ConvertReferenceToPtr | FirstArgIsWrappedObject | IncludeDefaultExpression | OriginalName | ShowStatic | UnderscoreSpaces | ProtectedEnumAsInts));
+      std::cout << s.toLatin1().constData() << std::endl;
+      return true;
+    }
+  }
+  return false;
+}
 
 AbstractMetaFunctionList ShellGenerator::getFunctionsToWrap(const AbstractMetaClass* meta_class)
 {
   AbstractMetaFunctionList functions = meta_class->queryFunctions( 
-    AbstractMetaClass::NormalFunctions | AbstractMetaClass::WasPublic
+    AbstractMetaClass::NormalFunctions | AbstractMetaClass::WasVisible
     | AbstractMetaClass::NotRemovedFromTargetLang | AbstractMetaClass::ClassImplements
     );
   AbstractMetaFunctionList functions2 = meta_class->queryFunctions( 
@@ -271,9 +314,13 @@ AbstractMetaFunctionList ShellGenerator::getFunctionsToWrap(const AbstractMetaCl
 
   AbstractMetaFunctionList resultFunctions;
 
+  bool hasPromoter = meta_class->typeEntry()->shouldCreatePromoter();
+
   foreach(AbstractMetaFunction* func, set1.toList()) {
-    if (!func->isAbstract() && func->implementingClass()==meta_class) {
-      resultFunctions << func;
+    if (func->implementingClass()==meta_class) {
+      if (hasPromoter || func->wasPublic()) {
+        resultFunctions << func;
+      }
     }
   }
   qSort(resultFunctions.begin(), resultFunctions.end(), function_sorter);
@@ -284,7 +331,8 @@ AbstractMetaFunctionList ShellGenerator::getVirtualFunctionsForShell(const Abstr
 {
   AbstractMetaFunctionList functions = meta_class->queryFunctions( 
     AbstractMetaClass::VirtualFunctions | AbstractMetaClass::WasVisible
-//    | AbstractMetaClass::NotRemovedFromTargetLang
+    // in case of abstract base classes, we need a shell implementation even for removed virtual functions...
+    //    | AbstractMetaClass::NotRemovedFromTargetLang
     );
   qSort(functions.begin(), functions.end(), function_sorter);
   return functions;
@@ -295,7 +343,7 @@ AbstractMetaFunctionList ShellGenerator::getProtectedFunctionsThatNeedPromotion(
   AbstractMetaFunctionList functions; 
   AbstractMetaFunctionList functions1 = getFunctionsToWrap(meta_class); 
   foreach(AbstractMetaFunction* func, functions1) {
-    if (!func->isPublic() || func->isVirtual()) {
+    if (func->wasProtected() || func->isVirtual()) {
       functions << func;
     }
   }
@@ -380,3 +428,17 @@ bool ShellGenerator::isBuiltIn(const QString& name) {
   return builtIn.contains(name);
 }
 
+TypeSystem::Ownership ShellGenerator::writeOwnershipTemplate(QTextStream & s, const AbstractMetaFunction * meta_function, int argumentIndex)
+{
+  TypeSystem::Ownership ownership = meta_function->ownership(meta_function->ownerClass(), TypeSystem::TargetLangCode, argumentIndex);
+  if (ownership == TypeSystem::CppOwnership) {
+    s << "PythonQtPassOwnershipToCPP<";
+  }
+  else if (ownership == TypeSystem::TargetLangOwnership) {
+    s << "PythonQtPassOwnershipToPython<";
+  }
+  else if (ownership == TypeSystem::TargetLangThisOwnership) {
+    s << "PythonQtNewOwnerOfThis<";
+  }
+  return ownership;
+}

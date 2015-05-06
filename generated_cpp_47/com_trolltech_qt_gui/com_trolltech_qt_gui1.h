@@ -252,12 +252,6 @@ void delete_QCleanlooksStyle(QCleanlooksStyle* obj) { delete obj; }
 
 
 
-
-class PythonQtPublicPromoter_QClipboard : public QClipboard
-{ public:
-inline bool  promoted_event(QEvent*  arg__1) { return QClipboard::event(arg__1); }
-};
-
 class PythonQtWrapper_QClipboard : public QObject
 { Q_OBJECT
 public:
@@ -266,7 +260,6 @@ enum Mode{
   Clipboard = QClipboard::Clipboard,   Selection = QClipboard::Selection,   FindBuffer = QClipboard::FindBuffer,   LastMode = QClipboard::LastMode};
 public slots:
    void clear(QClipboard* theWrappedObject, QClipboard::Mode  mode = QClipboard::Clipboard);
-   bool  event(QClipboard* theWrappedObject, QEvent*  arg__1);
    QImage  image(QClipboard* theWrappedObject, QClipboard::Mode  mode = QClipboard::Clipboard) const;
    const QMimeData*  mimeData(QClipboard* theWrappedObject, QClipboard::Mode  mode = QClipboard::Clipboard) const;
    bool  ownsClipboard(QClipboard* theWrappedObject) const;

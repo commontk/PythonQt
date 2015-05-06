@@ -44,12 +44,13 @@
 #include <iostream>
 
 QHash<QByteArray, PythonQtMethodInfo*> PythonQtMethodInfo::_cachedSignatures;
+QHash<int, PythonQtMethodInfo::ParameterInfo> PythonQtMethodInfo::_cachedParameterInfos;
 QHash<QByteArray, QByteArray> PythonQtMethodInfo::_parameterNameAliases;
 
 PythonQtMethodInfo::PythonQtMethodInfo(const QMetaMethod& meta, PythonQtClassInfo* classInfo)
 {
 #ifdef PYTHONQT_DEBUG
-  QByteArray sig(meta.signature());
+  QByteArray sig = PythonQtUtils::signature(meta));
   sig = sig.mid(sig.indexOf('('));
   QByteArray fullSig = QByteArray(meta.typeName()) + " " + sig;
   std::cout << "caching " << fullSig.data() << std::endl;
@@ -59,7 +60,7 @@ PythonQtMethodInfo::PythonQtMethodInfo(const QMetaMethod& meta, PythonQtClassInf
   fillParameterInfo(type, QByteArray(meta.typeName()), classInfo);
   _parameters.append(type);
   QList<QByteArray> names = meta.parameterTypes();
-  foreach (const QByteArray& name, names) {
+  Q_FOREACH (const QByteArray& name, names) {
     fillParameterInfo(type, name, classInfo);
     _parameters.append(type);
   }
@@ -70,7 +71,7 @@ PythonQtMethodInfo::PythonQtMethodInfo(const QByteArray& typeName, const QList<Q
   ParameterInfo type;
   fillParameterInfo(type, typeName, NULL);
   _parameters.append(type);
-  foreach (const QByteArray& name, args) {
+  Q_FOREACH (const QByteArray& name, args) {
     fillParameterInfo(type, name, NULL);
     _parameters.append(type);
   }
@@ -78,7 +79,7 @@ PythonQtMethodInfo::PythonQtMethodInfo(const QByteArray& typeName, const QList<Q
 
 const PythonQtMethodInfo* PythonQtMethodInfo::getCachedMethodInfo(const QMetaMethod& signal, PythonQtClassInfo* classInfo)
 {
-  QByteArray sig(signal.signature());
+  QByteArray sig(PythonQtUtils::signature(signal));
   sig = sig.mid(sig.indexOf('('));
   QByteArray fullSig = QByteArray(signal.typeName()) + " " + sig;
   PythonQtMethodInfo* result = _cachedSignatures.value(fullSig);
@@ -117,9 +118,30 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
   QByteArray name = orgName;
 
   type.enumWrapper = NULL;
-  
+  type.innerNamePointerCount = 0;
+  type.isQList = false;
+  type.passOwnershipToCPP = false;
+  type.passOwnershipToPython = false;
+  type.newOwnerOfThis = false;
+
   int len = name.length();
   if (len>0) {
+    if (name.startsWith("PythonQtPassOwnershipToCPP<")) {
+      type.passOwnershipToCPP = true;
+      name = name.mid(27, len-28);
+      len -= 28;
+    } else
+    if (name.startsWith("PythonQtPassOwnershipToPython<")) {
+      type.passOwnershipToPython = true;
+      name = name.mid(30, len-31);
+      len -= 31;
+    } else
+    if (name.startsWith("PythonQtNewOwnerOfThis<")) {
+      type.newOwnerOfThis = true;
+      name = name.mid(23, len-24);
+      len -= 24;
+    }
+
     if (strncmp(name.constData(), "const ", 6)==0) {
       name = name.mid(6);
       len -= 6;
@@ -129,7 +151,7 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
     }
     char pointerCount = 0;
     bool hadReference = false;
-    // remove * and & from the end of the string, handle & and * the same way
+    // remove * and & from the end of the string
     while (name.at(len-1) == '*') {
       len--;
       pointerCount++;
@@ -142,6 +164,7 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
       name = name.left(len);
     }
     type.pointerCount = pointerCount;
+    type.isReference = hadReference;
 
     QByteArray alias = _parameterNameAliases.value(name);
     if (!alias.isEmpty()) {
@@ -149,13 +172,29 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
     }
 
     type.typeId = nameToType(name);
-    if ((type.pointerCount == 0) && type.typeId == Unknown) {
+    if (type.typeId == Unknown) {
       type.typeId = QMetaType::type(name.constData());
+#if( QT_VERSION >= QT_VERSION_CHECK(5,0,0) )
+      if (type.typeId == QMetaType::UnknownType) {
+#else
       if (type.typeId == QMetaType::Void) {
+#endif
         type.typeId = Unknown;
       }
     }
     type.name = name;
+
+    if (name.startsWith("QList<")) {
+      type.isQList = true;
+    }
+    if (name.contains("<")) {
+      QByteArray innerName = getInnerTemplateTypeName(name);
+      if (innerName.endsWith("*")) {
+        type.innerNamePointerCount = 1;
+        innerName.truncate(innerName.length() - 1);
+      }
+      type.innerName = innerName;
+    }
 
     if (type.typeId == PythonQtMethodInfo::Unknown || type.typeId >= QMetaType::User) {
       bool isLocalEnum;
@@ -166,7 +205,33 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
     type.typeId = QMetaType::Void;
     type.pointerCount = 0;
     type.isConst = false;
+    type.isReference = false;
   }
+}
+
+int PythonQtMethodInfo::getInnerTemplateMetaType(const QByteArray& typeName)
+{
+  int idx = typeName.indexOf("<");
+  if (idx > 0) {
+    int idx2 = typeName.lastIndexOf(">");
+    if (idx2 > 0) {
+      QByteArray innerType = typeName.mid(idx + 1, idx2 - idx - 1).trimmed();
+      return QMetaType::type(innerType.constData());
+    }
+  }
+  return QMetaType::Void;
+}
+
+QByteArray PythonQtMethodInfo::getInnerTemplateTypeName(const QByteArray& typeName)
+{
+  int idx = typeName.indexOf("<");
+  if (idx > 0) {
+    int idx2 = typeName.lastIndexOf(">");
+    if (idx2 > 0) {
+      return typeName.mid(idx + 1, idx2 - idx - 1).trimmed();
+    }
+  }
+  return QByteArray();
 }
 
 int PythonQtMethodInfo::nameToType(const char* name)
@@ -197,6 +262,7 @@ int PythonQtMethodInfo::nameToType(const char* name)
     _parameterTypeDict.insert("QString", QMetaType::QString);
     _parameterTypeDict.insert("", QMetaType::Void);
     _parameterTypeDict.insert("void", QMetaType::Void);
+    _parameterTypeDict.insert("QtMsgType", QMetaType::Int);
 
     // GL types
     _parameterTypeDict.insert("GLenum", QMetaType::UInt);
@@ -217,9 +283,11 @@ int PythonQtMethodInfo::nameToType(const char* name)
     if (QT_POINTER_SIZE == 8) {
       _parameterTypeDict.insert("qgl_GLintptr", QMetaType::LongLong);
       _parameterTypeDict.insert("qgl_GLsizeiptr", QMetaType::LongLong);
+      _parameterTypeDict.insert("size_t", QMetaType::ULongLong);
     } else {
       _parameterTypeDict.insert("qgl_GLintptr", QMetaType::Int);
       _parameterTypeDict.insert("qgl_GLsizeiptr", QMetaType::Int);
+      _parameterTypeDict.insert("size_t", QMetaType::UInt);
     }
 
     // QVariant names
@@ -229,8 +297,10 @@ int PythonQtMethodInfo::nameToType(const char* name)
     _parameterTypeDict.insert("qulonglong", QMetaType::ULongLong);
     _parameterTypeDict.insert("qint64", QMetaType::LongLong);
     _parameterTypeDict.insert("quint64", QMetaType::ULongLong);
+    _parameterTypeDict.insert("QVariantHash", QMetaType::QVariantHash);
     _parameterTypeDict.insert("QVariantMap", QMetaType::QVariantMap);
     _parameterTypeDict.insert("QVariantList", QMetaType::QVariantList);
+    _parameterTypeDict.insert("QHash<QString,QVariant>", QMetaType::QVariantHash);
     _parameterTypeDict.insert("QMap<QString,QVariant>", QMetaType::QVariantMap);
     _parameterTypeDict.insert("QList<QVariant>", QMetaType::QVariantList);
     _parameterTypeDict.insert("QStringList", QMetaType::QStringList);
@@ -283,11 +353,24 @@ void PythonQtMethodInfo::cleanupCachedMethodInfos()
     delete i.next().value();
   }
   _cachedSignatures.clear();
+  _cachedParameterInfos.clear();
 }
 
 void PythonQtMethodInfo::addParameterTypeAlias(const QByteArray& alias, const QByteArray& name)
 {
   _parameterNameAliases.insert(alias, name);
+}
+
+const PythonQtMethodInfo::ParameterInfo& PythonQtMethodInfo::getParameterInfoForMetaType(int type)
+{
+  QHash<int, ParameterInfo>::ConstIterator it = _cachedParameterInfos.find(type);
+  if (it != _cachedParameterInfos.constEnd()) {
+    return it.value();
+  }
+  ParameterInfo info;
+  fillParameterInfo(info, QMetaType::typeName(type));
+  _cachedParameterInfos.insert(type, info);
+  return _cachedParameterInfos[type];
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -303,10 +386,10 @@ void PythonQtSlotInfo::deleteOverloadsAndThis()
 }
 
 
-QString PythonQtSlotInfo::fullSignature()
+QString PythonQtSlotInfo::fullSignature(bool skipReturnValue, int optionalArgsIndex) const
 { 
-  bool skipFirstArg = isInstanceDecorator();
-  QString result = _meta.typeName();
+  int firstArgOffset = isInstanceDecorator()?2:1;
+  QString result;
   QByteArray sig = slotName();
   QList<QByteArray> names = _meta.parameterNames();
 
@@ -331,27 +414,36 @@ QString PythonQtSlotInfo::fullSignature()
     }
   }
 
-  result += QByteArray(" ") + sig;
+  result += sig;
   result += "(";
 
-  int lastEntry = _parameters.count()-1;
-  for (int i = skipFirstArg?2:1; i<_parameters.count(); i++) {
-    if (_parameters.at(i).isConst) {
-      result += "const ";
+  for (int i = firstArgOffset; i<_parameters.count(); i++) {
+    if ((optionalArgsIndex + firstArgOffset) == i) {
+      result += " [";
     }
-    result += _parameters.at(i).name;
-    if (_parameters.at(i).pointerCount) {
-      QByteArray stars;
-      stars.fill('*', _parameters.at(i).pointerCount);
-      result += stars;
+    if (i!=firstArgOffset) {
+      result += ", ";
     }
+    //if (_parameters.at(i).isConst) {
+    //  result += "const ";
+    //}
+    if (_parameters.at(i).name == "bool" && _parameters.at(i).pointerCount == 1) {
+      result += "PythonQt.BoolResult";
+    } else {
+      result += _parameters.at(i).name;
+    }
+    //if (_parameters.at(i).pointerCount) {
+    //  QByteArray stars;
+    //  stars.fill('*', _parameters.at(i).pointerCount);
+    //  result += stars;
+    //}
     if (!names.at(i-1).isEmpty()) {
       result += " ";
       result += names.at(i-1);
     }
-    if (i!=lastEntry) {
-      result += ", ";
-    }
+  }
+  if (optionalArgsIndex != -1) {
+    result += "]";
   }
   result += ")";
 
@@ -364,15 +456,125 @@ QString PythonQtSlotInfo::fullSignature()
   if (isDestructor) {
     result = QString("~") + result;
   } 
+
+  if (!skipReturnValue) {
+    if (!_parameters.at(0).name.isEmpty()) {
+      result += " -> ";
+      result += _parameters.at(0).name;
+    }
+  }
   return result;
 }
 
 
-QByteArray PythonQtSlotInfo::slotName()
+QByteArray PythonQtSlotInfo::slotName(bool removeDecorators) const
 {
-  QByteArray sig(_meta.signature());
-  int idx = sig.indexOf('(');
-  sig = sig.left(idx);
-  return sig;
+  QByteArray name = PythonQtUtils::methodName(_meta);
+  if (removeDecorators) {
+    if (name.startsWith("static_")) {
+      name = name.mid(7);
+      int idx = name.indexOf("_");
+      if (idx>=0) {
+        name = name.mid(idx+1);
+      }
+    }
+  }
+  return name;
 }
 
+QByteArray PythonQtSlotInfo::signature() const
+{
+  return PythonQtUtils::signature(_meta);
+}
+
+QStringList PythonQtSlotInfo::overloads(bool skipReturnValue) const
+{
+  const PythonQtSlotInfo* info = this;
+  QList<const PythonQtSlotInfo*> list;
+  do {
+    list << info;
+    info = info->nextInfo();
+  } while (info);
+
+  QList<const PythonQtSlotInfo*> all = list;
+
+  QStringList results;
+  while (!list.isEmpty()) {
+    const PythonQtSlotInfo* current = list.takeFirst();
+    int minSameArgs = 1000;
+    QList<PythonQtMethodInfo::ParameterInfo> currentArguments = current->arguments();
+    int maxArgs = currentArguments.size();
+    const PythonQtSlotInfo* maxArgSlot = current;
+    QList<const PythonQtSlotInfo*> slotsWithSameArgs;
+    slotsWithSameArgs << current;
+    QMutableListIterator<const PythonQtSlotInfo*> it(all);
+    while (it.hasNext()) {
+      const PythonQtSlotInfo* other = it.next();
+      // same slot...
+      if (other == current) {
+        continue;
+      }
+      // different return types...
+      if (other->parameters().at(0).name != current->parameters().at(0).name) {
+        continue;
+      }
+      QList<PythonQtMethodInfo::ParameterInfo> otherArguments = other->arguments();
+      int paramCount = qMin(currentArguments.size(), otherArguments.size());
+      int sameArgs = 0;
+      for (int i = 0; i<paramCount; i++) {
+        if (currentArguments.at(i).name == otherArguments.at(i).name) {
+          sameArgs++;
+        } else {
+          break;
+        }
+      }
+      if (sameArgs > 0 && sameArgs == paramCount) {
+        slotsWithSameArgs << other;
+        minSameArgs = qMin(sameArgs, minSameArgs);
+        if (otherArguments.size() > maxArgs) {
+          maxArgs = otherArguments.size();
+          maxArgSlot = other;
+          current = other;
+          currentArguments = otherArguments;
+        }
+      }
+    }
+    if (slotsWithSameArgs.size() > 1) {
+      results << maxArgSlot->fullSignature(skipReturnValue, minSameArgs);
+      foreach(const PythonQtSlotInfo* o, slotsWithSameArgs) {
+        list.removeOne(o);
+      }
+    } else {
+      results << current->fullSignature(skipReturnValue);
+    }
+  }
+  return results;
+}
+
+QList<PythonQtMethodInfo::ParameterInfo> PythonQtSlotInfo::arguments() const
+{
+  QList<PythonQtMethodInfo::ParameterInfo> result;
+  for (int i = isInstanceDecorator()?2:1; i<_parameters.size(); i++) {
+    result << _parameters[i];
+  }
+  return result;
+}
+
+QByteArray PythonQtSlotInfo::getImplementingClassName() const
+{
+  if (isInstanceDecorator()) {
+    return _parameters.at(1).name;
+  } else if (isClassDecorator()) {
+    QByteArray name = PythonQtUtils::methodName(_meta);
+    if (name.startsWith("static_")) {
+      name = name.mid(7);
+      int idx = name.indexOf("_");
+      name = name.mid(0, idx);
+      return name;
+    } else {
+      return name;
+    }
+  } else {
+    return _meta.enclosingMetaObject()->className();
+  }
+}
