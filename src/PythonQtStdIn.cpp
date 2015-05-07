@@ -53,6 +53,7 @@ static PyObject *PythonQtStdInRedirect_new(PyTypeObject *type, PyObject * /*args
 
 static PyObject *PythonQtStdInRedirect_readline(PyObject * self, PyObject * args)
 {
+  Q_UNUSED(args);
   PythonQtStdInRedirect*  s = (PythonQtStdInRedirect*)self;
   QString string;
   if (s->_cb) {
