@@ -157,6 +157,7 @@ set(headers
     src/PythonQtStdIn.h
     src/PythonQtStdOut.h
     src/PythonQtSystem.h
+    src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
