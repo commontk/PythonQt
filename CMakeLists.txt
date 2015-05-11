@@ -56,7 +56,6 @@ endif()
 
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 
-set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns)
 foreach(qtlib ${qtlibs})
   OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
 endforeach()
@@ -83,6 +82,11 @@ endif()
 # Setup Qt
 
 if(PythonQt_QT_VERSION MATCHES 5)
+
+  if(BUILD_TESTING)
+    list(APPEND qtlibs Test)
+  endif()
+
   find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS ${qtlibs} REQUIRED)
 
   if(Qt5_DIR)
@@ -104,6 +108,11 @@ if(PythonQt_QT_VERSION MATCHES 5)
     message(FATAL_ERROR "Could not determine Qt binary directory: ${_result} ${QT_BINARY_DIR} ${_error}")
   endif()
 
+  foreach(qtlib ${qtlibs})
+       include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
+       add_definitions(${Qt5${qtlib}_DEFINITIONS})
+  endforeach()
+
   #-----------------------------------------------------------------------------
   # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
   # associated with the Qt version being used.
@@ -124,7 +133,7 @@ else()
     endif()
 
     # Enable required qt module
-    foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
+    foreach(qtlib ${qtlibs})
       string(TOUPPER ${qtlib} qtlib_uppercase)
       if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
         message(FATAL_ERROR "QT_QT${${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
@@ -137,12 +146,15 @@ else()
     message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
   endif()
 
+  # Enable QtTest in Qt4 is the option BUILD_TESTING was activated
+  set(QT_USE_QTTEST ${BUILD_TESTING})
+
   #-----------------------------------------------------------------------------
   # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
   # associated with the Qt version being used.
   set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 
-  # TODO: generated headers for Qt4.8 contains several locales that are not available 
+  # TODO: generated headers for Qt4.8 contains several locales that are not available
   #       out of the box -> force 4.7
   if("${generated_cpp_suffix}" STREQUAL "_46" OR "${generated_cpp_suffix}" STREQUAL "_48")
     set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
@@ -225,28 +237,28 @@ set(moc_sources
 
 #-----------------------------------------------------------------------------
 # Add extra sources
-foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
-  
+foreach(qtlib ${qtlibs})
+
   if (${PythonQt_Wrap_Qt${qtlib}})
-    
+
     ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
-    
+
     set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
-    
+
     foreach(index RANGE 0 11)
-    
+
       # Source files
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
         list(APPEND sources ${file_prefix}${index}.cpp)
       endif()
-      
+
       # Headers that should run through moc
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
         list(APPEND moc_sources ${file_prefix}${index}.h)
       endif()
-      
+
     endforeach()
-    
+
     list(APPEND sources ${file_prefix}_init.cpp)
 
   endif()
@@ -270,17 +282,6 @@ else()
   qt5_wrap_cpp(gen_moc_sources ${moc_sources})
   qt5_wrap_ui(gen_ui_sources ${ui_sources})
   qt5_add_resources(gen_qrc_sources ${qrc_sources})
-
-  include_directories(${Qt5Core_INCLUDE_DIRS})
-  include_directories(${Qt5Widgets_INCLUDE_DIRS})
-  include_directories(${Network_INCLUDE_DIRS})
-  include_directories(${OpenGL_INCLUDE_DIRS})
-  include_directories(${Sql_INCLUDE_DIRS})
-  include_directories(${Svg_INCLUDE_DIRS})
-  include_directories(${WebKitWidgets_INCLUDE_DIRS})
-  include_directories(${Xml_INCLUDE_DIRS})
-  include_directories(${XmlPatterns_INCLUDE_DIRS})
-  include_directories(${UiTools_INCLUDE_DIRS})
 endif()
 #-----------------------------------------------------------------------------
 # Build the library
@@ -288,7 +289,7 @@ endif()
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
-  
+
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
@@ -342,7 +343,7 @@ if(BUILD_TESTING)
     QT5_WRAP_CPP(test_sources
       tests/PythonQtTests.h
       )
-  endif() 
+  endif()
 
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
 
