@@ -16,7 +16,7 @@ include(CTestUseLaunchers OPTIONAL)
 #----------------------------------------------------------------------------
 # Qt version
 
-set(DESIRED_QT_VERSION 5 CACHE STRING "Pick a version of Qt to use: 4 or 5")
+set(PythonQt_QT_VERSION 5 CACHE STRING "Pick a version of Qt to use: 4 or 5")
 
 set(minimum_required_qt5_version "5.3.0")
 set(minimum_required_qt4_version "4.6.2")
@@ -32,11 +32,12 @@ add_definitions(-DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
 # Build options
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 
-if(DESIRED_QT_VERSION MATCHES 4)
+if(PythonQt_QT_VERSION MATCHES 4)
   set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns locale)
 else()
   set(qtlibs Core Network OpenGL Sql Svg Widgets WebKitWidgets Xml XmlPatterns UiTools)
 endif()
+
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
 endif()
@@ -81,7 +82,7 @@ endif()
 #-----------------------------------------------------------------------------
 # Setup Qt
 
-if(DESIRED_QT_VERSION MATCHES 5)
+if(PythonQt_QT_VERSION MATCHES 5)
   find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS ${qtlibs} REQUIRED)
 
   if(Qt5_DIR)
@@ -141,8 +142,8 @@ else()
   # associated with the Qt version being used.
   set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 
-  # TODO: generated headers for Qt4.8 contains several strange locales that are not available out of the box
-  #       force 4.7
+  # TODO: generated headers for Qt4.8 contains several locales that are not available 
+  #       out of the box -> force 4.7
   if("${generated_cpp_suffix}" STREQUAL "_46" OR "${generated_cpp_suffix}" STREQUAL "_48")
     set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
    endif()
@@ -205,7 +206,7 @@ set(headers
     src/PythonQtPythonInclude.h
     src/PythonQtUtils.h
 )
-if(DESIRED_QT_VERSION MATCHES 4)
+if(PythonQt_QT_VERSION MATCHES 4)
   set(sources ${sources} generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp)
   set(headers ${headers} generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h)
 endif()
@@ -261,7 +262,7 @@ set(qrc_sources )
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-if(DESIRED_QT_VERSION MATCHES 4)
+if(PythonQt_QT_VERSION MATCHES 4)
   qt4_wrap_cpp(gen_moc_sources ${moc_sources})
   qt4_wrap_ui(gen_ui_sources ${ui_sources})
   qt4_add_resources(gen_qrc_sources ${qrc_sources})
@@ -333,10 +334,15 @@ if(BUILD_TESTING)
     tests/PythonQtTests.cpp
     tests/PythonQtTests.h
     )
-
-  QT4_WRAP_CPP(test_sources
-    tests/PythonQtTests.h
-    )
+  if(PythonQt_QT_VERSION MATCHES 4)
+    QT4_WRAP_CPP(test_sources
+      tests/PythonQtTests.h
+      )
+  else()
+    QT5_WRAP_CPP(test_sources
+      tests/PythonQtTests.h
+      )
+  endif() 
 
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
 
