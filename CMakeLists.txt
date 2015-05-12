@@ -311,7 +311,7 @@ target_link_libraries(PythonQt
               ${PYTHON_LIBRARY}
               ${QT_LIBRARIES}
   )
-message(${QT_LIBRARIES})
+
 #-----------------------------------------------------------------------------
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
