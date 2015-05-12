@@ -108,8 +108,10 @@ if(PythonQt_QT_VERSION MATCHES 5)
     message(FATAL_ERROR "Could not determine Qt binary directory: ${_result} ${QT_BINARY_DIR} ${_error}")
   endif()
 
+  set(QT_LIBRARIES )
   foreach(qtlib ${qtlibs})
        include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
+       list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
        add_definitions(${Qt5${qtlib}_DEFINITIONS})
   endforeach()
 
@@ -141,13 +143,12 @@ else()
       set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
     endforeach()
 
+    set(QT_USE_QTTEST ${BUILD_TESTING})
+
     include(${QT_USE_FILE})
   else()
     message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
   endif()
-
-  # Enable QtTest in Qt4 is the option BUILD_TESTING was activated
-  set(QT_USE_QTTEST ${BUILD_TESTING})
 
   #-----------------------------------------------------------------------------
   # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
@@ -310,7 +311,7 @@ target_link_libraries(PythonQt
               ${PYTHON_LIBRARY}
               ${QT_LIBRARIES}
   )
-
+message(${QT_LIBRARIES})
 #-----------------------------------------------------------------------------
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
@@ -348,7 +349,7 @@ if(BUILD_TESTING)
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
 
   add_executable(PythonQtCppTests ${test_sources})
-  target_link_libraries(PythonQtCppTests PythonQt)
+  target_link_libraries(PythonQtCppTests PythonQt ${Qt5Test_LIBRARIES})
 
   add_test(
     NAME tests_PythonQtTestMain
