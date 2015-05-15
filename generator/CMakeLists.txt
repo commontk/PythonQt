@@ -11,23 +11,29 @@ include(CTestUseLaunchers OPTIONAL)
 
 set(minimum_required_qt_version "4.6.2")
 
-find_package(Qt4)
-
-if(QT4_FOUND)
-
-  set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
-
-  if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
-      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
-  endif()
-  
-  set(QT_USE_QTXML ON)
-  
-  include(${QT_USE_FILE})
+if (PythonQt_QT_VERSION VERSION_GREATER "4")
+  set(qtlibs Core)
+  foreach(qtlib ${qtlibs})
+    find_package(Qt5${qtlib})
+  endforeach()
 else()
-  message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
-endif()
+  find_package(Qt4)
 
+  if(QT4_FOUND)
+
+    set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+
+    if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
+      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
+    endif()
+
+    set(QT_USE_QTXML ON)
+
+    include(${QT_USE_FILE})
+  else()
+    message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
+  endif()
+endif()
 #-----------------------------------------------------------------------------
 # Sources
 

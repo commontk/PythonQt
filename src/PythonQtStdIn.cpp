@@ -58,7 +58,11 @@ static PyObject *PythonQtStdInRedirect_readline(PyObject * self, PyObject * args
   if (s->_cb) {
     string =  (*s->_cb)(s->_callData);
     }
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  return Py_BuildValue(const_cast<char*>("s"), const_cast<char*>(string.toLatin1().data()));
+#else
   return Py_BuildValue(const_cast<char*>("s"), const_cast<char*>(string.toAscii().data()));
+#endif
 }
 
 static PyMethodDef PythonQtStdInRedirect_methods[] = {

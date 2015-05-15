@@ -169,16 +169,20 @@ PythonQtSlotInfo* PythonQtClassInfo::findDecoratorSlotsFromDecoratorProvider(con
       QMetaMethod m = meta->method(i);
       if ((m.methodType() == QMetaMethod::Method ||
            m.methodType() == QMetaMethod::Slot) && m.access() == QMetaMethod::Public) {
-        
-        const char* sigStart = m.signature();
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QByteArray sigStart = m.methodSignature();
+#else
+        QByteArray sigStart = m.signature();
+#endif
         bool isClassDeco = false;
-        if (qstrncmp(sigStart, "static_", 7)==0) {
+        if (sigStart.startsWith("static_")) {
           // skip the static_classname_ part of the string
-          sigStart += 7 + 1 + strlen(className());
+          sigStart.remove(0,7+strlen(className())+1);
           isClassDeco = true;
-        } else if (qstrncmp(sigStart, "new_", 4)==0) {
+        } else if (sigStart.startsWith("new_")) {
           isClassDeco = true;
-        } else if (qstrncmp(sigStart, "delete_", 7)==0) {
+        } else if (sigStart.startsWith("delete_")) {
           isClassDeco = true;
         }
         // find the first '('
@@ -220,7 +224,11 @@ PythonQtSlotInfo* PythonQtClassInfo::findDecoratorSlotsFromDecoratorProvider(con
         m.methodType() == QMetaMethod::Slot) && m.access() == QMetaMethod::Public)
         || m.methodType()==QMetaMethod::Signal) {
 
-          const char* sigStart = m.signature();
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+          QByteArray sigStart = m.methodSignature();
+#else
+          QByteArray sigStart = m.signature();
+#endif
           // find the first '('
           int offset = findCharOffset(sigStart, '(');
 
@@ -375,11 +383,16 @@ PythonQtSlotInfo* PythonQtClassInfo::findDecoratorSlots(const char* memberName, 
   while (it.hasNext()) {
 
     PythonQtSlotInfo* infoOrig = it.next();
-          
-    const char* sigStart = infoOrig->metaMethod()->signature();
-    if (qstrncmp("static_", sigStart, 7)==0) {
-      sigStart += 7;
-      sigStart += findCharOffset(sigStart, '_')+1;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    QByteArray sigStart = infoOrig->metaMethod()->methodSignature();
+#else
+    QByteArray sigStart = infoOrig->metaMethod()->signature();
+#endif
+    if (sigStart.startsWith("static_")) {
+      sigStart.remove(0,7);
+      int offset = findCharOffset(sigStart, '_');
+      sigStart.remove(0,offset+1);
     }
     int offset = findCharOffset(sigStart, '(');
     if (memberNameLen == offset && qstrncmp(memberName, sigStart, offset)==0) {
@@ -409,18 +422,22 @@ void PythonQtClassInfo::listDecoratorSlotsFromDecoratorProvider(QStringList& lis
       QMetaMethod m = meta->method(i);
       if ((m.methodType() == QMetaMethod::Method ||
            m.methodType() == QMetaMethod::Slot) && m.access() == QMetaMethod::Public) {
-        
-        const char* sigStart = m.signature();
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QByteArray sigStart = m.methodSignature();
+#else
+        QByteArray sigStart = m.signature();
+#endif
         bool isClassDeco = false;
-        if (qstrncmp(sigStart, "static_", 7)==0) {
+        if (sigStart.startsWith("static_")) {
           // skip the static_classname_ part of the string
-          sigStart += 7 + 1 + strlen(className());
+          sigStart.remove(0,7+strlen(className())+1);
           isClassDeco = true;
-        } else if (qstrncmp(sigStart, "new_", 4)==0) {
+        } else if (sigStart.startsWith("new_")) {
           continue;
-        } else if (qstrncmp(sigStart, "delete_", 7)==0) {
+        } else if (sigStart.startsWith("delete_")) {
           continue;
-        } else if (qstrncmp(sigStart, "py_", 3)==0) {
+        } else if (sigStart.startsWith("py_")) {
           // hide everything that starts with py_
           continue;
         }
@@ -429,7 +446,7 @@ void PythonQtClassInfo::listDecoratorSlotsFromDecoratorProvider(QStringList& lis
         
         // XXX no checking is currently done if the slots have correct first argument or not...
         if (!metaOnly || isClassDeco) {
-          list << QString::fromLatin1(sigStart, offset); 
+          list << QString::fromLatin1(sigStart, offset);
         }
       }
     }
@@ -484,7 +501,11 @@ QStringList PythonQtClassInfo::memberList()
       if (((m.methodType() == QMetaMethod::Method ||
         m.methodType() == QMetaMethod::Slot) && m.access() == QMetaMethod::Public)
           || m.methodType()==QMetaMethod::Signal) {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QByteArray signa(m.methodSignature());
+#else
         QByteArray signa(m.signature());
+#endif
         signa = signa.left(signa.indexOf('('));
         l << signa;
       }
@@ -641,7 +662,11 @@ QString PythonQtClassInfo::help()
       for (int i = 0; i < numMethods; i++) {
         QMetaMethod m = _meta->method(i);
         if (m.methodType() == QMetaMethod::Signal) {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+          h += QString(m.methodSignature()) + "\n";
+#else
           h += QString(m.signature()) + "\n";
+#endif
         }
       }
     }
