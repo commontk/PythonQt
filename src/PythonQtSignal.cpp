@@ -109,7 +109,11 @@ meth_get__doc__(PythonQtSignalFunctionObject * /*m*/, void * /*closure*/)
 static PyObject *
 meth_get__name__(PythonQtSignalFunctionObject *m, void * /*closure*/)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  return PyString_FromString(m->m_ml->metaMethod()->methodSignature());
+#else
   return PyString_FromString(m->m_ml->metaMethod()->signature());
+#endif
 }
 
 static int
@@ -187,7 +191,11 @@ static PyObject *PythonQtSignalFunction_connect(PythonQtSignalFunctionObject* ty
       if (argc==1) {
         // connect with Python callable
         PyObject* callable = PyTuple_GET_ITEM(args, 0);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        bool result = PythonQt::self()->addSignalHandler(self->_obj, QByteArray("2") + type->m_ml->metaMethod()->methodSignature(), callable);
+#else
         bool result = PythonQt::self()->addSignalHandler(self->_obj, QByteArray("2") + type->m_ml->metaMethod()->signature(), callable);
+#endif
         return PythonQtConv::GetPyBool(result);
       } else {
         PyErr_SetString(PyExc_ValueError, "Called connect with wrong number of arguments");
@@ -203,7 +211,11 @@ static PyObject *PythonQtSignalFunction_disconnect(PythonQtSignalFunctionObject*
     PythonQtInstanceWrapper* self = (PythonQtInstanceWrapper*) type->m_self;
     if (self->_obj) {
       Py_ssize_t argc = PyTuple_Size(args);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+      QByteArray signal = QByteArray("2") + type->m_ml->metaMethod()->methodSignature();
+#else
       QByteArray signal = QByteArray("2") + type->m_ml->metaMethod()->signature();
+#endif
       if (argc==1) {
         // disconnect with Python callable
         PyObject* callable = PyTuple_GET_ITEM(args, 0);
@@ -272,7 +284,11 @@ meth_compare(PythonQtSignalFunctionObject *a, PythonQtSignalFunctionObject *b)
     return (a->m_self < b->m_self) ? -1 : 1;
   if (a->m_ml == b->m_ml)
     return 0;
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+  if (strcmp(a->m_ml->metaMethod()->methodSignature(), b->m_ml->metaMethod()->methodSignature()) < 0)
+#else
   if (strcmp(a->m_ml->metaMethod()->signature(), b->m_ml->metaMethod()->signature()) < 0)
+#endif
     return -1;
   else
     return 1;

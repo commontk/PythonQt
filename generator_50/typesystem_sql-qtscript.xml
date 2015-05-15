@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<typesystem package="com.trolltech.qt.sql">
+  
+  <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QSqlField' has equals operators but no qHash() function" />
+  <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QSqlRecord' has equals operators but no qHash() function" />
+
+</typesystem>
