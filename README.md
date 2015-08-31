@@ -43,7 +43,23 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains 5 branches:
+This repository contains 6 branches:
+
+### patched-6
+* Based on patched-5 + [r403](http://sourceforge.net/p/pythonqt/code/403/)
+* Includes the following PythonQt updates:
+```
+$ git shortlog 2d445d5..e93e36b --no-merges 
+florianlink (8):
+      fixed error handling for evalFile     made name->objectName alias optional (off by default, add PYTHONQT_SUPPORT_NAME_PROPERTY to DEFINES if you need it)     added py_delete() slot support for built-in delete() method
+      added support for QTimer::singleShot()
+      fixed a missign QMetaObject::disconnect which leads to connection leaking     added removeSignalHandlers()
+      fixed test
+      initial version that handles qualified virtual calls better
+      improved handling of qualified virtual calls
+      improved handling of qualified virtual calls
+      removed generating wrappers for virtual functions that are already declared in a base class
+```
 
 ### patched-5
 * Based on patched-4 + [r395](http://sourceforge.net/p/pythonqt/code/395/)
