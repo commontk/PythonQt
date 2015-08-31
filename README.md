@@ -43,8 +43,17 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains three branches:
-* Based on [r245](http://sourceforge.net/p/pythonqt/code/245/)
+This repository contains 5 branches:
+
+### patched-5
+* Based on patched-4 + [r395](http://sourceforge.net/p/pythonqt/code/395/)
+* List of features:
+ * CMake:
+  * Fix install rules
+  * Fix "_invalid_parameter_noinfo_noreturn" link error
+ * PythonQt:
+  * Add Qt5 support
+  * Add PY3K support
 
 ### patched-4
 * Based on patched-3 + [r245](http://sourceforge.net/p/pythonqt/code/245/)
