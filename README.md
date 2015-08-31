@@ -47,6 +47,8 @@ This repository contains 6 branches:
 
 ### patched-6
 * Based on patched-5 + [r403](http://sourceforge.net/p/pythonqt/code/403/)
+* List of bug fixes:
+ * Fix for memory leaks and cleanup crash
 * Includes the following PythonQt updates:
 ```
 $ git shortlog 2d445d5..e93e36b --no-merges 
