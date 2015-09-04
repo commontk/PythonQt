@@ -23,7 +23,7 @@ Prerequisites
 Build instructions
 ------------------
 
-By default, the `patched-3` version will be checked out.
+By default, the `patched-5` version will be checked out.
 
 ```
 git clone git://github.com/commontk/PythonQt.git
@@ -46,7 +46,9 @@ Available branches
 This repository contains 5 branches:
 
 ### patched-5
-* Based on patched-4 + [r395](http://sourceforge.net/p/pythonqt/code/395/)
+* Based on patched-4 + [r403](http://sourceforge.net/p/pythonqt/code/403/) excluding commit [r397](http://sourceforge.net/p/pythonqt/code/397/)
+* List of bug fixes:
+ * Fix for memory leaks and cleanup crash
 * List of features:
  * CMake:
   * Fix install rules
