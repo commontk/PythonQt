@@ -77,6 +77,9 @@ int main(int argc, char *argv[])
     Py_Finalize();
   }
 
+  PythonQtTestCleanup cleanup;
+  failCount += QTest::qExec(&cleanup, argc, argv);
+
   if (failCount) {
     std::cerr << "Tests failed: " << failCount << std::endl;
   } else {

@@ -1,6 +1,7 @@
 #ifndef _PYTHONQTTESTCLEANUP_H
 #define _PYTHONQTTESTCLEANUP_H
 
+#include "PythonQt.h"
 #include <QtTest/QtTest>
 
 class PythonQtTestCleanupHelper;
@@ -17,10 +18,7 @@ private Q_SLOTS:
   void cleanup();
 
   void testQtEnum();
-  void testCallQtMethodInDestructorOwnedQTimer();
-  void testCallQtMethodInDestructorWeakRefGuarded();
-  void testSignalReceiverCleanup();
-  void testPyFinalizeThenPythonQtCleanup();
+  void testCallQtMethodInDel();
 
 private:
   PythonQtTestCleanupHelper* _helper;
@@ -39,7 +37,6 @@ public:
 
 public Q_SLOTS:
   void setPassed() { _passed = true; }
-  void onDestroyed(QObject *) { }
 
 private:
   bool _passed;

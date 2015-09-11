@@ -1,6 +1,6 @@
 #include "PythonQtTestCleanup.h"
 #include "PythonQt.h"
-#include "PythonQt_QtAll.h"
+#include "PythonQt_QtBindings.h"
 
 void PythonQtTestCleanup::initTestCase()
 {
@@ -15,7 +15,7 @@ void PythonQtTestCleanup::init()
   // Initialize before each test
 
   PythonQt::init(PythonQt::IgnoreSiteModule);
-  PythonQt_QtAll::init();
+  PythonQt_init_QtBindings();
 
   _helper = new PythonQtTestCleanupHelper();
   PythonQtObjectPtr main = PythonQt::self()->getMainModule();
@@ -24,15 +24,18 @@ void PythonQtTestCleanup::init()
 
 void PythonQtTestCleanup::cleanup()
 {
-  // Cleanup PythonQt resources before finalizing Python
-  PythonQt::cleanup();
+  // Finalize and cleanup after each test
+
+  PythonQtObjectPtr main = PythonQt::self()->getMainModule();
+  PythonQt::self()->removeVariable(main, "obj");
+  delete _helper;
+  _helper = NULL;
 
   if (Py_IsInitialized()) {
     Py_Finalize();
   }
 
-  delete _helper;
-  _helper = nullptr;
+  PythonQt::cleanup();
 }
 
 void PythonQtTestCleanup::testQtEnum()
@@ -44,7 +47,7 @@ void PythonQtTestCleanup::testQtEnum()
     ));
 }
 
-void PythonQtTestCleanup::testCallQtMethodInDestructorOwnedQTimer()
+void PythonQtTestCleanup::testCallQtMethodInDel()
 {
   QVERIFY(_helper->runScript(
     "import PythonQt.QtCore\n" \
@@ -54,48 +57,8 @@ void PythonQtTestCleanup::testCallQtMethodInDestructorOwnedQTimer()
     "  def __del__(self):\n" \
     "    self.timer.setSingleShot(True)\n" \
     "x = TimerWrapper()\n" \
-    "del x\n" \
     "obj.setPassed()\n"
     ));
-}
-
-void PythonQtTestCleanup::testCallQtMethodInDestructorWeakRefGuarded()
-{
-  QVERIFY(_helper->runScript(
-    "import weakref\n" \
-    "import PythonQt.QtCore\n" \
-    "class TimerWrapper(object):\n" \
-    "  def __init__(self):\n" \
-    "    self.timerWeakRef = weakref.ref(PythonQt.QtCore.QTimer())\n" \
-    "  def __del__(self):\n" \
-    "    if self.timerWeakRef():\n" \
-    "      self.timerWeakRef().setSingleShot(True)\n" \
-    "x = TimerWrapper()\n" \
-    "obj.setPassed()\n"
-    ));
-}
-
-void PythonQtTestCleanup::testSignalReceiverCleanup()
-{
-  PythonQtObjectPtr main = PythonQt::self()->getMainModule();
-
-  // Test that PythonQtSignalReceiver is cleaned up properly,
-  // i.e. PythonQt::cleanup() doesn't segfault
-  QVERIFY(_helper->runScript(
-    "import PythonQt.QtCore\n" \
-    "timer = PythonQt.QtCore.QTimer(obj)\n" \
-    "timer.connect('destroyed()', obj.onDestroyed)\n" \
-    "obj.setPassed()\n"
-    ));
-}
-
-void PythonQtTestCleanup::testPyFinalizeThenPythonQtCleanup()
-{
-  if (Py_IsInitialized()) {
-      Py_Finalize();
-  }
-
-  PythonQt::cleanup();
 }
 
 bool PythonQtTestCleanupHelper::runScript(const char* script)
