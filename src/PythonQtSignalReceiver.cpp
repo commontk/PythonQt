@@ -172,7 +172,9 @@ PythonQtSignalReceiver::PythonQtSignalReceiver(QObject* obj):PythonQtSignalRecei
 
 PythonQtSignalReceiver::~PythonQtSignalReceiver()
 {
-  PythonQt::priv()->removeSignalEmitter(_obj);
+  if (PythonQt::priv()) {
+    PythonQt::priv()->removeSignalEmitter(_obj);
+  }
 }
 
 
