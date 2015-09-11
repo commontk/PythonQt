@@ -76,12 +76,25 @@ public:
   PythonQtValueStorage() {
     _chunkIdx  = 0;
     _chunkOffset = 0;
+    _currentChunk = NULL;
+  };
+
+  //! initialize memory
+  void init() {
+    assert(_currentChunk == NULL);
+    assert(_chunks.isEmpty());
+    _chunkIdx = 0;
+    _chunkOffset = 0;
     _currentChunk = new T[chunkEntries];
     _chunks.append(_currentChunk);
-  };
+  }
 
   //! clear all memory
   void clear() {
+    _chunkIdx = 0;
+    _chunkOffset = 0;
+    _currentChunk = NULL;
+
     T* chunk;
     Q_FOREACH(chunk, _chunks) {
       delete[]chunk;
