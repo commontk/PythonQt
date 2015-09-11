@@ -279,6 +279,18 @@ if(BUILD_TESTING)
     tests/PythonQtTests.h
     )
 
+  if(PythonQt_Wrap_Qtcore)
+    include_directories(generated_cpp${generated_cpp_suffix})
+
+    list(APPEND test_sources
+      tests/PythonQtTestCleanup.cpp
+      tests/PythonQtTestCleanup.h
+      )
+    QT4_WRAP_CPP(test_sources
+      tests/PythonQtTestCleanup.h
+      )
+  endif()
+
   set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
 
   add_executable(PythonQtCppTests ${test_sources})
