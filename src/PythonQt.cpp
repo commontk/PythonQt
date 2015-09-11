@@ -1294,6 +1294,10 @@ PythonQtPrivate::PythonQtPrivate()
   _hadError = false;
   _systemExitExceptionHandlerEnabled = false;
   _debugAPI = new PythonQtDebugAPI(this);
+
+  PythonQtConv::global_valueStorage.init();
+  PythonQtConv::global_ptrStorage.init();
+  PythonQtConv::global_variantStorage.init();
 }
 
 void PythonQtPrivate::setupSharedLibrarySuffixes()
