@@ -695,6 +695,7 @@ PythonQtClassWrapper* PythonQtPrivate::createNewPythonQtClassWrapper(PythonQtCla
   PyObject* className = PyString_FromString(pythonClassName.constData());
 
   PyObject* baseClasses = PyTuple_New(1);
+  Py_INCREF(&PythonQtInstanceWrapper_Type);
   PyTuple_SET_ITEM(baseClasses, 0, (PyObject*)&PythonQtInstanceWrapper_Type);
 
   PyObject* typeDict = PyDict_New();
@@ -1650,6 +1651,7 @@ void PythonQt::initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQ
 #endif
   _p->_pythonQtModuleName = name;
   
+  Py_INCREF(&PythonQtBoolResult_Type);
   PyModule_AddObject(_p->pythonQtModule().object(), "BoolResult", (PyObject*)&PythonQtBoolResult_Type);
   PythonQtObjectPtr sys;
   sys.setNewRef(PyImport_ImportModule("sys"));
@@ -1673,7 +1675,9 @@ void PythonQt::initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQ
     Py_ssize_t old_size = PyTuple_Size(old_module_names);
     PyObject *module_names = PyTuple_New(old_size + 1);
     for (Py_ssize_t i = 0; i < old_size; i++) {
-      PyTuple_SetItem(module_names, i, PyTuple_GetItem(old_module_names, i));
+      PyObject *item = PyTuple_GetItem(old_module_names, i);
+      Py_INCREF(item);
+      PyTuple_SetItem(module_names, i, item);
     }
     PyTuple_SetItem(module_names, old_size, PyString_FromString(name.constData()));
     PyModule_AddObject(sys.object(), "builtin_module_names", module_names);
