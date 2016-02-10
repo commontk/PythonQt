@@ -47,8 +47,6 @@
 #include <QMetaObject>
 #include <QMetaEnum>
 
-QHash<QByteArray, int> PythonQtMethodInfo::_parameterTypeDict;
-
 PythonQtClassInfo::PythonQtClassInfo() {
   _meta = NULL;
   _constructors = NULL;

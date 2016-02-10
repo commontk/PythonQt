@@ -160,10 +160,10 @@ public:
   static QString CPPObjectToString(int type, const void* data);
     
   //! register a converter callback from python to cpp for given metatype
-  static void registerPythonToMetaTypeConverter(int metaTypeId, PythonQtConvertPythonToMetaTypeCB* cb) { _pythonToMetaTypeConverters.insert(metaTypeId, cb); }
+  static void registerPythonToMetaTypeConverter(int metaTypeId, PythonQtConvertPythonToMetaTypeCB* cb) { GetPythonToMetaTypeConverters()->insert(metaTypeId, cb); }
 
   //! register a converter callback from cpp to python for given metatype
-  static void registerMetaTypeToPythonConverter(int metaTypeId, PythonQtConvertMetaTypeToPythonCB* cb) { _metaTypeToPythonConverters.insert(metaTypeId, cb); }
+  static void registerMetaTypeToPythonConverter(int metaTypeId, PythonQtConvertMetaTypeToPythonCB* cb) { GetMetaTypeToPythonConverters()->insert(metaTypeId, cb); }
 
   //! converts the Qt parameter given in \c data, interpreting it as a \c type registered qvariant/meta type, into a Python object,
   static PyObject* convertQtValueToPythonInternal(int type, const void* data);
@@ -187,8 +187,8 @@ public:
   static PythonQtValueStorageWithCleanup<QVariant, 128>  global_variantStorage;
 
 protected:
-  static QHash<int, PythonQtConvertMetaTypeToPythonCB*> _metaTypeToPythonConverters; 
-  static QHash<int, PythonQtConvertPythonToMetaTypeCB*> _pythonToMetaTypeConverters; 
+  static QHash<int, PythonQtConvertMetaTypeToPythonCB*>* GetMetaTypeToPythonConverters(); 
+  static QHash<int, PythonQtConvertPythonToMetaTypeCB*>* GetPythonToMetaTypeConverters(); 
  
   //! handle automatic conversion of some special types (QColor, QBrush, ...)
   static void* handlePythonToQtAutoConversion(int typeId, PyObject* obj, void* alreadyAllocatedCPPObject);

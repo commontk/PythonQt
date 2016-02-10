@@ -51,8 +51,21 @@ PythonQtValueStorage<qint64, 128>  PythonQtConv::global_valueStorage;
 PythonQtValueStorage<void*, 128>   PythonQtConv::global_ptrStorage;
 PythonQtValueStorageWithCleanup<QVariant, 128> PythonQtConv::global_variantStorage;
 
-QHash<int, PythonQtConvertMetaTypeToPythonCB*> PythonQtConv::_metaTypeToPythonConverters;
-QHash<int, PythonQtConvertPythonToMetaTypeCB*> PythonQtConv::_pythonToMetaTypeConverters;
+QHash<int, PythonQtConvertMetaTypeToPythonCB*>* PythonQtConv::GetMetaTypeToPythonConverters() {
+  static QHash<int, PythonQtConvertMetaTypeToPythonCB*>* _metaTypeToPythonConverters = nullptr;
+  if (_metaTypeToPythonConverters == nullptr) {
+	_metaTypeToPythonConverters = new QHash<int, PythonQtConvertMetaTypeToPythonCB*>();
+  }
+  return _metaTypeToPythonConverters;
+}
+
+QHash<int, PythonQtConvertPythonToMetaTypeCB*>* PythonQtConv::GetPythonToMetaTypeConverters() {
+  static QHash<int, PythonQtConvertPythonToMetaTypeCB*>* _pythonToMetaTypeConverters = nullptr;
+  if (_pythonToMetaTypeConverters == nullptr) {
+	_pythonToMetaTypeConverters = new QHash<int, PythonQtConvertPythonToMetaTypeCB*>();
+  }
+  return _pythonToMetaTypeConverters;
+}
 
 PyObject* PythonQtConv::GetPyBool(bool val)
 {
@@ -103,7 +116,7 @@ PyObject* PythonQtConv::ConvertQtValueToPython(const PythonQtMethodInfo::Paramet
 
   if (info.typeId >= QMetaType::User) {
     // if a converter is registered, we use is:
-    PythonQtConvertMetaTypeToPythonCB* converter = _metaTypeToPythonConverters.value(info.typeId);
+    PythonQtConvertMetaTypeToPythonCB* converter = GetMetaTypeToPythonConverters()->value(info.typeId);
     if (converter) {
       return (*converter)(info.pointerCount==0?data:*((void**)data), info.typeId);
     }
@@ -254,7 +267,7 @@ PyObject* PythonQtConv::convertQtValueToPythonInternal(int type, const void* dat
      default:
        // check if we have a QList of pointers, which we can circumvent with a QList<void*>
        if (info.isQList && (info.innerNamePointerCount == 1)) {
-         static int id = QMetaType::type("QList<void*>");
+         int id = QMetaType::type("QList<void*>");
          PythonQtValueStorage_ADD_VALUE(global_variantStorage, QVariant, QVariant::Type(id), ptr);
          // return the constData pointer that will be filled with the result value later on
          ptr = (void*)((QVariant*)ptr)->constData();
@@ -295,13 +308,13 @@ void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, vo
 {
   void* ptr = alreadyAllocatedCPPObject;
 
-  static int penId = QMetaType::type("QPen");
-  static int brushId = QMetaType::type("QBrush");
-  static int cursorId = QMetaType::type("QCursor");
-  static int colorId = QMetaType::type("QColor");
-  static PyObject* qtGlobalColorEnum = PythonQtClassInfo::findEnumWrapper("Qt::GlobalColor", NULL);
+  int penId = QMetaType::type("QPen");
+  int brushId = QMetaType::type("QBrush");
+  int cursorId = QMetaType::type("QCursor");
+  int colorId = QMetaType::type("QColor");
+  PyObject* qtGlobalColorEnum = PythonQtClassInfo::findEnumWrapper("Qt::GlobalColor", NULL);
   if (typeId == cursorId) {
-    static PyObject* qtCursorShapeEnum = PythonQtClassInfo::findEnumWrapper("Qt::CursorShape", NULL);
+    PyObject* qtCursorShapeEnum = PythonQtClassInfo::findEnumWrapper("Qt::CursorShape", NULL);
     if ((PyObject*)obj->ob_type == qtCursorShapeEnum) {
       Qt::CursorShape val = (Qt::CursorShape)PyInt_AsLong(obj);
       if (!ptr) {
@@ -313,7 +326,7 @@ void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, vo
     }
   } else if (typeId == penId) {
     // brushes can be created from QColor and from Qt::GlobalColor (and from brushes, but that's the default)
-    static PyObject* qtColorClass = PythonQt::priv()->getClassInfo("QColor")->pythonQtClassWrapper();
+    PyObject* qtColorClass = PythonQt::priv()->getClassInfo("QColor")->pythonQtClassWrapper();
     if ((PyObject*)obj->ob_type == qtGlobalColorEnum) {
       Qt::GlobalColor val = (Qt::GlobalColor)PyInt_AsLong(obj);
       if (!ptr) {
@@ -332,7 +345,7 @@ void* PythonQtConv::handlePythonToQtAutoConversion(int typeId, PyObject* obj, vo
     }
   } else if (typeId == brushId) {
     // brushes can be created from QColor and from Qt::GlobalColor (and from brushes, but that's the default)
-    static PyObject* qtColorClass = PythonQt::priv()->getClassInfo("QColor")->pythonQtClassWrapper();
+    PyObject* qtColorClass = PythonQt::priv()->getClassInfo("QColor")->pythonQtClassWrapper();
     if ((PyObject*)obj->ob_type == qtGlobalColorEnum) {
       Qt::GlobalColor val = (Qt::GlobalColor)PyInt_AsLong(obj);
       if (!ptr) {
@@ -649,7 +662,7 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
          if (info.typeId == PythonQtMethodInfo::Unknown || info.typeId >= QMetaType::User) {
            // check for QList<AnyPtr*> case, where we will use a QList<void*> QVariant
            if (info.isQList && (info.innerNamePointerCount == 1)) {
-             static int id = QMetaType::type("QList<void*>");
+             int id = QMetaType::type("QList<void*>");
              if (!alreadyAllocatedCPPObject) {
                PythonQtValueStorage_ADD_VALUE_IF_NEEDED(alreadyAllocatedCPPObject, global_variantStorage, QVariant, QVariant::Type(id), ptr);
                ptr = (void*)((QVariant*)ptr)->constData();
@@ -668,7 +681,7 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
          // We only do this for registered type > QMetaType::User for performance reasons.
          if (info.typeId >= QMetaType::User) {
            // Maybe we have a special converter that is registered for that type:
-           PythonQtConvertPythonToMetaTypeCB* converter = _pythonToMetaTypeConverters.value(info.typeId);
+           PythonQtConvertPythonToMetaTypeCB* converter = GetPythonToMetaTypeConverters()->value(info.typeId);
            if (converter) {
              if (!alreadyAllocatedCPPObject) {
                // create a new empty variant of concrete type:
@@ -1174,7 +1187,7 @@ QVariant PythonQtConv::PyObjToQVariant(PyObject* val, int type)
     } else if (type >= QVariant::UserType) {
       // not an instance wrapper, but there might be other converters 
       // Maybe we have a special converter that is registered for that type:
-      PythonQtConvertPythonToMetaTypeCB* converter = _pythonToMetaTypeConverters.value(type);
+      PythonQtConvertPythonToMetaTypeCB* converter = GetPythonToMetaTypeConverters()->value(type);
       if (converter) {
         // allocate a default object of the needed type:
         v = QVariant(type, (const void*)NULL);

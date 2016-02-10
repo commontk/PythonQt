@@ -761,7 +761,7 @@ QString PythonQtImport::replaceExtension(const QString& str, const QString& ext)
 PyObject* PythonQtImport::getCodeFromPyc(const QString& file)
 {
   PyObject* code;
-  const static QString pycStr("pyc");
+  const QString pycStr("pyc");
   QString pyc = replaceExtension(file, pycStr);
   if (PythonQt::importInterface()->exists(pyc)) {
     time_t mtime = 0;
