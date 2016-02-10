@@ -120,6 +120,12 @@ if(PythonQt_QT_VERSION MATCHES 5)
   # associated with the Qt version being used.
   set(generated_cpp_suffix "_${Qt5Core_VERSION_MAJOR}${Qt5Core_VERSION_MINOR}")
 
+  # Use Qt5.4 as default for higher versions like it's done in build/common.prf
+  if(${Qt5Core_VERSION_MINOR} GREATER 4)
+    set(generated_cpp_suffix "_${Qt5Core_VERSION_MAJOR}4")
+  endif()
+
+
 else()
   #-----------------------------------------------------------------------------
   # Setup Qt4
