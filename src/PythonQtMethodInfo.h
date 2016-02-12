@@ -122,13 +122,13 @@ public:
 
 protected:
 
-  static QHash<QByteArray, int> _parameterTypeDict;
-  static QHash<QByteArray, QByteArray> _parameterNameAliases;
+  static QHash<QByteArray, int>* GetParameterTypeDict();
+  static QHash<QByteArray, QByteArray>* GetParameterNameAliases();
 
   //! stores the cached signatures of methods to speedup mapping from Qt to Python types
-  static QHash<QByteArray, PythonQtMethodInfo*> _cachedSignatures;
+  static QHash<QByteArray, PythonQtMethodInfo*>* GetCachedSignatures();
 
-  static QHash<int, ParameterInfo> _cachedParameterInfos;
+  static QHash<int, ParameterInfo>* GetCachedParameterInfos();
 
   QList<ParameterInfo> _parameters;
 };
