@@ -270,6 +270,8 @@ if(BUILD_TESTING)
     tests/PythonQtTestMain.cpp
     )
 
+  set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
+
   list(APPEND test_sources
     tests/PythonQtTests.cpp
     tests/PythonQtTests.h
@@ -289,9 +291,9 @@ if(BUILD_TESTING)
     QT4_WRAP_CPP(test_sources
       tests/PythonQtTestCleanup.h
       )
-  endif()
 
-  set_property(SOURCE tests/PythonQtTestMain.cpp PROPERTY COMPILE_DEFINITIONS "main=tests_PythonQtTestMain")
+    set_property(SOURCE tests/PythonQtTestMain.cpp APPEND PROPERTY COMPILE_DEFINITIONS "PythonQt_Wrap_Qtcore")
+  endif()
 
   add_executable(PythonQtCppTests ${test_sources})
   target_link_libraries(PythonQtCppTests PythonQt)
