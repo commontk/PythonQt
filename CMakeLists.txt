@@ -123,9 +123,12 @@ endmacro()
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
 # associated with the Qt version being used.
+
+set(generated_cpp_suffix_46 _47)
+
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
-if("${generated_cpp_suffix}" STREQUAL "_46")
-  set(generated_cpp_suffix "_47") # Also use 4.7 wrappers for 4.6.x version
+if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
+  set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
 endif()
 
 #-----------------------------------------------------------------------------
