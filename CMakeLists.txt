@@ -96,6 +96,10 @@ else()
   message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
 endif()
 
+macro(pythonqt_wrap_cpp)
+  qt4_wrap_cpp(${ARGV})
+endmacro()
+
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
 # associated with the Qt version being used.
@@ -210,7 +214,7 @@ endforeach()
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-qt4_wrap_cpp(gen_moc_sources ${moc_sources})
+pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 
 #-----------------------------------------------------------------------------
 # Build the library
@@ -265,7 +269,7 @@ if(BUILD_TESTING)
     tests/PythonQtTests.h
     )
 
-  QT4_WRAP_CPP(test_sources
+  pythonqt_wrap_cpp(test_sources
     tests/PythonQtTests.h
     )
 
@@ -276,7 +280,7 @@ if(BUILD_TESTING)
       tests/PythonQtTestCleanup.cpp
       tests/PythonQtTestCleanup.h
       )
-    QT4_WRAP_CPP(test_sources
+    pythonqt_wrap_cpp(test_sources
       tests/PythonQtTestCleanup.h
       )
 
