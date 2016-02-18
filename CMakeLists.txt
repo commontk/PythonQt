@@ -11,6 +11,20 @@ cmake_minimum_required(VERSION 2.8)
 project(PythonQt)
 #-----------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------
+# Qt version
+
+# Set PythonQt_QT_VERSION
+set(PythonQt_QT_VERSION 4)
+
+# Requirements
+set(minimum_required_qt4_version "4.6.2")
+set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
+
+# Qt components
+set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)
+set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
+
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -40,17 +54,24 @@ if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
   set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
 endif()
 
-option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
+set(qt4_wrapped_libs ${qt4libs})
+set(qt_wrapped_libs ${qt${PythonQt_QT_VERSION}_wrapped_libs})
 
-set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns)
-foreach(qtlib ${qtlibs})
+# Define PythonQt_Wrap_Qt* options
+option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
+foreach(qtlib ${qt_wrapped_libs})
   OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
 endforeach()
 
+
 # Force option if it applies
 if(PythonQt_Wrap_QtAll)
-  list(REMOVE_ITEM qtlibs xmlpatterns) # xmlpatterns wrapper does *NOT* build at all :(
-  foreach(qtlib ${qtlibs})
+  set(_qt_wrapped_libs ${qt_wrapped_libs})
+
+  # XXX xmlpatterns wrapper does *NOT* build at all :(
+  list(REMOVE_ITEM _qt_wrapped_libs xmlpatterns)
+
+  foreach(qtlib ${_qt_wrapped_libs})
     if(NOT ${PythonQt_Wrap_Qt${qtlib}})
       set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
       message(STATUS "Enabling [PythonQt_Wrap_Qt${qtlib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
@@ -68,7 +89,6 @@ endif()
 #-----------------------------------------------------------------------------
 # Setup Qt
 
-set(minimum_required_qt_version "4.6.2")
 
 find_package(Qt4)
 
@@ -81,7 +101,7 @@ if(QT4_FOUND)
   endif()
 
   # Enable required qt module
-  foreach(qtlib network opengl sql svg uitools webkit xml xmlpatterns)
+  foreach(qtlib ${qt_wrapped_libs})
     string(TOUPPER ${qtlib} qtlib_uppercase)
     if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
       message(FATAL_ERROR "QT_QT${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
@@ -185,7 +205,7 @@ set(moc_sources
 
 #-----------------------------------------------------------------------------
 # Add extra sources
-foreach(qtlib core gui network opengl sql svg uitools webkit xml xmlpatterns)
+foreach(qtlib ${qt_wrapped_libs})
 
   if (${PythonQt_Wrap_Qt${qtlib}})
 
