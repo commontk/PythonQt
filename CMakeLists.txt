@@ -35,7 +35,12 @@ option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 if(PythonQt_QT_VERSION MATCHES 4)
   set(qtlibs core gui network opengl sql svg uitools webkit xml xmlpatterns locale)
 else()
-  set(qtlibs Core Network OpenGL Sql Svg Widgets WebKitWidgets Xml XmlPatterns UiTools)
+  set(qtlibs Core Network OpenGL Sql Svg Widgets Xml XmlPatterns UiTools)
+  find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS Core REQUIRED)
+
+  if(${Qt5Core_VERSION_MINOR} LESS 6)
+    list(APPEND qtlibs WebKitWidgets)
+  endif()
 endif()
 
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
@@ -362,5 +367,4 @@ if(BUILD_TESTING)
     COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
     )
 endif()
-
 
