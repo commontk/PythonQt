@@ -1550,7 +1550,7 @@ PythonQtClassInfo* PythonQtPrivate::currentClassInfoForClassWrapperCreation()
 
 void PythonQtPrivate::addDecorators(QObject* o, int decoTypes)
 {
-  if (o == nullptr)
+  if (!o)
     {
     return;
     }
