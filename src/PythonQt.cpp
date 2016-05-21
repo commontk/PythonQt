@@ -1510,6 +1510,10 @@ PythonQtClassInfo* PythonQtPrivate::currentClassInfoForClassWrapperCreation()
 
 void PythonQtPrivate::addDecorators(QObject* o, int decoTypes)
 {
+  if (!o)
+    {
+    return;
+    }
   o->setParent(this);
   int numMethods = o->metaObject()->methodCount();
   for (int i = 0; i < numMethods; i++) {
