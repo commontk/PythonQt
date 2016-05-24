@@ -192,6 +192,12 @@ else()
 
 endif()
 
+if(UNIX)
+  find_package(OpenGL)
+  if(OPENGL_FOUND)
+    list(APPEND QT_LIBRARIES ${OPENGL_LIBRARIES})
+  endif()
+endif()
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
 # associated with the Qt version being used.
