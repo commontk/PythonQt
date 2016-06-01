@@ -43,7 +43,15 @@ set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_vers
 set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools WebKitWidgets Xml XmlPatterns)
 set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)
 set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
-
+  
+# Webkit need to be removed Qt >= 5.6
+if(PythonQt_QT_VERSION MATCHES 5)
+  find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS Core REQUIRED)
+  if(${Qt5Core_VERSION_MINOR} GREATER 5)
+    list(REMOVE_ITEM qtlibs WebKitWidgets)
+    list(REMOVE_ITEM qt4libs webkit)
+  endif()
+endif()
 #-----------------------------------------------------------------------------
 # Python libraries
 
