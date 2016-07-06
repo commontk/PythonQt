@@ -1,0 +1,18 @@
+language: cpp
+
+os: osx
+
+sudo: required
+osx_image: xcode7.1
+
+          
+before_install:
+  - brew update
+  - brew install gcc qt5 cmake
+
+script:
+  - cmake -DQt5_DIR=/usr/local/opt/qt5/lib/cmake/Qt5 -UQT_QMAKE_EXECUTABLE -DPythonQt_Wrap_QtAll=TRUE . 
+  - make 
+  - make install
+
+install:

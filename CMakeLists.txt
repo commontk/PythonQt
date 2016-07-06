@@ -363,6 +363,7 @@ install(TARGETS PythonQt
         LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
+install(FILES src/gui/PythonQtScriptingConsole.h DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}/gui)
 
 #-----------------------------------------------------------------------------
 # Testing
