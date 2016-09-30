@@ -333,7 +333,7 @@ PyObject *PythonQtSlotFunction_CallImpl(PythonQtClassInfo* classInfo, QObject* o
   }
 
 #ifdef PYTHONQT_DEBUG
-  std::cout << "called " << info->metaMethod()->typeName() << " " << info->signature() << std::endl;
+  std::cout << "called " << info->metaMethod()->typeName() << " " << info->signature().constData() << std::endl;
 #endif
 
   PyObject* r = NULL;
