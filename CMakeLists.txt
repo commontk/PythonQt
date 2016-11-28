@@ -35,7 +35,7 @@ else()
 endif()
 
 # Requirements
-set(minimum_required_qt5_version "5.3.0")
+set(minimum_required_qt5_version "5.2.0")
 set(minimum_required_qt4_version "4.6.2")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
@@ -47,11 +47,19 @@ set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
 # Webkit need to be removed Qt >= 5.6
 if(PythonQt_QT_VERSION MATCHES 5)
   find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS Core REQUIRED)
-  if(${Qt5Core_VERSION_MINOR} GREATER 5)
+  if(${Qt5Core_VERSION_MINOR} GREATER 5 OR ${Qt5Core_VERSION_MINOR} EQUAL 2)
     list(REMOVE_ITEM qtlibs WebKitWidgets)
     list(REMOVE_ITEM qt4libs webkit)
   endif()
+	
+  if(${Qt5Core_VERSION_MINOR} EQUAL 2)
+	list(APPEND qtlibs PrintSupport)
+    list(APPEND qt4libs printsupport)
+  endif()
+
 endif()
+
+
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -92,6 +100,8 @@ set(qt5_wrapped_lib_depends_gui Multimedia)
 
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
+set(qtlib_to_wraplib_PrintSupport printsupport)
+
 
 # Define PythonQt_Wrap_Qt* options
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
@@ -320,7 +330,10 @@ foreach(qtlib ${qt_wrapped_libs})
 
     endforeach()
 
-    list(APPEND sources ${file_prefix}_init.cpp)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}_init.cpp)
+  	  list(APPEND sources ${file_prefix}_init.cpp)
+	  message( ${file_prefix}_init.cpp)
+	endif()
 
   endif()
 endforeach()
