@@ -39,8 +39,16 @@ set(minimum_required_qt5_version "5.3.0")
 set(minimum_required_qt4_version "4.6.2")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
+# Needed to set "Qt5_VERSION"
+if(PythonQt_QT_VERSION VERSION_GREATER "4")
+  find_package(Qt5 COMPONENTS Core QUIET)
+endif()
+
 # Qt components
-set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools WebKitWidgets Xml XmlPatterns)
+set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools Xml XmlPatterns)
+if(PythonQt_QT_VERSION VERSION_GREATER "4" AND "${Qt5_VERSION}" VERSION_LESS "5.6.0")
+  list(APPEND qt5libs WebKitWidgets)
+endif()
 set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)
 set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
 
@@ -80,7 +88,7 @@ set(qt4_wrapped_libs ${qt4libs})
 set(qt5_wrapped_libs ${qt4libs})
 set(qt_wrapped_libs ${qt${PythonQt_QT_VERSION}_wrapped_libs})
 
-set(qt5_wrapped_lib_depends_gui Multimedia)
+set(qt5_wrapped_lib_depends_gui Multimedia PrintSupport)
 
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
