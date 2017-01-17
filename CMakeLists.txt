@@ -150,6 +150,9 @@ if(PythonQt_QT_VERSION VERSION_GREATER "4")
     list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
   endforeach()
 
+  # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+  include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
+
   set(QT_VERSION_MAJOR ${Qt5Core_VERSION_MAJOR})
   set(QT_VERSION_MINOR ${Qt5Core_VERSION_MINOR})
 
@@ -209,7 +212,9 @@ set(generated_cpp_suffix_51 _50)
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
   set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
-elseif(${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} VERSION_GREATER "5.4")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
+  set(generated_cpp_suffix "_56")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.3")
   set(generated_cpp_suffix "_54")
 endif()
 
@@ -227,10 +232,12 @@ set(sources
     src/PythonQtMethodInfo.cpp
     src/PythonQtMisc.cpp
     src/PythonQtObjectPtr.cpp
+    src/PythonQtProperty.cpp
     src/PythonQtQFileImporter.cpp
     src/PythonQtSignalReceiver.cpp
     src/PythonQtSlot.cpp
     src/PythonQtSignal.cpp
+    src/PythonQtSlotDecorator.cpp
     src/PythonQtStdDecorators.cpp
     src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
@@ -261,10 +268,12 @@ set(headers
     src/PythonQtMethodInfo.h
     src/PythonQtMisc.h
     src/PythonQtObjectPtr.h
+    src/PythonQtProperty.h
     src/PythonQtQFileImporter.h
     src/PythonQtSignalReceiver.h
     src/PythonQtSlot.h
     src/PythonQtSignal.h
+    src/PythonQtSlotDecorator.h
     src/PythonQtStdDecorators.h
     src/PythonQtStdIn.h
     src/PythonQtStdOut.h
@@ -272,6 +281,7 @@ set(headers
     src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
+
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
 )
 
