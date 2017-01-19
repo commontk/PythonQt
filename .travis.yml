@@ -6,7 +6,7 @@ sudo: required
           
 before_install:
   - brew update
-  - brew install cmake gcc qt5 
+  - brew install gcc qt5 
 
 script:
   - cmake -DQt5_DIR=/usr/local/opt/qt5/lib/cmake/Qt5 -UQT_QMAKE_EXECUTABLE -DPythonQt_Wrap_QtAll=TRUE . 
