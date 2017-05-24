@@ -250,46 +250,46 @@ static PyObject *PythonQtInstanceWrapper_richcompare(PythonQtInstanceWrapper* wr
     return Py_NotImplemented;
   }
 
-  QByteArray memberName;
+  const char* memberName;
   switch (code) {
   case Py_LT:
     {
-      static QByteArray name = "__lt__";
+      static const char* name = "__lt__";
       memberName = name;
     }
     break;
 
   case Py_LE:
     {
-      static QByteArray name = "__le__";
+      static const char* name = "__le__";
       memberName = name;
     }
     break;
 
   case Py_EQ:
     {
-      static QByteArray name = "__eq__";
+      static const char* name = "__eq__";
       memberName = name;
     }
     break;
 
   case Py_NE:
     {
-      static QByteArray name = "__ne__";
+      static const char* name = "__ne__";
       memberName = name;
     }
     break;
 
   case Py_GT:
     {
-      static QByteArray name = "__gt__";
+      static const char* name = "__gt__";
       memberName = name;
     }
     break;
 
   case Py_GE:
     {
-      static QByteArray name = "__ge__";
+      static const char* name = "__ge__";
       memberName = name;
     }
     break;
@@ -414,7 +414,7 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
     }
 
     {
-      static const QByteArray dynamicDictString("py_dynamic_dict");
+      static const char* dynamicDictString("py_dynamic_dict");
       // check for a dynamic dict getter slot
       PythonQtMemberInfo member = wrapper->classInfo()->member(dynamicDictString);
       if (member._type == PythonQtMemberInfo::Slot) {
@@ -499,7 +499,7 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
     break;
   case PythonQtMemberInfo::NotFound:
     {
-      static const QByteArray getterString("py_get_");
+      const QByteArray getterString("py_get_");
       // check for a getter slot
       PythonQtMemberInfo member = wrapper->classInfo()->member(getterString + attributeName);
       if (member._type == PythonQtMemberInfo::Slot) {
@@ -507,7 +507,7 @@ static PyObject *PythonQtInstanceWrapper_getattro(PyObject *obj,PyObject *name)
       }
 
       {
-        static const QByteArray dynamicGetterString("py_dynamic_get_attrib");
+        static const char* dynamicGetterString("py_dynamic_get_attrib");
         // check for a dynamic getter slot
         PythonQtMemberInfo member = wrapper->classInfo()->member(dynamicGetterString);
         if (member._type == PythonQtMemberInfo::Slot) {
@@ -634,7 +634,7 @@ static int PythonQtInstanceWrapper_setattro(PyObject *obj,PyObject *name,PyObjec
   }
   else if (member._type == PythonQtMemberInfo::NotFound) {
     // check for a setter slot
-    static const QByteArray setterString("py_set_");
+    const QByteArray setterString("py_set_");
     PythonQtMemberInfo setter = wrapper->classInfo()->member(setterString + attributeName);
     if (setter._type == PythonQtMemberInfo::Slot) {
       // call the setter and ignore the result value

@@ -43,10 +43,6 @@
 #include "PythonQtClassInfo.h"
 #include <iostream>
 
-QHash<QByteArray, PythonQtMethodInfo*> PythonQtMethodInfo::_cachedSignatures;
-QHash<int, PythonQtMethodInfo::ParameterInfo> PythonQtMethodInfo::_cachedParameterInfos;
-QHash<QByteArray, QByteArray> PythonQtMethodInfo::_parameterNameAliases;
-
 PythonQtMethodInfo::PythonQtMethodInfo(const QMetaMethod& meta, PythonQtClassInfo* classInfo)
 {
 #ifdef PYTHONQT_DEBUG
@@ -82,10 +78,10 @@ const PythonQtMethodInfo* PythonQtMethodInfo::getCachedMethodInfo(const QMetaMet
   QByteArray sig(PythonQtUtils::signature(signal));
   sig = sig.mid(sig.indexOf('('));
   QByteArray fullSig = QByteArray(signal.typeName()) + " " + sig;
-  PythonQtMethodInfo* result = _cachedSignatures.value(fullSig);
+  PythonQtMethodInfo* result = getCachedSignatures()->value(fullSig);
   if (!result) {
     result = new PythonQtMethodInfo(signal, classInfo);
-    _cachedSignatures.insert(fullSig, result);
+    getCachedSignatures()->insert(fullSig, result);
   }
   return result;
 }
@@ -105,10 +101,10 @@ const PythonQtMethodInfo* PythonQtMethodInfo::getCachedMethodInfoFromArgumentLis
     arguments << arg;
   }
   fullSig += ")";
-  PythonQtMethodInfo* result = _cachedSignatures.value(fullSig);
+  PythonQtMethodInfo* result = getCachedSignatures()->value(fullSig);
   if (!result) {
     result = new PythonQtMethodInfo(typeName, arguments);
-    _cachedSignatures.insert(fullSig, result);
+    getCachedSignatures()->insert(fullSig, result);
   }
   return result;
 }
@@ -166,7 +162,7 @@ void PythonQtMethodInfo::fillParameterInfo(ParameterInfo& type, const QByteArray
     type.pointerCount = pointerCount;
     type.isReference = hadReference;
 
-    QByteArray alias = _parameterNameAliases.value(name);
+    QByteArray alias = getParameterNameAliases()->value(name);
     if (!alias.isEmpty()) {
       name = alias;
     }
@@ -236,110 +232,110 @@ QByteArray PythonQtMethodInfo::getInnerTemplateTypeName(const QByteArray& typeNa
 
 int PythonQtMethodInfo::nameToType(const char* name)
 {
-  if (_parameterTypeDict.isEmpty()) {
+  if (getParameterTypeDict()->isEmpty()) {
     // we could also use QMetaType::nameToType, but that does a string compare search
     // and does not support QVariant
 
     // QMetaType names
-    _parameterTypeDict.insert("long", QMetaType::Long);
-    _parameterTypeDict.insert("int", QMetaType::Int);
-    _parameterTypeDict.insert("short", QMetaType::Short);
-    _parameterTypeDict.insert("char", QMetaType::Char);
-    _parameterTypeDict.insert("ulong", QMetaType::ULong);
-    _parameterTypeDict.insert("unsigned long", QMetaType::ULong);
-    _parameterTypeDict.insert("uint", QMetaType::UInt);
-    _parameterTypeDict.insert("unsigned int", QMetaType::UInt);
-    _parameterTypeDict.insert("ushort", QMetaType::UShort);
-    _parameterTypeDict.insert("unsigned short", QMetaType::UShort);
-    _parameterTypeDict.insert("uchar", QMetaType::UChar);
-    _parameterTypeDict.insert("unsigned char", QMetaType::UChar);
-    _parameterTypeDict.insert("bool", QMetaType::Bool);
-    _parameterTypeDict.insert("float", QMetaType::Float);
-    _parameterTypeDict.insert("double", QMetaType::Double);
-    _parameterTypeDict.insert("qreal", QMetaType::Double);
-    _parameterTypeDict.insert("QChar", QMetaType::QChar);
-    _parameterTypeDict.insert("QByteArray", QMetaType::QByteArray);
-    _parameterTypeDict.insert("QString", QMetaType::QString);
-    _parameterTypeDict.insert("", QMetaType::Void);
-    _parameterTypeDict.insert("void", QMetaType::Void);
-    _parameterTypeDict.insert("QtMsgType", QMetaType::Int);
+    getParameterTypeDict()->insert("long", QMetaType::Long);
+    getParameterTypeDict()->insert("int", QMetaType::Int);
+    getParameterTypeDict()->insert("short", QMetaType::Short);
+    getParameterTypeDict()->insert("char", QMetaType::Char);
+    getParameterTypeDict()->insert("ulong", QMetaType::ULong);
+    getParameterTypeDict()->insert("unsigned long", QMetaType::ULong);
+    getParameterTypeDict()->insert("uint", QMetaType::UInt);
+    getParameterTypeDict()->insert("unsigned int", QMetaType::UInt);
+    getParameterTypeDict()->insert("ushort", QMetaType::UShort);
+    getParameterTypeDict()->insert("unsigned short", QMetaType::UShort);
+    getParameterTypeDict()->insert("uchar", QMetaType::UChar);
+    getParameterTypeDict()->insert("unsigned char", QMetaType::UChar);
+    getParameterTypeDict()->insert("bool", QMetaType::Bool);
+    getParameterTypeDict()->insert("float", QMetaType::Float);
+    getParameterTypeDict()->insert("double", QMetaType::Double);
+    getParameterTypeDict()->insert("qreal", QMetaType::Double);
+    getParameterTypeDict()->insert("QChar", QMetaType::QChar);
+    getParameterTypeDict()->insert("QByteArray", QMetaType::QByteArray);
+    getParameterTypeDict()->insert("QString", QMetaType::QString);
+    getParameterTypeDict()->insert("", QMetaType::Void);
+    getParameterTypeDict()->insert("void", QMetaType::Void);
+    getParameterTypeDict()->insert("QtMsgType", QMetaType::Int);
 
     // GL types
-    _parameterTypeDict.insert("GLenum", QMetaType::UInt);
-    _parameterTypeDict.insert("GLboolean", QMetaType::UChar);
-    _parameterTypeDict.insert("GLbitfield", QMetaType::UInt);
-    _parameterTypeDict.insert("GLbyte", QMetaType::Char);
-    _parameterTypeDict.insert("GLubyte", QMetaType::UChar);
-    _parameterTypeDict.insert("GLshort", QMetaType::Short);
-    _parameterTypeDict.insert("GLushort", QMetaType::UShort);
-    _parameterTypeDict.insert("GLint", QMetaType::Int);
-    _parameterTypeDict.insert("GLuint", QMetaType::UInt);
-    _parameterTypeDict.insert("GLsizei", QMetaType::UInt);
-    _parameterTypeDict.insert("GLclampf", QMetaType::Float);
-    _parameterTypeDict.insert("GLfloat", QMetaType::Float);
-    _parameterTypeDict.insert("GLclampd", QMetaType::Double);
-    _parameterTypeDict.insert("GLdouble", QMetaType::Double);
-    _parameterTypeDict.insert("GLvoid", QMetaType::Void);
+    getParameterTypeDict()->insert("GLenum", QMetaType::UInt);
+    getParameterTypeDict()->insert("GLboolean", QMetaType::UChar);
+    getParameterTypeDict()->insert("GLbitfield", QMetaType::UInt);
+    getParameterTypeDict()->insert("GLbyte", QMetaType::Char);
+    getParameterTypeDict()->insert("GLubyte", QMetaType::UChar);
+    getParameterTypeDict()->insert("GLshort", QMetaType::Short);
+    getParameterTypeDict()->insert("GLushort", QMetaType::UShort);
+    getParameterTypeDict()->insert("GLint", QMetaType::Int);
+    getParameterTypeDict()->insert("GLuint", QMetaType::UInt);
+    getParameterTypeDict()->insert("GLsizei", QMetaType::UInt);
+    getParameterTypeDict()->insert("GLclampf", QMetaType::Float);
+    getParameterTypeDict()->insert("GLfloat", QMetaType::Float);
+    getParameterTypeDict()->insert("GLclampd", QMetaType::Double);
+    getParameterTypeDict()->insert("GLdouble", QMetaType::Double);
+    getParameterTypeDict()->insert("GLvoid", QMetaType::Void);
     if (QT_POINTER_SIZE == 8) {
-      _parameterTypeDict.insert("qgl_GLintptr", QMetaType::LongLong);
-      _parameterTypeDict.insert("qgl_GLsizeiptr", QMetaType::LongLong);
-      _parameterTypeDict.insert("size_t", QMetaType::ULongLong);
+      getParameterTypeDict()->insert("qgl_GLintptr", QMetaType::LongLong);
+      getParameterTypeDict()->insert("qgl_GLsizeiptr", QMetaType::LongLong);
+      getParameterTypeDict()->insert("size_t", QMetaType::ULongLong);
     } else {
-      _parameterTypeDict.insert("qgl_GLintptr", QMetaType::Int);
-      _parameterTypeDict.insert("qgl_GLsizeiptr", QMetaType::Int);
-      _parameterTypeDict.insert("size_t", QMetaType::UInt);
+      getParameterTypeDict()->insert("qgl_GLintptr", QMetaType::Int);
+      getParameterTypeDict()->insert("qgl_GLsizeiptr", QMetaType::Int);
+      getParameterTypeDict()->insert("size_t", QMetaType::UInt);
     }
 
     // QVariant names
-    _parameterTypeDict.insert("Q_LLONG", QMetaType::LongLong);
-    _parameterTypeDict.insert("Q_ULLONG", QMetaType::ULongLong);
-    _parameterTypeDict.insert("qlonglong", QMetaType::LongLong);
-    _parameterTypeDict.insert("qulonglong", QMetaType::ULongLong);
-    _parameterTypeDict.insert("qint64", QMetaType::LongLong);
-    _parameterTypeDict.insert("quint64", QMetaType::ULongLong);
-    _parameterTypeDict.insert("QVariantHash", QMetaType::QVariantHash);
-    _parameterTypeDict.insert("QVariantMap", QMetaType::QVariantMap);
-    _parameterTypeDict.insert("QVariantList", QMetaType::QVariantList);
-    _parameterTypeDict.insert("QHash<QString,QVariant>", QMetaType::QVariantHash);
-    _parameterTypeDict.insert("QMap<QString,QVariant>", QMetaType::QVariantMap);
-    _parameterTypeDict.insert("QList<QVariant>", QMetaType::QVariantList);
-    _parameterTypeDict.insert("QStringList", QMetaType::QStringList);
-    _parameterTypeDict.insert("QBitArray", QMetaType::QBitArray);
-    _parameterTypeDict.insert("QDate", QMetaType::QDate);
-    _parameterTypeDict.insert("QTime", QMetaType::QTime);
-    _parameterTypeDict.insert("QDateTime", QMetaType::QDateTime);
-    _parameterTypeDict.insert("QUrl", QMetaType::QUrl);
-    _parameterTypeDict.insert("QLocale", QMetaType::QLocale);
-    _parameterTypeDict.insert("QRect", QMetaType::QRect);
-    _parameterTypeDict.insert("QRectF", QMetaType::QRectF);
-    _parameterTypeDict.insert("QSize", QMetaType::QSize);
-    _parameterTypeDict.insert("QSizeF", QMetaType::QSizeF);
-    _parameterTypeDict.insert("QLine", QMetaType::QLine);
-    _parameterTypeDict.insert("QLineF", QMetaType::QLineF);
-    _parameterTypeDict.insert("QPoint", QMetaType::QPoint);
-    _parameterTypeDict.insert("QPointF", QMetaType::QPointF);
-    _parameterTypeDict.insert("QRegExp", QMetaType::QRegExp);
-    _parameterTypeDict.insert("QFont", QMetaType::QFont);
-    _parameterTypeDict.insert("QPixmap", QMetaType::QPixmap);
-    _parameterTypeDict.insert("QBrush", QMetaType::QBrush);
-    _parameterTypeDict.insert("QColor", QMetaType::QColor);
-    _parameterTypeDict.insert("QCursor", QMetaType::QCursor);
-    _parameterTypeDict.insert("QPalette", QMetaType::QPalette);
-    _parameterTypeDict.insert("QIcon", QMetaType::QIcon);
-    _parameterTypeDict.insert("QImage", QMetaType::QImage);
-    _parameterTypeDict.insert("QRegion", QMetaType::QRegion);
-    _parameterTypeDict.insert("QBitmap", QMetaType::QBitmap);
-    _parameterTypeDict.insert("QSizePolicy", QMetaType::QSizePolicy);
-    _parameterTypeDict.insert("QKeySequence", QMetaType::QKeySequence);
-    _parameterTypeDict.insert("QPen", QMetaType::QPen);
-    _parameterTypeDict.insert("QTextLength", QMetaType::QTextLength);
-    _parameterTypeDict.insert("QTextFormat", QMetaType::QTextFormat);
-    _parameterTypeDict.insert("QMatrix", QMetaType::QMatrix);
-    _parameterTypeDict.insert("QVariant", PythonQtMethodInfo::Variant);
+    getParameterTypeDict()->insert("Q_LLONG", QMetaType::LongLong);
+    getParameterTypeDict()->insert("Q_ULLONG", QMetaType::ULongLong);
+    getParameterTypeDict()->insert("qlonglong", QMetaType::LongLong);
+    getParameterTypeDict()->insert("qulonglong", QMetaType::ULongLong);
+    getParameterTypeDict()->insert("qint64", QMetaType::LongLong);
+    getParameterTypeDict()->insert("quint64", QMetaType::ULongLong);
+    getParameterTypeDict()->insert("QVariantHash", QMetaType::QVariantHash);
+    getParameterTypeDict()->insert("QVariantMap", QMetaType::QVariantMap);
+    getParameterTypeDict()->insert("QVariantList", QMetaType::QVariantList);
+    getParameterTypeDict()->insert("QHash<QString,QVariant>", QMetaType::QVariantHash);
+    getParameterTypeDict()->insert("QMap<QString,QVariant>", QMetaType::QVariantMap);
+    getParameterTypeDict()->insert("QList<QVariant>", QMetaType::QVariantList);
+    getParameterTypeDict()->insert("QStringList", QMetaType::QStringList);
+    getParameterTypeDict()->insert("QBitArray", QMetaType::QBitArray);
+    getParameterTypeDict()->insert("QDate", QMetaType::QDate);
+    getParameterTypeDict()->insert("QTime", QMetaType::QTime);
+    getParameterTypeDict()->insert("QDateTime", QMetaType::QDateTime);
+    getParameterTypeDict()->insert("QUrl", QMetaType::QUrl);
+    getParameterTypeDict()->insert("QLocale", QMetaType::QLocale);
+    getParameterTypeDict()->insert("QRect", QMetaType::QRect);
+    getParameterTypeDict()->insert("QRectF", QMetaType::QRectF);
+    getParameterTypeDict()->insert("QSize", QMetaType::QSize);
+    getParameterTypeDict()->insert("QSizeF", QMetaType::QSizeF);
+    getParameterTypeDict()->insert("QLine", QMetaType::QLine);
+    getParameterTypeDict()->insert("QLineF", QMetaType::QLineF);
+    getParameterTypeDict()->insert("QPoint", QMetaType::QPoint);
+    getParameterTypeDict()->insert("QPointF", QMetaType::QPointF);
+    getParameterTypeDict()->insert("QRegExp", QMetaType::QRegExp);
+    getParameterTypeDict()->insert("QFont", QMetaType::QFont);
+    getParameterTypeDict()->insert("QPixmap", QMetaType::QPixmap);
+    getParameterTypeDict()->insert("QBrush", QMetaType::QBrush);
+    getParameterTypeDict()->insert("QColor", QMetaType::QColor);
+    getParameterTypeDict()->insert("QCursor", QMetaType::QCursor);
+    getParameterTypeDict()->insert("QPalette", QMetaType::QPalette);
+    getParameterTypeDict()->insert("QIcon", QMetaType::QIcon);
+    getParameterTypeDict()->insert("QImage", QMetaType::QImage);
+    getParameterTypeDict()->insert("QRegion", QMetaType::QRegion);
+    getParameterTypeDict()->insert("QBitmap", QMetaType::QBitmap);
+    getParameterTypeDict()->insert("QSizePolicy", QMetaType::QSizePolicy);
+    getParameterTypeDict()->insert("QKeySequence", QMetaType::QKeySequence);
+    getParameterTypeDict()->insert("QPen", QMetaType::QPen);
+    getParameterTypeDict()->insert("QTextLength", QMetaType::QTextLength);
+    getParameterTypeDict()->insert("QTextFormat", QMetaType::QTextFormat);
+    getParameterTypeDict()->insert("QMatrix", QMetaType::QMatrix);
+    getParameterTypeDict()->insert("QVariant", PythonQtMethodInfo::Variant);
     // own special types... (none so far, could be e.g. ObjectList
   }
-  QHash<QByteArray, int>::const_iterator it = _parameterTypeDict.find(name);
-  if (it!=_parameterTypeDict.end()) {
+  QHash<QByteArray, int>::const_iterator it = getParameterTypeDict()->find(name);
+  if (it!=getParameterTypeDict()->end()) {
     return it.value();
   } else {
     return PythonQtMethodInfo::Unknown;
@@ -348,29 +344,29 @@ int PythonQtMethodInfo::nameToType(const char* name)
 
 void PythonQtMethodInfo::cleanupCachedMethodInfos()
 {
-  QHashIterator<QByteArray, PythonQtMethodInfo *> i(_cachedSignatures);
+  QHashIterator<QByteArray, PythonQtMethodInfo *> i(*getCachedSignatures());
   while (i.hasNext()) {
     delete i.next().value();
   }
-  _cachedSignatures.clear();
-  _cachedParameterInfos.clear();
+  getCachedSignatures()->clear();
+  getCachedParameterInfos()->clear();
 }
 
 void PythonQtMethodInfo::addParameterTypeAlias(const QByteArray& alias, const QByteArray& name)
 {
-  _parameterNameAliases.insert(alias, name);
+  getParameterNameAliases()->insert(alias, name);
 }
 
 const PythonQtMethodInfo::ParameterInfo& PythonQtMethodInfo::getParameterInfoForMetaType(int type)
 {
-  QHash<int, ParameterInfo>::ConstIterator it = _cachedParameterInfos.find(type);
-  if (it != _cachedParameterInfos.constEnd()) {
+  QHash<int, ParameterInfo>::ConstIterator it = getCachedParameterInfos()->find(type);
+  if (it != getCachedParameterInfos()->constEnd()) {
     return it.value();
   }
   ParameterInfo info;
   fillParameterInfo(info, QMetaType::typeName(type));
-  _cachedParameterInfos.insert(type, info);
-  return _cachedParameterInfos[type];
+  getCachedParameterInfos()->insert(type, info);
+  return getCachedParameterInfos()->value(type);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -584,4 +580,40 @@ QByteArray PythonQtSlotInfo::getImplementingClassName() const
   } else {
     return _meta.enclosingMetaObject()->className();
   }
+}
+
+QHash<QByteArray, int>* PythonQtMethodInfo::getParameterTypeDict()
+{
+  static QHash<QByteArray, int>* parameterTypeDict = NULL;
+  if (parameterTypeDict == NULL) {
+    parameterTypeDict = new QHash<QByteArray, int>();
+  }
+  return parameterTypeDict;
+}
+
+QHash<QByteArray, QByteArray>* PythonQtMethodInfo::getParameterNameAliases()
+{
+  static QHash<QByteArray, QByteArray>* parameterNameAliases = NULL;
+  if (parameterNameAliases == NULL) {
+    parameterNameAliases = new QHash<QByteArray, QByteArray>();
+  }
+  return parameterNameAliases;
+}
+
+QHash<QByteArray, PythonQtMethodInfo*>* PythonQtMethodInfo::getCachedSignatures()
+{
+  static QHash<QByteArray, PythonQtMethodInfo*>* cachedSignatures = NULL;
+  if (cachedSignatures == NULL) {
+    cachedSignatures = new QHash<QByteArray, PythonQtMethodInfo*>();
+  }
+  return cachedSignatures;
+}
+
+QHash<int, PythonQtMethodInfo::ParameterInfo>* PythonQtMethodInfo::getCachedParameterInfos()
+{
+  static QHash<int, PythonQtMethodInfo::ParameterInfo>* cachedParameterInfos = NULL;
+  if (cachedParameterInfos == NULL) {
+    cachedParameterInfos = new QHash<int, PythonQtMethodInfo::ParameterInfo>();
+  }
+  return cachedParameterInfos;
 }

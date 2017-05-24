@@ -52,7 +52,7 @@
 static PyObject* PythonQtInstanceWrapper_invert(PythonQtInstanceWrapper* wrapper)
 {
   PyObject* result = NULL;
-  static QByteArray memberName = "__invert__";
+  static const char* memberName = "__invert__";
   PythonQtMemberInfo opSlot = wrapper->classInfo()->member(memberName);
   if (opSlot._type == PythonQtMemberInfo::Slot) {
     result = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, opSlot._slot, NULL, NULL, wrapper->_wrappedPtr);
@@ -63,7 +63,7 @@ static PyObject* PythonQtInstanceWrapper_invert(PythonQtInstanceWrapper* wrapper
 static PyObject* PythonQtInstanceWrapper_negative(PythonQtInstanceWrapper* wrapper)
 {
   PyObject* result = NULL;
-  static QByteArray memberName = "__sub__";
+  static const char* memberName = "__sub__";
   PythonQtMemberInfo opSlot = wrapper->classInfo()->member(memberName);
   if (opSlot._type == PythonQtMemberInfo::Slot) {
     result = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, opSlot._slot, NULL, NULL, wrapper->_wrappedPtr);
@@ -75,7 +75,7 @@ static int PythonQtInstanceWrapper_nonzero(PythonQtInstanceWrapper* wrapper)
 {
   int result = (wrapper->_wrappedPtr == NULL && wrapper->_obj == NULL)?0:1;
   if (result) {
-    static QByteArray memberName = "__nonzero__";
+    static const char* memberName = "__nonzero__";
     PythonQtMemberInfo opSlot = wrapper->classInfo()->member(memberName);
     if (opSlot._type == PythonQtMemberInfo::Slot) {
       PyObject* resultObj = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, opSlot._slot, NULL, NULL, wrapper->_wrappedPtr);
@@ -92,7 +92,7 @@ static Py_ssize_t PythonQtInstanceWrapper_length(PythonQtInstanceWrapper* wrappe
 {
   qint64 result = -1;
   if (wrapper->_wrappedPtr != NULL || wrapper->_obj != NULL) {
-    static QByteArray memberName = "__len__";
+    static const char* memberName = "__len__";
     PythonQtMemberInfo opSlot = wrapper->classInfo()->member(memberName);
     if (opSlot._type == PythonQtMemberInfo::Slot) {
       PyObject* resultObj = PythonQtSlotFunction_CallImpl(wrapper->classInfo(), wrapper->_obj, opSlot._slot, NULL, NULL, wrapper->_wrappedPtr);
@@ -191,15 +191,15 @@ static PyObject* PythonQtInstanceWrapper_mul(PyObject* self, PyObject* other)
 #define BINARY_OP(NAME) \
 static PyObject* PythonQtInstanceWrapper_ ## NAME(PyObject* self, PyObject* other) \
 { \
-  static const QByteArray opName("__" #NAME "__"); \
+  static const const char* opName("__" #NAME "__"); \
   return PythonQtInstanceWrapper_binaryfunc(self, other, opName); \
 }
 
 #define BINARY_OP_INPLACE(NAME) \
   static PyObject* PythonQtInstanceWrapper_i ## NAME(PyObject* self, PyObject* other) \
 { \
-  static const QByteArray opName("__i" #NAME "__"); \
-  static const QByteArray fallbackName("__" #NAME "__"); \
+  static const const char* opName("__i" #NAME "__"); \
+  static const const char* fallbackName("__" #NAME "__"); \
   return PythonQtInstanceWrapper_binaryfunc(self, other, opName, fallbackName); \
 }
 
