@@ -46,7 +46,7 @@ endif()
 
 # Qt components
 set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools Xml XmlPatterns)
-if(PythonQt_QT_VERSION VERSION_GREATER "4" AND "${Qt5_VERSION}" VERSION_LESS "5.6.0")
+if(PythonQt_QT_VERSION VERSION_GREATER "4")
   list(APPEND qt5libs WebKitWidgets)
 endif()
 set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)

@@ -55,6 +55,8 @@ PythonQtValueStorageWithCleanup<QVariant, 128> PythonQtConv::global_variantStora
 QHash<int, PythonQtConvertMetaTypeToPythonCB*> PythonQtConv::_metaTypeToPythonConverters;
 QHash<int, PythonQtConvertPythonToMetaTypeCB*> PythonQtConv::_pythonToMetaTypeConverters;
 
+PythonQtConvertPythonSequenceToQVariantListCB* PythonQtConv::_pythonSequenceToQVariantListCB = NULL;
+
 PyObject* PythonQtConv::GetPyBool(bool val)
 {
   PyObject* r = val?Py_True:Py_False;
@@ -102,7 +104,7 @@ PyObject* PythonQtConv::ConvertQtValueToPython(const PythonQtMethodInfo::Paramet
     }
   }
 
-  if (info.typeId >= QMetaType::User) {
+  if (info.typeId >= QMetaType::User || info.typeId == QMetaType::QByteArrayList) {
     // if a converter is registered, we use is:
     PythonQtConvertMetaTypeToPythonCB* converter = _metaTypeToPythonConverters.value(info.typeId);
     if (converter) {
@@ -668,7 +670,7 @@ void* PythonQtConv::ConvertPythonToQt(const PythonQtMethodInfo::ParameterInfo& i
          }
 
          // We only do this for registered type > QMetaType::User for performance reasons.
-         if (info.typeId >= QMetaType::User) {
+         if (info.typeId >= QMetaType::User || info.typeId == QMetaType::QByteArrayList) {
            // Maybe we have a special converter that is registered for that type:
            PythonQtConvertPythonToMetaTypeCB* converter = _pythonToMetaTypeConverters.value(info.typeId);
            if (converter) {
@@ -1028,13 +1030,13 @@ QVariant PythonQtConv::PyObjToQVariant(PyObject* val, int type)
         v = qVariantFromValue(myObject);
       }
       return v;
+    } else if (val == Py_None) {
+      // none is invalid
+      type = QVariant::Invalid;
     } else if (PyDict_Check(val)) {
       type = QVariant::Map;
     } else if (PyList_Check(val) || PyTuple_Check(val) || PySequence_Check(val)) {
       type = QVariant::List;
-    } else if (val == Py_None) {
-      // none is invalid
-      type = QVariant::Invalid;
     } else {
       // this used to be:
       // type = QVariant::String;
@@ -1151,20 +1153,30 @@ QVariant PythonQtConv::PyObjToQVariant(PyObject* val, int type)
     pythonToMapVariant<QVariantHash>(val, v);
     break;
   case QVariant::List:
-    if (PySequence_Check(val)) {
+  {
+    bool isListOrTuple = PyList_Check(val) || PyTuple_Check(val);
+    if (isListOrTuple || PySequence_Check(val)) {
+      if (!isListOrTuple && _pythonSequenceToQVariantListCB) {
+        // Only call this if we don't have a tuple or list.
+        QVariant result = (*_pythonSequenceToQVariantListCB)(val);
+        if (result.isValid()) {
+          return result;
+        }
+      }
       int count = PySequence_Size(val);
       if (count >= 0) {
         // only get items if size is valid (>= 0)
         QVariantList list;
         PyObject* value;
-        for (int i = 0;i<count;i++) {
-          value = PySequence_GetItem(val,i);
+        for (int i = 0; i < count; i++) {
+          value = PySequence_GetItem(val, i);
           list.append(PyObjToQVariant(value, -1));
           Py_XDECREF(value);
         }
         v = list;
       }
     }
+  }
     break;
   case QVariant::StringList:
     {

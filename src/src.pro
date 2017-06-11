@@ -4,7 +4,7 @@
 # $Source$
 # --------------------------------------------------
 
-TARGET   = PythonQt
+TARGET   = PythonQt-Qt5-PythonXY
 TEMPLATE = lib
 
 
@@ -22,6 +22,8 @@ isEmpty(PYTHONQT_STATIC) {
   CONFIG += static
 }
 
+DEFINES += PYTHONQT_CATCH_ALL_EXCEPTIONS
+
 contains(QT_MAJOR_VERSION, 5) {
   QT += widgets core-private
 }
@@ -33,6 +35,7 @@ INCLUDEPATH += $$PWD
 
 include ( ../build/common.prf )  
 include ( ../build/python.prf )
+TARGET = $$replace(TARGET, PythonXY, Python$${PYTHON_VERSION})
 
 include ( src.pri )  
 
