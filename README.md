@@ -43,7 +43,12 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains 7 branches:
+This repository contains 8 branches:
+
+### patched-8
+* Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
+  * revert of [r444](http://sourceforge.net/p/pythonqt/code/444/)
+  * all changes from ``patched-7`` cherry-picked.
 
 ### patched-7
 * Based on [r443](http://sourceforge.net/p/pythonqt/code/443/) with:
