@@ -366,8 +366,17 @@ static int PythonQtClassWrapper_init(PythonQtClassWrapper* self, PyObject* args,
 
     // take the class info from the superType
     self->_classInfo = ((PythonQtClassWrapper*)superType)->classInfo();
-
     self->_dynamicClassInfo = new PythonQtDynamicClassInfo();
+
+    // take the class info from the superType and fill the whole chain
+    PyTypeObject* typeChain = (PyTypeObject *)self;
+    while (typeChain && Py_TYPE(typeChain) != &PythonQtClassWrapper_Type) {
+
+      ((PythonQtClassWrapper*)typeChain)->_classInfo = ((PythonQtClassWrapper*)superType)->classInfo();
+      ((PythonQtClassWrapper*)typeChain)->_dynamicClassInfo = new PythonQtDynamicClassInfo();
+
+      typeChain = typeChain->tp_base;
+    }
   }
 
   return 0;
@@ -457,12 +466,10 @@ static PyObject *PythonQtClassWrapper_getattro(PyObject *obj, PyObject *name)
     }
     PyObject* dict = PyDict_New();
       
-    QStringList l = wrapper->classInfo()->memberList();
-    Q_FOREACH (QString name, l) {
-      if (name.startsWith("py_get_")) {
-        // add slot getters as normal properties
-        name = name.mid(7);
-      }
+    QSet<QString> completeSet = QSet<QString>::fromList(wrapper->classInfo()->memberList());
+    completeSet.unite(QSet<QString>::fromList(wrapper->classInfo()->propertyList()));
+
+    Q_FOREACH (QString name, completeSet) {
       if (name.startsWith("py_")) {
         // do not expose internal slots
         continue;
