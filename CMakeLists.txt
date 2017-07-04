@@ -5,7 +5,7 @@
 # If you are not a CMake expert, you should better use the provided qmake profiles.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 #-----------------------------------------------------------------------------
 project(PythonQt)
@@ -150,6 +150,8 @@ if(PythonQt_QT_VERSION VERSION_GREATER "4")
     list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
   endforeach()
 
+  include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
+
   set(QT_VERSION_MAJOR ${Qt5Core_VERSION_MAJOR})
   set(QT_VERSION_MINOR ${Qt5Core_VERSION_MINOR})
 
@@ -234,6 +236,8 @@ set(sources
     src/PythonQtStdDecorators.cpp
     src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
+    src/PythonQtProperty.cpp
+    src/PythonQtSlotDecorator.cpp
     src/gui/PythonQtScriptingConsole.cpp
 
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
@@ -272,6 +276,8 @@ set(headers
     src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
+    src/PythonQtProperty.h
+    src/PythonQtSlotDecorator.cpp
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
 )
 
@@ -340,6 +346,10 @@ set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 #
 set_target_properties(PythonQt  PROPERTIES
   INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+  )
+
+target_compile_options(PythonQt PRIVATE
+  $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,19.0>>:/bigobj>
   )
 
 target_link_libraries(PythonQt

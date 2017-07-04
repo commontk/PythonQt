@@ -17,13 +17,13 @@ official repository.
 Prerequisites
 -------------
 
-* CMake 2.8.x
+* CMake 3.x
 * Qt 4.6.2 or above
 
 Build instructions
 ------------------
 
-By default, the `patched-5` version will be checked out.
+By default, the `patched-7` version will be checked out.
 
 ```
 git clone git://github.com/commontk/PythonQt.git
@@ -43,7 +43,13 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains 8 branches:
+This repository contains 9 branches:
+
+### patched-9
+* Based on patched-8
+* List of features:
+  * Add MSVC 2017 support
+  * Add Qt 5.8 and Qt 5.9 support
 
 ### patched-8
 * Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
