@@ -17,7 +17,7 @@ official repository.
 Prerequisites
 -------------
 
-* CMake 3.x
+* CMake 2.8.12
 * Qt 4.6.2 or above
 
 Build instructions

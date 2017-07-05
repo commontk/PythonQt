@@ -5,7 +5,7 @@
 # If you are not a CMake expert, you should better use the provided qmake profiles.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.12)
 
 #-----------------------------------------------------------------------------
 project(PythonQt)
@@ -349,7 +349,7 @@ set_target_properties(PythonQt  PROPERTIES
   )
 
 target_compile_options(PythonQt PRIVATE
-  $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,19.0>>:/bigobj>
+  $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
   )
 
 target_link_libraries(PythonQt
