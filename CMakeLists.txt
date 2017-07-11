@@ -317,6 +317,10 @@ set_target_properties(PythonQt  PROPERTIES
   INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
   )
 
+target_compile_options(PythonQt PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+  )
+
 target_link_libraries(PythonQt
               ${PYTHON_LIBRARY}
               ${QT_LIBRARIES}
