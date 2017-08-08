@@ -1,16 +1,22 @@
 PythonQt
 ========
 
-This project is an unofficial fork of [PythonQt](http://pythonqt.sourceforge.net/) sources
-hosted on sourceforge and is used as staging area to maintain and test patches that
-will then be contributed back to the official repository.
+Why is this project ?
+---------------------
+
+This project is **NOT** the official PythonQt repository.
+
+It is a fork of [PythonQt](http://pythonqt.sourceforge.net/) sources hosted on sourceforge
+adding support for [CMake](https://cmake.org) build system.
+
+It is used as staging area to maintain and test patches that will be contributed back to the
+official repository.
 
 What is PythonQt ?
 ------------------
 
-PythonQt is a dynamic [Python](http://www.python.org) binding for [Qt](http://qt.nokia.com).
-It offers an easy way to embed the Python scripting language into
-your Qt applications.
+PythonQt is a dynamic Python binding for Qt. It offers an easy way to embed the Python
+scripting language into your Qt applications.
 
 Prerequisites
 -------------
@@ -154,17 +160,9 @@ Once you've made your great commits:
 
 1. [Fork][fk] PythonQt
 2. Create a topic branch - `git checkout -b my_branch`
-3. Push to your branch - `git push origin my_branch`
-4. Create an [Issue][is] with a link to your branch
+3. Push to your fork - `git push origin my_branch`
+4. Create an [Pull Request][pr]
 5. That's it!
-
-
-Meta
-----
-
-* Code: `git clone git://github.com/commontk/PythonQt.git`
-* Home: <http://pythonqt.sourceforge.net/>
-* Bugs: <http://github.com/commontk/PythonQt/issues>
 
 License
 -------
@@ -172,5 +170,5 @@ License
 PythonQt is licensed under the GNU Lesser General Public License.
 
 [fk]: http://help.github.com/forking/
-[is]: http://github.com/commontk/PythonQt/issues
+[pr]: https://help.github.com/articles/creating-a-pull-request/
 
