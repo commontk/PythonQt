@@ -5,11 +5,9 @@
 # If you are not a CMake expert, you should better use the provided qmake profiles.
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-#-----------------------------------------------------------------------------
 project(PythonQt)
-#-----------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------
 # Qt version
@@ -44,10 +42,19 @@ if(PythonQt_QT_VERSION VERSION_GREATER "4")
   find_package(Qt5 COMPONENTS Core QUIET)
 endif()
 
+#----------------------------------------------------------------------------
 # Qt components
 set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools Xml XmlPatterns)
 if(PythonQt_QT_VERSION VERSION_GREATER "4" AND "${Qt5_VERSION}" VERSION_LESS "5.6.0")
-  list(APPEND qt5libs WebKitWidgets)
+  list(APPEND qt5libs
+    WebKitWidgets
+    )
+endif()
+if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
+  list(APPEND qt5libs
+    Qml
+    Quick
+    )
 endif()
 set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)
 set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
@@ -81,6 +88,7 @@ if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
   set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
 endif()
 
+#-----------------------------------------------------------------------------
 # Since the Qt bindings sources used for both Qt4 and Qt5 are
 # grouped using Qt4 naming convention, qt_wrapped_libs variables are the
 # same for the two Qt versions.

@@ -10,6 +10,8 @@ void PythonQt_init_QtNetwork(PyObject*);
 void PythonQt_init_QtCore(PyObject*);
 void PythonQt_init_QtWebKit(PyObject*);
 void PythonQt_init_QtOpenGL(PyObject*);
+void PythonQt_init_QtQml(PyObject*);
+void PythonQt_init_QtQuick(PyObject*);
 void PythonQt_init_QtXml(PyObject*);
 void PythonQt_init_QtXmlPatterns(PyObject*);
 void PythonQt_init_QtUiTools(PyObject*);
@@ -30,6 +32,14 @@ PYTHONQT_EXPORT void PythonQt_init_QtBindings()
 
   #ifdef PYTHONQT_WRAP_Qtopengl
   PythonQt_init_QtOpenGL(0);
+  #endif
+
+  #ifdef PYTHONQT_WRAP_Qtqml
+  PythonQt_init_QtQml(0);
+  #endif
+
+  #ifdef PYTHONQT_WRAP_Qtquick
+  PythonQt_init_QtQuick(0);
   #endif
 
   #ifdef PYTHONQT_WRAP_Qtsql
