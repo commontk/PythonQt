@@ -44,20 +44,28 @@ endif()
 
 #----------------------------------------------------------------------------
 # Qt components
-set(qt5libs Core Widgets Network OpenGL Sql Svg UiTools Xml XmlPatterns)
+set(qtlibs
+  Core
+  Widgets
+  Network
+  OpenGL
+  Sql
+  Svg
+  UiTools
+  Xml
+  XmlPatterns
+  )
 if(PythonQt_QT_VERSION VERSION_GREATER "4" AND "${Qt5_VERSION}" VERSION_LESS "5.6.0")
-  list(APPEND qt5libs
+  list(APPEND qtlibs
     WebKitWidgets
     )
 endif()
 if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
-  list(APPEND qt5libs
+  list(APPEND qtlibs
     Qml
     Quick
     )
 endif()
-set(qt4libs core gui network opengl sql svg uitools webkit xml xmlpatterns)
-set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
 
 #-----------------------------------------------------------------------------
 # Python libraries
@@ -89,25 +97,18 @@ if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
 endif()
 
 #-----------------------------------------------------------------------------
-# Since the Qt bindings sources used for both Qt4 and Qt5 are
-# grouped using Qt4 naming convention, qt_wrapped_libs variables are the
-# same for the two Qt versions.
-set(qt4_wrapped_libs ${qt4libs})
-set(qt5_wrapped_libs ${qt4libs})
-set(qt_wrapped_libs ${qt${PythonQt_QT_VERSION}_wrapped_libs})
-
-set(qt5_wrapped_lib_depends_gui Multimedia PrintSupport)
-
-set(qtlib_to_wraplib_Widgets gui)
-set(qtlib_to_wraplib_WebKitWidgets webkit)
-
 # Define PythonQt_Wrap_Qt* options
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
 foreach(qtlib ${qt_wrapped_libs})
   OPTION(PythonQt_Wrap_Qt${qtlib} "Make all of Qt${qtlib} available in python" OFF)
 endforeach()
 
+#-----------------------------------------------------------------------------
 # Set qtlib_to_wraplib_* variables
+
+set(qtlib_to_wraplib_Widgets gui)
+set(qtlib_to_wraplib_WebKitWidgets webkit)
+
 foreach(qtlib ${qtlibs})
   string(TOLOWER ${qtlib} qtlib_lowercase)
   if(DEFINED qtlib_to_wraplib_${qtlib})
@@ -116,19 +117,24 @@ foreach(qtlib ${qtlibs})
   set(qtlib_to_wraplib_${qtlib} ${qtlib_lowercase})
 endforeach()
 
+set(qt5_wrapped_lib_depends_gui Multimedia PrintSupport)
+
+#-----------------------------------------------------------------------------
 # Force option if it applies
 if(PythonQt_Wrap_QtAll)
-  set(_qt_wrapped_libs ${qt_wrapped_libs})
 
-  # XXX xmlpatterns wrapper does *NOT* build at all :(
-  list(REMOVE_ITEM _qt_wrapped_libs xmlpatterns)
-
-  foreach(qtlib ${_qt_wrapped_libs})
-    if(NOT ${PythonQt_Wrap_Qt${qtlib}})
-      set(PythonQt_Wrap_Qt${qtlib} ON CACHE BOOL "Make all of Qt${qtlib} available in python" FORCE)
-      message(STATUS "Enabling [PythonQt_Wrap_Qt${qtlib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
+  foreach(qtlib ${qtlibs})
+    # XXX xmlpatterns wrapper does *NOT* build at all :(
+    if(${qtlib} STREQUAL "XmlPatterns")
+      continue()
+    endif()
+    set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
+    if(NOT ${PythonQt_Wrap_Qt${qt_wrapped_lib}})
+      set(PythonQt_Wrap_Qt${qt_wrapped_lib} ON CACHE BOOL "Make all of Qt${qt_wrapped_lib} available in python" FORCE)
+      message(STATUS "Enabling [PythonQt_Wrap_Qt${qt_wrapped_lib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
     endif()
   endforeach()
+
 endif()
 
 option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
@@ -189,12 +195,13 @@ else()
     endif()
 
     # Enable required qt module
-    foreach(qtlib ${qt_wrapped_libs})
-      string(TOUPPER ${qtlib} qtlib_uppercase)
-      if (NOT ${QT_QT${qtlib_uppercase}_FOUND})
-        message(FATAL_ERROR "QT_QT${qtlib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qtlib}")
+    foreach(qtlib ${qtlibs})
+      set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
+      string(TOUPPER ${qt_wrapped_lib} qt_wrapped_lib_uppercase)
+      if (NOT ${QT_QT${qt_wrapped_lib_uppercase}_FOUND})
+        message(FATAL_ERROR "QT_QT${qt_wrapped_lib_uppercase} *not* FOUND - Try to disable PythonQt_Wrap_Qt${qt_wrapped_lib}")
       endif()
-      set(QT_USE_QT${qtlib_uppercase} ${PythonQt_Wrap_Qt${qtlib}})
+      set(QT_USE_QT${qt_wrapped_lib_uppercase} ${PythonQt_Wrap_Qt${qt_wrapped_lib}})
     endforeach()
 
     # Enable QtTest in Qt4 is the option BUILD_TESTING was activated
@@ -316,13 +323,15 @@ set(moc_sources
 
 #-----------------------------------------------------------------------------
 # Add extra sources
-foreach(qtlib ${qt_wrapped_libs})
+foreach(qtlib ${qtlibs})
 
-  if (${PythonQt_Wrap_Qt${qtlib}})
+  set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
 
-    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
+  if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
 
-    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
+    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
+
+    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
     foreach(index RANGE 0 12)
 
