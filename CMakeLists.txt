@@ -150,6 +150,9 @@ if(PythonQt_QT_VERSION VERSION_GREATER "4")
     list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
   endforeach()
 
+  # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+  include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
+
   set(QT_VERSION_MAJOR ${Qt5Core_VERSION_MAJOR})
   set(QT_VERSION_MINOR ${Qt5Core_VERSION_MINOR})
 
