@@ -84,7 +84,7 @@ endif()
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
 
-set(qt5_wrapped_lib_depends_gui Multimedia)
+set(qt5_wrapped_lib_depends_gui Multimedia PrintSupport)
 
 foreach(qtlib ${qtlibs})
   string(TOLOWER ${qtlib} qtlib_lowercase)
