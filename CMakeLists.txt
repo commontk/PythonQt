@@ -78,13 +78,13 @@ if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
   set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
 endif()
 
-set(qt5_wrapped_lib_depends_gui Multimedia)
-
 #-----------------------------------------------------------------------------
 # Set qtlib_to_wraplib_* variables
 
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
+
+set(qt5_wrapped_lib_depends_gui Multimedia)
 
 foreach(qtlib ${qtlibs})
   string(TOLOWER ${qtlib} qtlib_lowercase)
@@ -262,13 +262,15 @@ set(moc_sources
 #-----------------------------------------------------------------------------
 # Add extra sources
 
-foreach(qtlib ${qt_wrapped_libs})
+foreach(qtlib ${qtlibs})
 
-  if (${PythonQt_Wrap_Qt${qtlib}})
+  set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
 
-    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qtlib})
+  if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
 
-    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qtlib}/com_trolltech_qt_${qtlib})
+    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
+
+    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
     foreach(index RANGE 0 12)
 
