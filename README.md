@@ -18,24 +18,50 @@ What is PythonQt ?
 PythonQt is a dynamic Python binding for Qt. It offers an easy way to embed the Python
 scripting language into your Qt applications.
 
-Prerequisites
--------------
+Which branch ?
+--------------
 
-* CMake
-* Qt 4 or 5
+Based on the Qt version your project is expected to support, you could use
+one of the branch referenced below:
+
+| Supported Qt version   | 4                      | 5                      |
+|------------------------|------------------------|------------------------|
+| Branch                 | [patched-6][patched-6] | [patched-8][patched-8] |
+| Base PythonQt revision | [r403][r403]           | [r455][r455]           |
+
+
+[patched-6]: https://github.com/commontk/PythonQt/tree/patched-6
+[r403]: http://sourceforge.net/p/pythonqt/code/403/
+
+[patched-8]: https://github.com/commontk/PythonQt/tree/patched-8
+[r455]: http://sourceforge.net/p/pythonqt/code/455/
+
 
 Build instructions
 ------------------
 
-1. Checkout sources
+1. Install CMake and Qt
+
+2. Checkout sources
 
 ```
 git clone git://github.com/commontk/PythonQt.git
-mkdir PythonQt-build
-cd PythonQt-build
 ```
 
-2. Configure
+3. Checkout branch
+
+```
+git checkout -b patched-X origin/patched-X
+```
+
+*See table above for exact branch name*
+
+
+4. Configure
+
+```
+mkdir PythonQt-build && cd PythonQt-build
+```
 
 * using Qt4:
 
@@ -49,7 +75,7 @@ cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/qmake ../PythonQt
 cmake -DQt5_DIR:PATH=/path/to/Qt5.X.Y/X.Y/compiler/lib/cmake/Qt5 ../PythonQt
 ```
 
-3. Build
+5. Build
 
 ```
 make
@@ -61,7 +87,7 @@ Additional configure options are:
 * `CMAKE_BUILD_TYPE`:  Debug, Release, RelWithDebInfo or MinSizeRel
 * `PythonQt_DEBUG`: Enable/Disable PythonQt debug output
 * `PythonQt_Wrap_QtAll`: Make all Qt components available in python
-* `PythonQt_Wrap_Qt<componentname>`: Build PythonQt wrapper associated with `<componentname>`. Possible `<componentname>` are `gui`, `network`, `opengl`, `sql`, `uitools`, `webkit`, `xml`, `xmlpatterns`.
+* `PythonQt_Wrap_Qt<componentname>`: Build a specific PythonQt wrapper.
 
 Available branches
 ------------------
@@ -72,11 +98,14 @@ This repository contains 8 branches:
 * Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
   * revert of [r444](http://sourceforge.net/p/pythonqt/code/444/)
   * all changes from ``patched-7`` cherry-picked.
+  * add support for build wrapping for Qml and Quick components
+  * improve Qt5 support and remove Qt4 support
 
 ### patched-7
 * Based on [r443](http://sourceforge.net/p/pythonqt/code/443/) with:
   * partial revert of [r431](http://sourceforge.net/p/pythonqt/code/431/) to re-enable CMake support
   * all changes from ``patched-6`` cherry-picked.
+  * add Qt5 support
 
 ### patched-6
 * Based on patched-5 + [r403](http://sourceforge.net/p/pythonqt/code/403/)
