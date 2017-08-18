@@ -342,14 +342,6 @@ add_library(PythonQt SHARED
   )
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
-#
-# That should solve linkage error on Mac when the project is used in a superbuild setup
-# See http://blog.onesadcookie.com/2008/01/installname-magic.html
-#
-set_target_properties(PythonQt  PROPERTIES
-  INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
-  )
-
 target_link_libraries(PythonQt
               ${PYTHON_LIBRARY}
               ${QT_LIBRARIES}
