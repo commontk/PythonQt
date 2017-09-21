@@ -109,6 +109,7 @@ This repository contains 8 branches:
   * add Qt5 support
 
 ### patched-6
+* Remove explicit setup of `INSTALL_NAME_DIR`. Backported PR [#59](https://github.com/commontk/PythonQt/pull/59)
 * Based on patched-5 + [r403](http://sourceforge.net/p/pythonqt/code/403/)
 * List of bug fixes:
   * Fix for memory leaks and cleanup crash
