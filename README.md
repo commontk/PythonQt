@@ -95,6 +95,7 @@ Available branches
 This repository contains 8 branches:
 
 ### patched-8
+* Remove explicit setup of `INSTALL_NAME_DIR`. See PR [#59](https://github.com/commontk/PythonQt/pull/59)
 * Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
   * revert of [r444](http://sourceforge.net/p/pythonqt/code/444/)
   * all changes from ``patched-7`` cherry-picked.
