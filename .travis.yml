@@ -6,6 +6,7 @@ sudo: required
           
 before_install:
   - brew update
+  - brew cask uninstall oclint
   - brew install gcc qt5 
 
 script:
