@@ -781,10 +781,10 @@ static int PythonQtInstanceWrapper_builtin_nonzero(PyObject *obj)
 static long PythonQtInstanceWrapper_hash(PythonQtInstanceWrapper *obj)
 {
   if (obj->_wrappedPtr != NULL) {
-    return reinterpret_cast<long>(obj->_wrappedPtr);
+    return reinterpret_cast<uintptr_t>(obj->_wrappedPtr);
   } else {
     QObject* qobj = obj->_obj; // get pointer from QPointer wrapper
-    return reinterpret_cast<long>(qobj);
+    return reinterpret_cast<uintptr_t>(qobj);
   }
 }
 

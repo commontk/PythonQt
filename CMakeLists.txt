@@ -21,6 +21,15 @@ if(DEFINED Qt5_DIR AND DEFINED QT_QMAKE_EXECUTABLE)
 To build with Qt4, specify QT_QMAKE_EXECUTABLE. To build with Qt5, specify  Qt5_DIR.")
 endif()
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(ARCH_64 TRUE)
+else()
+  set(ARCH_64 FALSE)
+endif()
+if(MINGW AND ARCH_64)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wa,-mbig-obj")
+endif()
+
 # Set PythonQt_QT_VERSION
 if(DEFINED Qt5_DIR)
   message(STATUS "${PROJECT_NAME}: Setting PythonQt_QT_VERSION to 5 because Qt5_DIR is defined.")
