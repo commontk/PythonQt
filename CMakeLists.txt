@@ -21,6 +21,15 @@ if(DEFINED Qt5_DIR AND DEFINED QT_QMAKE_EXECUTABLE)
 To build with Qt4, specify QT_QMAKE_EXECUTABLE. To build with Qt5, specify  Qt5_DIR.")
 endif()
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(ARCH_64 TRUE)
+else()
+  set(ARCH_64 FALSE)
+endif()
+if(MINGW AND ARCH_64)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wa,-mbig-obj")
+endif()
+
 # Set PythonQt_QT_VERSION
 if(DEFINED Qt5_DIR)
   message(STATUS "${PROJECT_NAME}: Setting PythonQt_QT_VERSION to 5 because Qt5_DIR is defined.")
@@ -35,7 +44,7 @@ else()
 endif()
 
 # Requirements
-set(minimum_required_qt5_version "5.3.0")
+set(minimum_required_qt5_version "5.2.0")
 set(minimum_required_qt4_version "4.6.2")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
@@ -47,11 +56,19 @@ set(qtlibs ${qt${PythonQt_QT_VERSION}libs})
 # Webkit need to be removed Qt >= 5.6
 if(PythonQt_QT_VERSION MATCHES 5)
   find_package(Qt5 ${minimum_required_qt5_version} COMPONENTS Core REQUIRED)
-  if(${Qt5Core_VERSION_MINOR} GREATER 5)
+  if(${Qt5Core_VERSION_MINOR} GREATER 5 OR ${Qt5Core_VERSION_MINOR} EQUAL 2)
     list(REMOVE_ITEM qtlibs WebKitWidgets)
     list(REMOVE_ITEM qt4libs webkit)
   endif()
+	
+  if(${Qt5Core_VERSION_MINOR} EQUAL 2)
+	list(APPEND qtlibs PrintSupport)
+    list(APPEND qt4libs printsupport)
+  endif()
+
 endif()
+
+
 #-----------------------------------------------------------------------------
 # Python libraries
 
@@ -92,6 +109,8 @@ set(qt5_wrapped_lib_depends_gui Multimedia)
 
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
+set(qtlib_to_wraplib_PrintSupport printsupport)
+
 
 # Define PythonQt_Wrap_Qt* options
 option(PythonQt_Wrap_QtAll "Make all Qt components available in python" OFF)
@@ -213,12 +232,17 @@ endif()
 set(generated_cpp_suffix_46 _47)
 set(generated_cpp_suffix_52 _50)
 set(generated_cpp_suffix_51 _50)
+set(generated_cpp_suffix_54 _54)
+set(generated_cpp_suffix_55 _54)
+set(generated_cpp_suffix_56 _54)
+set(generated_cpp_suffix_57 _54)
+set(generated_cpp_suffix_58 _58)
 
 set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
 if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
   set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
-elseif(${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} VERSION_GREATER "5.4")
-  set(generated_cpp_suffix "_54")
+elseif(${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} VERSION_GREATER "5.8")
+  set(generated_cpp_suffix "_58")
 endif()
 
 #-----------------------------------------------------------------------------
@@ -320,7 +344,10 @@ foreach(qtlib ${qt_wrapped_libs})
 
     endforeach()
 
-    list(APPEND sources ${file_prefix}_init.cpp)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}_init.cpp)
+  	  list(APPEND sources ${file_prefix}_init.cpp)
+	  message( ${file_prefix}_init.cpp)
+	endif()
 
   endif()
 endforeach()
@@ -355,6 +382,7 @@ install(TARGETS PythonQt
         LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
+install(FILES src/gui/PythonQtScriptingConsole.h DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}/gui)
 
 #-----------------------------------------------------------------------------
 # Testing
