@@ -4540,7 +4540,164 @@ QByteArray  PythonQtWrapper_QSignalTransition::signal(QSignalTransition* theWrap
   return ( theWrappedObject->signal());
 }
 
+// code from 48
+//
+PythonQtShell_QSocketNotifier::~PythonQtShell_QSocketNotifier() {
+  PythonQtPrivate* priv = PythonQt::priv();
+  if (priv) { priv->shellClassDeleted(this); }
+}
+void PythonQtShell_QSocketNotifier::childEvent(QChildEvent*  arg__1)
+{
+if (_wrapper && (((PyObject*)_wrapper)->ob_refcnt > 0)) {
+  static PyObject* name = PyString_FromString("childEvent");
+  PyObject* obj = PyBaseObject_Type.tp_getattro((PyObject*)_wrapper, name);
+  if (obj) {
+    static const char* argumentList[] ={"" , "QChildEvent*"};
+    static const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfoFromArgumentList(2, argumentList);
+    void* args[2] = {NULL, (void*)&arg__1};
+    PyObject* result = PythonQtSignalTarget::call(obj, methodInfo, args, true);
+    if (result) { Py_DECREF(result); } 
+    Py_DECREF(obj);
+    return;
+  } else {
+    PyErr_Clear();
+  }
+}
+  QSocketNotifier::childEvent(arg__1);
+}
+void PythonQtShell_QSocketNotifier::customEvent(QEvent*  arg__1)
+{
+if (_wrapper && (((PyObject*)_wrapper)->ob_refcnt > 0)) {
+  static PyObject* name = PyString_FromString("customEvent");
+  PyObject* obj = PyBaseObject_Type.tp_getattro((PyObject*)_wrapper, name);
+  if (obj) {
+    static const char* argumentList[] ={"" , "QEvent*"};
+    static const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfoFromArgumentList(2, argumentList);
+    void* args[2] = {NULL, (void*)&arg__1};
+    PyObject* result = PythonQtSignalTarget::call(obj, methodInfo, args, true);
+    if (result) { Py_DECREF(result); } 
+    Py_DECREF(obj);
+    return;
+  } else {
+    PyErr_Clear();
+  }
+}
+  QSocketNotifier::customEvent(arg__1);
+}
+bool  PythonQtShell_QSocketNotifier::event(QEvent*  arg__1)
+{
+if (_wrapper && (((PyObject*)_wrapper)->ob_refcnt > 0)) {
+  static PyObject* name = PyString_FromString("event");
+  PyObject* obj = PyBaseObject_Type.tp_getattro((PyObject*)_wrapper, name);
+  if (obj) {
+    static const char* argumentList[] ={"bool" , "QEvent*"};
+    static const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfoFromArgumentList(2, argumentList);
+      bool returnValue;
+    void* args[2] = {NULL, (void*)&arg__1};
+    PyObject* result = PythonQtSignalTarget::call(obj, methodInfo, args, true);
+    if (result) {
+      args[0] = PythonQtConv::ConvertPythonToQt(methodInfo->parameters().at(0), result, false, NULL, &returnValue);
+      if (args[0]!=&returnValue) {
+        if (args[0]==NULL) {
+          PythonQt::priv()->handleVirtualOverloadReturnError("event", methodInfo, result);
+        } else {
+          returnValue = *((bool*)args[0]);
+        }
+      }
+    }
+    if (result) { Py_DECREF(result); } 
+    Py_DECREF(obj);
+    return returnValue;
+  } else {
+    PyErr_Clear();
+  }
+}
+  return QSocketNotifier::event(arg__1);
+}
+bool  PythonQtShell_QSocketNotifier::eventFilter(QObject*  arg__1, QEvent*  arg__2)
+{
+if (_wrapper && (((PyObject*)_wrapper)->ob_refcnt > 0)) {
+  static PyObject* name = PyString_FromString("eventFilter");
+  PyObject* obj = PyBaseObject_Type.tp_getattro((PyObject*)_wrapper, name);
+  if (obj) {
+    static const char* argumentList[] ={"bool" , "QObject*" , "QEvent*"};
+    static const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfoFromArgumentList(3, argumentList);
+      bool returnValue;
+    void* args[3] = {NULL, (void*)&arg__1, (void*)&arg__2};
+    PyObject* result = PythonQtSignalTarget::call(obj, methodInfo, args, true);
+    if (result) {
+      args[0] = PythonQtConv::ConvertPythonToQt(methodInfo->parameters().at(0), result, false, NULL, &returnValue);
+      if (args[0]!=&returnValue) {
+        if (args[0]==NULL) {
+          PythonQt::priv()->handleVirtualOverloadReturnError("eventFilter", methodInfo, result);
+        } else {
+          returnValue = *((bool*)args[0]);
+        }
+      }
+    }
+    if (result) { Py_DECREF(result); } 
+    Py_DECREF(obj);
+    return returnValue;
+  } else {
+    PyErr_Clear();
+  }
+}
+  return QSocketNotifier::eventFilter(arg__1, arg__2);
+}
+void PythonQtShell_QSocketNotifier::timerEvent(QTimerEvent*  arg__1)
+{
+if (_wrapper && (((PyObject*)_wrapper)->ob_refcnt > 0)) {
+  static PyObject* name = PyString_FromString("timerEvent");
+  PyObject* obj = PyBaseObject_Type.tp_getattro((PyObject*)_wrapper, name);
+  if (obj) {
+    static const char* argumentList[] ={"" , "QTimerEvent*"};
+    static const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfoFromArgumentList(2, argumentList);
+    void* args[2] = {NULL, (void*)&arg__1};
+    PyObject* result = PythonQtSignalTarget::call(obj, methodInfo, args, true);
+    if (result) { Py_DECREF(result); } 
+    Py_DECREF(obj);
+    return;
+  } else {
+    PyErr_Clear();
+  }
+}
+  QSocketNotifier::timerEvent(arg__1);
+}
+QSocketNotifier* PythonQtWrapper_QSocketNotifier::new_QSocketNotifier(int  socket, QSocketNotifier::Type  arg__2, QObject*  parent)
+{ 
+return new PythonQtShell_QSocketNotifier(socket, arg__2, parent); }
 
+bool  PythonQtWrapper_QSocketNotifier::event(QSocketNotifier* theWrappedObject, QEvent*  arg__1)
+{
+  return ( ((PythonQtPublicPromoter_QSocketNotifier*)theWrappedObject)->promoted_event(arg__1));
+}
+
+bool  PythonQtWrapper_QSocketNotifier::isEnabled(QSocketNotifier* theWrappedObject) const
+{
+  return ( theWrappedObject->isEnabled());
+}
+
+int  PythonQtWrapper_QSocketNotifier::socket(QSocketNotifier* theWrappedObject) const
+{
+  return ( theWrappedObject->socket());
+}
+
+QSocketNotifier::Type  PythonQtWrapper_QSocketNotifier::type(QSocketNotifier* theWrappedObject) const
+{
+  return ( theWrappedObject->type());
+}
+// end of code from 48
+
+///  Hand edited QSocketNotifier code
+/*
+QSocketNotifier* PythonQtWrapper_QSocketNotifier::new_QSocketNotifier(qintptr socket, QSocketNotifier::Type type)
+{ 
+return new PythonQtShell_QSocketNotifier(socket, type); }
+
+int PythonQtShell_QSocketNotifier::qt_metacall(QMetaObject::Call call, int id, void** args) {
+  int result = QSocketNotifier::qt_metacall(call, id, args);
+  return result >= 0 ? PythonQt::priv()->handleMetaCall(this, _wrapper, call, id, args) : result;
+}
 
 bool  PythonQtWrapper_QSocketNotifier::isEnabled(QSocketNotifier* theWrappedObject) const
 {
@@ -4552,6 +4709,9 @@ QSocketNotifier::Type  PythonQtWrapper_QSocketNotifier::type(QSocketNotifier* th
   return ( theWrappedObject->type());
 }
 
+
+*/
+/// end of hand generated code
 
 
 QString  PythonQtWrapper_QStandardPaths::static_QStandardPaths_displayName(QStandardPaths::StandardLocation  type)
