@@ -1041,13 +1041,27 @@ void delete_QSignalTransition(QSignalTransition* obj) { delete obj; }
 };
 
 
+// code from 48 (QSocketNotifier is not wrapped correctly for Qt5)
 
+class PythonQtShell_QSocketNotifier : public QSocketNotifier
+{
+public:
+    PythonQtShell_QSocketNotifier(int  socket, QSocketNotifier::Type  arg__2, QObject*  parent = 0):QSocketNotifier(socket, arg__2, parent),_wrapper(NULL) {};
 
+   ~PythonQtShell_QSocketNotifier();
+
+virtual void childEvent(QChildEvent*  arg__1);
+virtual void customEvent(QEvent*  arg__1);
+virtual bool  event(QEvent*  arg__1);
+virtual bool  eventFilter(QObject*  arg__1, QEvent*  arg__2);
+virtual void timerEvent(QTimerEvent*  arg__1);
+
+  PythonQtInstanceWrapper* _wrapper; 
+};
 
 class PythonQtPublicPromoter_QSocketNotifier : public QSocketNotifier
 { public:
-inline bool  promoted_event(QEvent*  arg__1) { return this->event(arg__1); }
-inline bool  py_q_event(QEvent*  arg__1) { return QSocketNotifier::event(arg__1); }
+inline bool  promoted_event(QEvent*  arg__1) { return QSocketNotifier::event(arg__1); }
 };
 
 class PythonQtWrapper_QSocketNotifier : public QObject
@@ -1057,14 +1071,15 @@ Q_ENUMS(Type )
 enum Type{
   Read = QSocketNotifier::Read,   Write = QSocketNotifier::Write,   Exception = QSocketNotifier::Exception};
 public slots:
+QSocketNotifier* new_QSocketNotifier(int  socket, QSocketNotifier::Type  arg__2, QObject*  parent = 0);
 void delete_QSocketNotifier(QSocketNotifier* obj) { delete obj; } 
-   bool  py_q_event(QSocketNotifier* theWrappedObject, QEvent*  arg__1){  return (((PythonQtPublicPromoter_QSocketNotifier*)theWrappedObject)->py_q_event(arg__1));}
+   bool  event(QSocketNotifier* theWrappedObject, QEvent*  arg__1);
    bool  isEnabled(QSocketNotifier* theWrappedObject) const;
+   int  socket(QSocketNotifier* theWrappedObject) const;
    QSocketNotifier::Type  type(QSocketNotifier* theWrappedObject) const;
 };
 
-
-
+/// end of code from 48
 
 
 class PythonQtWrapper_QStandardPaths : public QObject
