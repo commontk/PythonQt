@@ -24,17 +24,17 @@ Which branch ?
 Based on the Qt version your project is expected to support, you could use
 one of the branch referenced below:
 
-| Supported Qt version   | 4                      | 5                      |
-|------------------------|------------------------|------------------------|
-| Branch                 | [patched-6][patched-6] | [patched-8][patched-8] |
-| Base PythonQt revision | [r403][r403]           | [r455][r455]           |
+| Supported Qt version   | 4                      | 5                                      |
+|------------------------|------------------------|----------------------------------------|
+| Branch                 | [patched-6][patched-6] | [patched-9][patched-9]                 |
+| Base PythonQt revision | [r403][r403]           | [MeVisLab/pythonqt@c07f09fd][c07f09fd] |
 
 
 [patched-6]: https://github.com/commontk/PythonQt/tree/patched-6
 [r403]: http://sourceforge.net/p/pythonqt/code/403/
 
-[patched-8]: https://github.com/commontk/PythonQt/tree/patched-8
-[r455]: http://sourceforge.net/p/pythonqt/code/455/
+[patched-9]: https://github.com/commontk/PythonQt/tree/patched-9
+[c07f09fd]: https://github.com/MeVisLab/pythonqt/commit/c07f09fd
 
 
 Build instructions
@@ -92,16 +92,28 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains 8 branches:
+This repository contains 9 branches:
+
+### patched-9
+* Based on [MeVisLab/pythonqt@c07f09fd](https://github.com/MeVisLab/pythonqt/commit/c07f09fd) with:
+  * all changes from ``patched-8`` cherry-picked expect:
+    * `Fix refcount problems seen when re-initializing Python after finalizing` already integrated as [MeVisLab/pythonqt@5e0d26c01ff](https://github.com/MeVisLab/pythonqt/commit/5e0d26c01ff) (`fixed ref counting of types`)
+    * `Explicitly initialize global storage containers` already integrated as [MeVisLab/pythonqt@170d4a475](https://github.com/MeVisLab/pythonqt/commit/170d4a475) (`reimplemented argument frame caching (previous approach was not thread-safe when GIL is used)`)
+    * `Expose QSocketNotifier for Qt5` already integrated as [MeVisLab/pythonqt@518765494d](https://github.com/MeVisLab/pythonqt/commit/518765494d) (`updated wrappers to contain QSocketNotifier and recent generator changes`)
+  * Add support for building 511 wrappers
+  * cmake: Add missing source file
 
 ### patched-8
-* Remove explicit setup of `INSTALL_NAME_DIR`. See PR [#59](https://github.com/commontk/PythonQt/pull/59)
 * Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
   * revert of [r444](http://sourceforge.net/p/pythonqt/code/444/)
   * all changes from ``patched-7`` cherry-picked.
   * add support for build wrapping for Qml and Quick components
   * improve Qt5 support and remove Qt4 support
+  * Remove explicit setup of `INSTALL_NAME_DIR`. See PR [#59](https://github.com/commontk/PythonQt/pull/59)
   * add patch from @pieper fixing wrapping of `QSocketNotifier` (see [PR#63](https://github.com/commontk/PythonQt/pull/63) and [message](https://sourceforge.net/p/pythonqt/discussion/631392/thread/c989429c/) on PythonQt mailinglist)
+  * Fix windows build error renaming stdout ivar
+  * Add support for enabling stdout/stderr redirection
+  * Fix setRedirectStdInCallbackEnabled
 
 ### patched-7
 * Based on [r443](http://sourceforge.net/p/pythonqt/code/443/) with:
