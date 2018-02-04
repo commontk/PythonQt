@@ -101,6 +101,7 @@ This repository contains 8 branches:
   * all changes from ``patched-7`` cherry-picked.
   * add support for build wrapping for Qml and Quick components
   * improve Qt5 support and remove Qt4 support
+  * add patch from @pieper fixing wrapping of `QSocketNotifier` (see [PR#63](https://github.com/commontk/PythonQt/pull/63) and [message](https://sourceforge.net/p/pythonqt/discussion/631392/thread/c989429c/) on PythonQt mailinglist)
 
 ### patched-7
 * Based on [r443](http://sourceforge.net/p/pythonqt/code/443/) with:
