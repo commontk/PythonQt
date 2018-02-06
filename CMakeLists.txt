@@ -282,6 +282,9 @@ set(headers
     src/PythonQtPythonInclude.h
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
 )
+set(headers_gui
+    src/gui/PythonQtScriptingConsole.h
+)
 
 #-----------------------------------------------------------------------------
 # Headers that should run through moc
@@ -355,6 +358,7 @@ install(TARGETS PythonQt
         LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
+install(FILES ${headers_gui} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}/gui)
 
 #-----------------------------------------------------------------------------
 # Testing
