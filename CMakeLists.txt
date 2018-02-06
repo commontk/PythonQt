@@ -360,6 +360,7 @@ install(TARGETS PythonQt
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
 install(FILES ${headers_gui} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}/gui)
 
+add_subdirectory(extensions)
 #-----------------------------------------------------------------------------
 # Testing
 
