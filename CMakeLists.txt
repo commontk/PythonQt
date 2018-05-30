@@ -35,6 +35,7 @@ set(qtlibs
   UiTools
   Xml
   XmlPatterns
+  CACHE INTERNAL "Helper for qt_required_components"
   )
 # Webkit has been removed in Qt >= 5.6
 if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_LESS "5.7")
@@ -53,11 +54,6 @@ endif()
 # Python libraries
 
 find_package(PythonLibs REQUIRED)
-include_directories("${PYTHON_INCLUDE_DIR}")
-add_definitions(
-  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
-  -DPYTHONQT_SUPPORT_NAME_PROPERTY
-  )
 
 #-----------------------------------------------------------------------------
 # Build options
@@ -129,41 +125,33 @@ endif()
 # Setup Qt
 
 # Required components
-set(qt_required_components Core Widgets)
+set(qt_required_components Core Widgets CACHE INTERNAL "Holds the qt required components needed")
 foreach(qtlib ${qtlibs})
   set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
   if(${PythonQt_Wrap_Qt${qt_wrapped_lib}})
     list(APPEND qt_required_components ${qtlib} ${qt${PythonQt_QT_VERSION}_wrapped_lib_depends_${qt_wrapped_lib}})
   endif()
 endforeach()
-if(BUILD_TESTING)
-  list(APPEND qt_required_components Test)
-endif()
+
 list(REMOVE_DUPLICATES qt_required_components)
 
 message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_components}]")
 find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
 
-set(QT_LIBRARIES )
+if(BUILD_TESTING)
+  find_package(Qt5Test REQUIRED)
+endif()
+
+set(QT_LIBRARIES CACHE INTERNAL "Holds the qt components needed with the Qt5:: prefix")
 foreach(qtlib ${qt_required_components})
+  # TODO needed by pythonqt_wrap_cpp it would be better to avoid this line
   include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
-  add_definitions(${Qt5${qtlib}_DEFINITIONS})
   list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
 endforeach()
-
-# Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
-include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
 
 macro(pythonqt_wrap_cpp)
   qt5_wrap_cpp(${ARGV})
 endmacro()
-
-if(UNIX)
-  find_package(OpenGL)
-  if(OPENGL_FOUND)
-    list(APPEND QT_LIBRARIES ${OPENGL_LIBRARIES})
-  endif()
-endif()
 
 #-----------------------------------------------------------------------------
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
@@ -299,21 +287,32 @@ pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 #-----------------------------------------------------------------------------
 # Build the library
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  )
 
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
   )
+
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+                                                  $<INSTALL_INTERFACE:include>)
+
+target_include_directories(PythonQt SYSTEM PUBLIC ${PYTHON_INCLUDE_DIR})
+# Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+target_include_directories(PythonQt SYSTEM PRIVATE ${Qt5Core_PRIVATE_INCLUDE_DIRS})
+
+target_compile_definitions(PythonQt PUBLIC -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK -DPYTHONQT_SUPPORT_NAME_PROPERTY
+                                    PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
+
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
-target_compile_options(PythonQt PRIVATE
-  $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
-  )
+if(UNIX)
+  find_package(OpenGL)
+  if(OPENGL_FOUND)
+    target_link_libraries(PythonQt PUBLIC ${OPENGL_LIBRARIES})
+  endif()
+endif()
 
-target_link_libraries(PythonQt
+target_link_libraries(PythonQt PUBLIC
               ${PYTHON_LIBRARY}
               ${QT_LIBRARIES}
   )
@@ -364,11 +363,10 @@ if(BUILD_TESTING)
   endif()
 
   add_executable(PythonQtCppTests ${test_sources})
-  target_link_libraries(PythonQtCppTests PythonQt)
+  target_link_libraries(PythonQtCppTests PythonQt Qt5::Test)
 
   add_test(
     NAME tests_PythonQtTestMain
     COMMAND ${Slicer_LAUNCH_COMMAND} $<TARGET_FILE:PythonQtCppTests> tests/PythonQtTestMain
     )
 endif()
-
