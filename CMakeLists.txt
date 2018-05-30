@@ -287,6 +287,7 @@ pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 #-----------------------------------------------------------------------------
 # Build the library
 
+set(LOCATION_FOR_CMAKE_TARGET_FILES ${PythonQt_INSTALL_LIBRARY_DIR}/cmake/${PROJECT_NAME})
 
 add_library(PythonQt SHARED
             ${sources}
@@ -320,11 +321,21 @@ target_link_libraries(PythonQt PUBLIC
 #-----------------------------------------------------------------------------
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
-install(TARGETS PythonQt
+install(TARGETS PythonQt EXPORT PythonQtTargets
         RUNTIME DESTINATION ${PythonQt_INSTALL_RUNTIME_DIR}
         LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
+
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
+
+install(EXPORT PythonQtTargets
+    NAMESPACE ${PROJECT_NAME}::
+    FILE PythonQtTargets.cmake
+    DESTINATION ${LOCATION_FOR_CMAKE_TARGET_FILES})
+
+configure_file(cmake/${PROJECT_NAME}Config.cmake.in ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake @ONLY)
+
+install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake DESTINATION "${LOCATION_FOR_CMAKE_TARGET_FILES}")
 
 #-----------------------------------------------------------------------------
 # Testing
