@@ -204,6 +204,7 @@ set(sources
     src/PythonQtStdDecorators.cpp
     src/PythonQtStdIn.cpp
     src/PythonQtStdOut.cpp
+    src/PythonQtThreadSupport.cpp
     src/gui/PythonQtScriptingConsole.cpp
 
     generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
@@ -241,6 +242,7 @@ set(headers
     src/PythonQtStdIn.h
     src/PythonQtStdOut.h
     src/PythonQtSystem.h
+    src/PythonQtThreadSupport.h
     src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
