@@ -53,11 +53,6 @@ endif()
 # Python libraries
 
 find_package(PythonLibs REQUIRED)
-include_directories("${PYTHON_INCLUDE_DIR}")
-add_definitions(
-  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
-  -DPYTHONQT_SUPPORT_NAME_PROPERTY
-  )
 
 #-----------------------------------------------------------------------------
 # Build options
@@ -76,6 +71,10 @@ endif()
 
 if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
   set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_CMAKE_DIR)
+  set(PythonQt_INSTALL_CMAKE_DIR ${PythonQt_INSTALL_LIBRARY_DIR}/cmake/PythonQt)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -273,8 +272,6 @@ foreach(qtlib ${qtlibs})
 
   if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
 
-    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
-
     set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
     foreach(index RANGE 0 12)
@@ -303,19 +300,34 @@ pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 #-----------------------------------------------------------------------------
 # Build the library
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  )
-
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
   )
+
+target_include_directories(PythonQt PUBLIC
+  # Python
+  ${PYTHON_INCLUDE_DIR}
+
+  # PythonQt
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+  $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
+  )
+
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
 target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
+  -DPYTHONQT_SUPPORT_NAME_PROPERTY
   )
+
+foreach(qtlib ${qtlibs})
+  set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
+  if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
+    target_compile_options(PythonQt PUBLIC -DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
+  endif()
+endforeach()
 
 target_link_libraries(PythonQt
               ${PYTHON_LIBRARY}
@@ -326,10 +338,18 @@ target_link_libraries(PythonQt
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
 install(TARGETS PythonQt
+        EXPORT PythonQtTargets
         RUNTIME DESTINATION ${PythonQt_INSTALL_RUNTIME_DIR}
         LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
         ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR})
+install(EXPORT PythonQtTargets DESTINATION ${PythonQt_INSTALL_CMAKE_DIR})
 install(FILES ${headers} DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR})
+
+configure_file(PythonQtConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfig.cmake
+  @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PythonQtConfig.cmake
+  DESTINATION ${PythonQt_INSTALL_CMAKE_DIR})
 
 #-----------------------------------------------------------------------------
 # Testing
