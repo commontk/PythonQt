@@ -12,6 +12,8 @@ adding support for [CMake](https://cmake.org) build system.
 It is used as staging area to maintain and test patches that will be contributed back to the
 official repository.
 
+PythonQt
+
 What is PythonQt ?
 ------------------
 
