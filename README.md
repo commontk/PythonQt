@@ -1,4 +1,4 @@
-PythonQt
+PythonQt - An Amazing Project
 ========
 
 Why is this project ?
