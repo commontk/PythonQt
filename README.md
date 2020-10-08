@@ -1,5 +1,6 @@
 PythonQt
 ========
+Logr: This Project Is Good
 
 Why is this project ?
 ---------------------
