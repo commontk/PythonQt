@@ -102,9 +102,7 @@ This repository contains 9 branches:
     * `Expose QSocketNotifier for Qt5` already integrated as [MeVisLab/pythonqt@518765494d](https://github.com/MeVisLab/pythonqt/commit/518765494d) (`updated wrappers to contain QSocketNotifier and recent generator changes`)
   * Add support for building 511 wrappers
   * cmake: Add missing source file
-
-### patched-8
-* Based on [r455](http://sourceforge.net/p/pythonqt/code/455/) with:
+urceforge.net/p/pythonqt/code/455/) with:
   * revert of [r444](http://sourceforge.net/p/pythonqt/code/444/)
   * all changes from ``patched-7`` cherry-picked.
   * add support for build wrapping for Qml and Quick components
