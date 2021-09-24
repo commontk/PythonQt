@@ -101,6 +101,7 @@ This repository contains 9 branches:
     * `Explicitly initialize global storage containers` already integrated as [MeVisLab/pythonqt@170d4a475](https://github.com/MeVisLab/pythonqt/commit/170d4a475) (`reimplemented argument frame caching (previous approach was not thread-safe when GIL is used)`)
     * `Expose QSocketNotifier for Qt5` already integrated as [MeVisLab/pythonqt@518765494d](https://github.com/MeVisLab/pythonqt/commit/518765494d) (`updated wrappers to contain QSocketNotifier and recent generator changes`)
   * Add support for building 511 wrappers
+  * Add support for QtMultimedia component
   * cmake: Add missing source file
 
 ### patched-8
