@@ -3,6 +3,8 @@
 *.lo
 *.o
 *.obj
+*.pdb
+*.cbt
 
 # Precompiled Headers
 *.gch
@@ -43,6 +45,8 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
+*resource.rc
+*.FileListAbsolute.txt
 
 # CMake
 CMakeLists.txt.user
@@ -81,6 +85,8 @@ Thumbs.db
 
 # Visual Studio Code
 .vscode/*
+
+*.tlog
 
 # Doxygen
 doxygen/html/*
