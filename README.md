@@ -26,15 +26,15 @@ one of the branch referenced below:
 
 | Supported Qt version   | 4                      | 5                                      |
 |------------------------|------------------------|----------------------------------------|
-| Branch                 | [patched-6][patched-6] | [patched-9][patched-9]                 |
-| Base PythonQt revision | [r403][r403]           | [MeVisLab/pythonqt@c07f09fd][c07f09fd] |
+| Branch                 | [patched-6][patched-6] | [patched-10][patched-10]               |
+| Base PythonQt revision | [r403][r403]           | [MeVisLab/pythonqt@fb16d6e][fb16d6e]   |
 
 
 [patched-6]: https://github.com/commontk/PythonQt/tree/patched-6
 [r403]: http://sourceforge.net/p/pythonqt/code/403/
 
-[patched-9]: https://github.com/commontk/PythonQt/tree/patched-9
-[c07f09fd]: https://github.com/MeVisLab/pythonqt/commit/c07f09fd
+[patched-10]: https://github.com/commontk/PythonQt/tree/patched-10
+[fb16d6e]: https://github.com/MeVisLab/pythonqt/commit/fb16d6e
 
 
 Build instructions
@@ -92,7 +92,15 @@ Additional configure options are:
 Available branches
 ------------------
 
-This repository contains 9 branches:
+This repository contains the following branches:
+
+### patched-10
+* Based on [MeVisLab/pythonqt@fb16d6e](https://github.com/MeVisLab/pythonqt/commit/fb16d6e) with:
+  * all changes from ``patched-9`` were cherry-picked expect:
+    * `Fix setRedirectStdInCallbackEnabled`  already integrated as [MeVisLab/pythonqt@06860d497](https://github.com/MeVisLab/pythonqt/commit/06860d497) (`Fix reference/memory leaks`)
+    * `Fix refcount of PyInt_Type when creating enum wrapper`  already integrated as [MeVisLab/pythonqt@963b667ac](https://github.com/MeVisLab/pythonqt/commit/963b667ac) (` Fix crash in GC: PyTuple_SET_ITEM steals reference`)
+    * `[Backport] Add isatty() method to PythonQtStdIn class` as it was a backport of [MeVisLab/pythonqt@7012000d8](https://github.com/MeVisLab/pythonqt/commit/7012000d8)
+  * cmake: Update PythonQtGenerator to support only Qt5
 
 ### patched-9
 * Based on [MeVisLab/pythonqt@c07f09fd](https://github.com/MeVisLab/pythonqt/commit/c07f09fd) with:
