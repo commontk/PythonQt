@@ -654,7 +654,7 @@ private:
   PythonQtSignalReceiver* getSignalReceiver(QObject* obj);
 
   PythonQt(int flags, const QByteArray& pythonQtModuleName);
-  ~PythonQt();
+  ~PythonQt() override;
   static PythonQt* _self;
   static int _uniqueModuleCount;
 
@@ -671,7 +671,7 @@ class PYTHONQT_EXPORT PythonQtPrivate : public QObject {
 
 public:
   PythonQtPrivate();
-  ~PythonQtPrivate();
+  ~PythonQtPrivate() override;
 
   enum DecoratorTypes {
     StaticDecorator = 1,
