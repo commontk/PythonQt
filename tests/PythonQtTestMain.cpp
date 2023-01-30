@@ -69,13 +69,13 @@ int main(int argc, char *argv[])
   PythonQtTestCleanup cleanup;
   failCount += QTest::qExec(&cleanup, argc, argv);
 
-  if (failCount>0) {
+  if (failCount) {
     std::cerr << "Tests failed: " << failCount << std::endl;
   } else {
     std::cout << "All tests passed successfully." << std::endl;
   }
 #endif
 
-  return failCount;
+  return failCount != 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
