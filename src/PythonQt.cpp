@@ -2308,7 +2308,6 @@ int PythonQtPrivate::handleMetaCall(QObject* object, PythonQtInstanceWrapper* wr
 
 void PythonQtPrivate::callMethodInPython(QMetaMethod &method, PythonQtInstanceWrapper* wrapper, void** args)
 {
-  QByteArray methodSig = method.methodSignature();
   PyObject* func = PyObject_GetAttrString((PyObject*)wrapper, method.name());
   if (func) {
     const PythonQtMethodInfo* methodInfo = PythonQtMethodInfo::getCachedMethodInfo(method, NULL);
