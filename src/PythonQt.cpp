@@ -2422,22 +2422,23 @@ QString PythonQtPrivate::getSignature(PyObject* object)
       //       inspect.getargs() can handle anonymous (tuple) arguments, while this code does not.
       //       It can be implemented, but it may be rarely needed and not necessary.
       PyCodeObject* code = (PyCodeObject*)func->func_code;
-      if (code->co_varnames) {
+      PyObject* co_varnames = PyCode_GetVarnames(code);
+      if (co_varnames) {
         int nargs = code->co_argcount;
-        Q_ASSERT(PyTuple_Check(code->co_varnames));
+        Q_ASSERT(PyTuple_Check(co_varnames));
         for (int i=0; i<nargs; i++) {
-          PyObject* name = PyTuple_GetItem(code->co_varnames, i);
+          PyObject* name = PyTuple_GetItem(co_varnames, i);
           Q_ASSERT(PyString_Check(name));
           arguments << PyString_AsString(name);
         }
         if (code->co_flags & CO_VARARGS) {
-          PyObject* s = PyTuple_GetItem(code->co_varnames, nargs);
+          PyObject* s = PyTuple_GetItem(co_varnames, nargs);
           Q_ASSERT(PyString_Check(s));
           varargs = PyString_AsString(s);
           nargs += 1;
         }
         if (code->co_flags & CO_VARKEYWORDS) {
-          PyObject* s = PyTuple_GetItem(code->co_varnames, nargs);
+          PyObject* s = PyTuple_GetItem(co_varnames, nargs);
           Q_ASSERT(PyString_Check(s));
           varkeywords = PyString_AsString(s);
         }
