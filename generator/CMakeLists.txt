@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
 #-----------------------------------------------------------------------------
 project(PythonQtGenerator)
@@ -9,24 +9,27 @@ include(CTestUseLaunchers OPTIONAL)
 #-----------------------------------------------------------------------------
 # Setup Qt
 
-set(minimum_required_qt_version "4.6.2")
-
-find_package(Qt4)
-
-if(QT4_FOUND)
-
-  set(found_qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
-
-  if(${found_qt_version} VERSION_LESS ${minimum_required_qt_version})
-      message(FATAL_ERROR "error: PythonQt requires Qt >= ${minimum_required_qt_version} -- you cannot use Qt ${found_qt_version}.")
+if(NOT DEFINED PythonQtGenerator_QT_VERSION)
+  if(DEFINED Qt5_DIR)
+    set(PythonQtGenerator_QT_VERSION 5)
+  else()
+    set(PythonQtGenerator_QT_VERSION 6)
   endif()
-  
-  set(QT_USE_QTXML ON)
-  
-  include(${QT_USE_FILE})
-else()
-  message(FATAL_ERROR "error: Qt4 was not found on your system. You probably need to set the QT_QMAKE_EXECUTABLE variable")
 endif()
+
+set(minimum_required_qt5_version "5.15.0")
+set(minimum_required_qt6_version "6.5.3")
+set(minimum_required_qt_version ${minimum_required_qt${PythonQtGenerator_QT_VERSION}_version})
+
+set(qt_required_components Core Xml)
+if(PythonQtGenerator_QT_VERSION VERSION_EQUAL 6)
+  list(APPEND qt_required_components Core5Compat)
+endif()
+
+message(STATUS "${PROJECT_NAME}: Required Qt${PythonQtGenerator_QT_VERSION} components [${qt_required_components}]")
+
+find_package(Qt${PythonQtGenerator_QT_VERSION} ${minimum_required_qt_version}
+  COMPONENTS ${qt_required_components} REQUIRED)
 
 #-----------------------------------------------------------------------------
 # Sources
@@ -93,11 +96,6 @@ set(moc_sources
   shellheadergenerator.h
   shellimplgenerator.h
   )
-  
-#-----------------------------------------------------------------------------
-# UI files
-
-set(ui_sources )
 
 #-----------------------------------------------------------------------------
 # Resources
@@ -108,9 +106,8 @@ set(qrc_sources
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-qt4_wrap_cpp(gen_moc_sources ${moc_sources})
-qt4_wrap_ui(gen_ui_sources ${ui_sources})
-qt4_add_resources(gen_qrc_sources ${qrc_sources})
+qt_wrap_cpp(gen_moc_sources ${moc_sources})
+qt_add_resources(gen_qrc_sources ${qrc_sources})
 
 #-----------------------------------------------------------------------------
 # Copy file expected by the generator and specify install rules
@@ -132,7 +129,6 @@ endforeach()
 
 SOURCE_GROUP("Resources" FILES
   ${qrc_sources}
-  ${ui_sources}
   ${files_to_copy}
   )
 
@@ -147,11 +143,14 @@ add_definitions(-DRXX_ALLOCATOR_INIT_0)
 add_executable(${PROJECT_NAME}
   ${sources}
   ${gen_moc_sources}
-  ${gen_ui_sources}
   ${gen_qrc_sources}
 )
 
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+  Qt::Core
+  Qt::Xml
+  $<$<VERSION_EQUAL:${PythonQtGenerator_QT_VERSION},6>:Qt6::Core5Compat>
+  )
 
 #-----------------------------------------------------------------------------
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
