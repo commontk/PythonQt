@@ -1,4 +1,6 @@
-project(Core LANGUAGES CXX)
+# This is the actual package to be installed
+# PythonQtParent project contains all compontents
+project(PythonQt LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -98,11 +100,34 @@ elseif(MINGW)
     target_compile_options(${PROJECT_NAME} PRIVATE "-Wa,-mbig-obj")
 endif()
 
+#-----------------------------------------------------------------------------
+# Build options
+
+if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
+  set(PythonQt_INSTALL_RUNTIME_DIR bin)
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_LIBRARY_DIR)
+  set(PythonQt_INSTALL_LIBRARY_DIR lib${LIB_SUFFIX})
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_ARCHIVE_DIR)
+  set(PythonQt_INSTALL_ARCHIVE_DIR lib${LIB_SUFFIX})
+endif()
+
+if(NOT DEFINED PythonQt_INSTALL_INCLUDE_DIR)
+  set(PythonQt_INSTALL_INCLUDE_DIR include/PythonQt)
+endif()
+
+
 include(GNUInstallDirs)
+#-----------------------------------------------------------------------------
+# Install library (on windows, put the dll in 'bin' and the archive in 'lib')
+
 install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
+    ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${PythonQt_INSTALL_RUNTIME_DIR}
+    PUBLIC_HEADER DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}
 )

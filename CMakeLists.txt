@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-project(PythonQt LANGUAGES CXX VERSION 3.5.6)
+project(PythonQtParent LANGUAGES CXX VERSION 3.5.6)
 
 #-----------------------------------------------------------------------------
 # Set a default build type if none was specified
@@ -36,6 +36,11 @@ add_compile_definitions( -DQT_NO_CAST_FROM_ASCII
                          -DQT_NO_CAST_TO_QVARIANT
                          -DQT_NO_CAST_FROM_QVARIANT )
 endif()
+# Python build properties
+add_definitions(
+  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
+  -DPYTHONQT_SUPPORT_NAME_PROPERTY
+)
 
 option(FORCE_BUILD_QT5 "Force Qt5 build instead of Qt6" OFF)
 
