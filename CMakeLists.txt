@@ -82,6 +82,25 @@ set(PYTHONQT_SUFFIX Qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}-Python${Python3_VE
 include_directories(src)
 add_subdirectory(generator)
 add_subdirectory(src)
-# HACK add_subdirectory(extensions)
-# HACK add_subdirectory(tests)
-# HACK add_subdirectory(examples)
+
+#-----------------------------------------------------------------------------
+# Extensions
+option(BUILD_EXTENSIONS "Build the extensions tree." OFF)
+if(BUILD_EXTENSIONS)
+  add_subdirectory(extensions)
+endif()
+
+#-----------------------------------------------------------------------------
+# Testing
+option(BUILD_TESTING "Build the testing tree." OFF)
+if(BUILD_TESTING)
+  include(CTest)
+  add_subdirectory(tests)
+endif()
+
+#-----------------------------------------------------------------------------
+# Examples
+option(BUILD_EXAMPLES "Build the examples tree." OFF)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
