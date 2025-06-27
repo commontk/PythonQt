@@ -1,6 +1,6 @@
 # This is the actual package to be installed
 # PythonQtParent project contains all compontents
-project(PythonQt LANGUAGES CXX)
+project(PythonQt LANGUAGES CXX VERSION 3.5.6)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -92,7 +92,13 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE PYTHONQT_EXPORTS PYTHONQT_CATCH_ALL_EXCEPTIONS)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC
+    INTERFACE
+    # Use headers in the build tree when configuring/running CMake here:
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    # Use headers in the install tree when someone does `find_package(PythonQt)`:
+    $<INSTALL_INTERFACE:include/PythonQt>
+)
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
@@ -125,9 +131,42 @@ include(GNUInstallDirs)
 # Install library (on windows, put the dll in 'bin' and the archive in 'lib')
 
 install(TARGETS ${PROJECT_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${PythonQt_INSTALL_LIBRARY_DIR}
-    ARCHIVE DESTINATION ${PythonQt_INSTALL_ARCHIVE_DIR}
-    RUNTIME DESTINATION ${PythonQt_INSTALL_RUNTIME_DIR}
-    PUBLIC_HEADER DESTINATION ${PythonQt_INSTALL_INCLUDE_DIR}
+    EXPORT ${PROJECT_NAME}Targets
+    BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${PythonQt_INSTALL_LIBRARY_DIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/${PythonQt_INSTALL_ARCHIVE_DIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/${PythonQt_INSTALL_RUNTIME_DIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/${PythonQt_INSTALL_INCLUDE_DIR}
+)
+
+
+#-----------------------------------------------------------------------------
+# Configure so that other builds can find PythonQt with find_package
+include(CMakePackageConfigHelpers)
+
+# Generate PythonQtConfigVersion.cmake
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    VERSION ${PROJECT_NAME}_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+# Install the export target
+install(EXPORT ${PROJECT_NAME}Targets
+        FILE ${PROJECT_NAME}Targets.cmake
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION lib/cmake/${PROJECT_NAME}
+ )
+
+# Generate and install PythonQtConfig.cmake
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION lib/cmake/${PROJECT_NAME}
 )
