@@ -17,6 +17,7 @@ endif()
 # explicitly set the source files the same as from
 # src.pri
 set(Core_SOURCES
+  PythonQt_QtBindings.cpp
   gui/PythonQtScriptingConsole.cpp
   PythonQt.cpp
   PythonQtBoolResult.cpp
@@ -47,6 +48,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 unset(Core_SOURCES)
 
 set(Core_PUBLIC_HEADER
+  PythonQt_QtBindings.h
   PythonQt.h
   PythonQtStdDecorators.h
   PythonQtClassInfo.h
