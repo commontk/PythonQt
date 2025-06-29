@@ -350,7 +350,7 @@ meth_compare(PythonQtSignalFunctionObject *a, PythonQtSignalFunctionObject *b)
 static long
 meth_hash(PythonQtSignalFunctionObject *a)
 {
-  long x,y;
+  long x;
   if (a->m_self == nullptr)
     x = 0;
   else {
@@ -358,11 +358,11 @@ meth_hash(PythonQtSignalFunctionObject *a)
     if (x == -1)
       return -1;
   }
-#if PY_VERSION_HEX >= 0x30D0000        /* 0x30D0000 == 3.13.0a0 */
-  y = Py_HashPointer((void*)(a->m_ml));        /* public in 3.13+ */
-#elif !defined(Py_LIMITED_API)
-  /* fallback: use CPython’s private helper (requires full API) */
-  y = _Py_HashPointer((void*)(a->m_ml));
+#if 0 // PY_VERSION_HEX >= 0x30D0000        /* 0x30D0000 == 3.13.0a0 */
+//  y = Py_HashPointer((void*)(a->m_ml));        /* public in 3.13+ */
+// #elif !defined(Py_LIMITED_API)
+//   /* fallback: use CPython’s private helper (requires full API) */
+//   y = _Py_HashPointer((void*)(a->m_ml));
 #else
   /* portable fallback for the limited/stable ABI */
   uintptr_t v = (uintptr_t)(void*)(a->m_ml);
