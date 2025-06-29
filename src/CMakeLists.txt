@@ -76,13 +76,13 @@ set(Core_PUBLIC_HEADER
   PythonQtThreadSupport.h
   PythonQtPythonInclude.h
 )
+
 foreach( header ${Core_PUBLIC_HEADER} )
   set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME PythonQt-${PYTHONQT_SUFFIX}
     PUBLIC_HEADER ${header}
   )
 endforeach()
-unset(Core_PUBLIC_HEADER)
 
 add_dependencies(${PROJECT_NAME} PythonQtWrapper)
 
@@ -102,6 +102,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     # Use headers in the install tree when someone does `find_package(PythonQt)`:
     $<INSTALL_INTERFACE:include/PythonQt>
 )
+
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
@@ -172,4 +173,9 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
     DESTINATION lib/cmake/${PROJECT_NAME}
+)
+
+install(FILES
+    ${Core_PUBLIC_HEADER}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/${PythonQt_INSTALL_INCLUDE_DIR}
 )
