@@ -258,6 +258,9 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
     PythonQtRegisterToolClassesTemplateConverterForKnownClass(QPen);
     PythonQtRegisterToolClassesTemplateConverterForKnownClass(QTextLength);
     PythonQtRegisterToolClassesTemplateConverterForKnownClass(QTextFormat);
+#if QT_VERSION < 0x060000
+    PythonQtRegisterToolClassesTemplateConverterForKnownClass(QMatrix);
+#endif
 
     PyObject* pack = PythonQt::priv()->packageByName("QtCore");
     PyObject* pack2 = PythonQt::priv()->packageByName("Qt");
@@ -321,6 +324,10 @@ void PythonQt::init(int flags, const QByteArray& pythonQtModuleName)
 void PythonQt::cleanup()
 {
   if (_self) {
+    // Remove signal handlers in advance, since destroying them calls back into
+    // PythonQt::priv()->removeSignalEmitter()
+    _self->removeSignalHandlers();
+
     delete _self;
     _self = nullptr;
   }
@@ -1548,6 +1555,10 @@ PythonQtClassInfo* PythonQtPrivate::currentClassInfoForClassWrapperCreation()
 
 void PythonQtPrivate::addDecorators(QObject* o, int decoTypes)
 {
+  if (!o)
+    {
+    return;
+    }
   o->setParent(this);
   int numMethods = o->metaObject()->methodCount();
   for (int i = 0; i < numMethods; i++) {
@@ -1841,7 +1852,13 @@ void PythonQt::initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQ
   PythonQtObjectPtr sys;
   sys.setNewRef(PyImport_ImportModule("sys"));
 
-  if (redirectStdOut) {
+  if (redirectStdOut)
+  {
+    // Backup original 'sys.stdout' and 'sys.stderr'
+    PyModule_AddObject(sys, "pythonqt_original_stdout", PyObject_GetAttrString(sys, "stdout"));
+    PyModule_AddObject(sys, "pythonqt_original_stderr", PyObject_GetAttrString(sys, "stderr"));
+
+    // Create a redirection object for stdout and stderr
     PythonQtObjectPtr out;
     PythonQtObjectPtr err;
     // create a redirection object for stdout and stderr
@@ -1850,10 +1867,11 @@ void PythonQt::initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQ
     err = PythonQtStdOutRedirectType.tp_new(&PythonQtStdOutRedirectType,nullptr, nullptr);
     ((PythonQtStdOutRedirect*)err.object())->_cb = stdErrRedirectCB;
     // replace the built in file objects with our own objects
-    PyModule_AddObject(sys, "stdout", out);
-    PyModule_AddObject(sys, "stderr", err);
-  }
+    PyModule_AddObject(sys, "pythonqt_stdout", out);
+    PyModule_AddObject(sys, "pythonqt_stderr", err);
 
+    setRedirectStdOutCallbackEnabled(redirectStdOut);
+  }
   // add PythonQt to the list of builtin module names
   PyObject *old_module_names = PyObject_GetAttrString(sys.object(),"builtin_module_names");
   if (old_module_names && PyTuple_Check(old_module_names)) {
@@ -1874,6 +1892,42 @@ void PythonQt::initPythonQtModule(bool redirectStdOut, const QByteArray& pythonQ
   PyDict_SetItem(modulesAttr, pyUnicodeObject, _p->_pythonQtModule.object());
   Py_XDECREF(modulesAttr);
   Py_XDECREF(pyUnicodeObject);
+}
+
+bool PythonQt::redirectStdOutCallbackEnabled() const
+{
+  PythonQtObjectPtr sys;
+  sys.setNewRef(PyImport_ImportModule("sys"));
+
+  PythonQtObjectPtr pythonqt_stdout;
+  pythonqt_stdout.setNewRef(PyObject_GetAttrString(sys.object(), "pythonqt_stdout"));
+
+  PythonQtObjectPtr sys_stdout;
+  sys_stdout.setNewRef(PyObject_GetAttrString(sys.object(), "stdout"));
+
+  return PyObject_RichCompareBool(pythonqt_stdout.object(), sys_stdout.object(), Py_EQ);
+}
+
+void PythonQt::setRedirectStdOutCallbackEnabled(bool enabled)
+{
+  PythonQtObjectPtr sys;
+  sys.setNewRef(PyImport_ImportModule("sys"));
+
+  if (enabled) {
+    if( PyObject_HasAttrString(sys.object(), "pythonqt_stdout") ) {
+      PyModule_AddObject(sys.object(), "stdout", PyObject_GetAttrString(sys.object(), "pythonqt_stdout"));
+    }
+    if( PyObject_HasAttrString(sys.object(), "pythonqt_stderr") ) {
+      PyModule_AddObject(sys.object(), "stderr", PyObject_GetAttrString(sys.object(), "pythonqt_stderr"));
+    }
+  } else {
+    if( PyObject_HasAttrString(sys.object(), "pythonqt_original_stdout") ) {
+      PyModule_AddObject(sys.object(), "stdout", PyObject_GetAttrString(sys.object(), "pythonqt_original_stdout"));
+    }
+    if( PyObject_HasAttrString(sys.object(), "pythonqt_original_stderr") ) {
+      PyModule_AddObject(sys.object(), "stderr", PyObject_GetAttrString(sys.object(), "pythonqt_original_stderr"));
+    }
+  }
 }
 
 QString PythonQt::getReturnTypeOfWrappedMethod(PyObject* module, const QString& name)

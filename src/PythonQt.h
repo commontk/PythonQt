@@ -263,6 +263,18 @@ public:
   //@}
 
   //---------------------------------------------------------------------------
+  //! \name Standard output handling
+  //@{
+
+  //! return \a true if std out/err redirection is enabled.
+  bool redirectStdOutCallbackEnabled() const;
+
+  //! enable or disable std out/err redirection to pythonStdOut() and pythonStdErr() signals.
+  void setRedirectStdOutCallbackEnabled(bool enabled);
+
+  //@}
+
+  //---------------------------------------------------------------------------
   //! \name Modules
   //@{
 
@@ -548,7 +560,7 @@ public:
   //@{
 
   //! get access to internal data (should not be used on the public API, but is used by some C functions)
-  static PythonQtPrivate* priv() { return _self->_p; }
+  static PythonQtPrivate* priv() { return _self ? _self->_p : NULL; }
 
   //! clear all NotFound entries on all class infos, to ensure that
   //! newly loaded wrappers can add methods even when the object was wrapped by PythonQt before the wrapper was loaded
