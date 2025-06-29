@@ -365,7 +365,18 @@ meth_hash(PythonQtSignalFunctionObject *a)
     if (x == -1)
       return -1;
   }
+#if PY_VERSION_HEX >= 0x30D0000        /* 0x30D0000 == 3.13.0a0 */
+  y = Py_HashPointer((void*)(a->m_ml));        /* public in 3.13+ */
+#elif !defined(Py_LIMITED_API)
+  /* fallback: use CPython’s private helper (requires full API) */
   y = _Py_HashPointer((void*)(a->m_ml));
+#else
+  /* portable fallback for the limited/stable ABI */
+  uintptr_t v = (uintptr_t)(void*)(a->m_ml);
+  /* simple mixing, similar to CPython’s */
+  Py_hash_t y = (Py_hash_t)(v >> 4) ^ (Py_hash_t)(v >> (sizeof(v)*4));
+  if (y == -1) y = -2;               /* never return −1 */
+#endif
   if (y == -1)
     return -1;
   x ^= y;
