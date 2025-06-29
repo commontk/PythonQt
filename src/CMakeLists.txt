@@ -74,11 +74,14 @@ set(Core_PUBLIC_HEADER
   PythonQtUtils.h
   PythonQtBoolResult.h
   PythonQtThreadSupport.h
+  PythonQtPythonInclude.h
 )
-set_target_properties(${PROJECT_NAME} PROPERTIES
+foreach( header ${Core_PUBLIC_HEADER} )
+  set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME PythonQt-${PYTHONQT_SUFFIX}
-    PUBLIC_HEADER ${Core_PUBLIC_HEADER}
-)
+    PUBLIC_HEADER ${header}
+  )
+endforeach()
 unset(Core_PUBLIC_HEADER)
 
 add_dependencies(${PROJECT_NAME} PythonQtWrapper)
