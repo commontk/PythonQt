@@ -1,29 +1,27 @@
+#-----------------------------------------------------------------------------
+# NOTE: The CMake files have been contributed to PythonQt and have not been tested with the current
+# PythonQt version. They have not yet been updated to support Qt 5 and/or Python 3.
+#
+# If you are not a CMake expert, you should better use the provided qmake profiles.
+#-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.20.6)
+cmake_minimum_required(VERSION 3.5)
 
 project(PythonQt)
 
 #----------------------------------------------------------------------------
 # Qt version
 
-set(_default_qt_major_version 5)
-if(DEFINED Qt6_DIR)
-  set(_default_qt_major_version 6)
-endif()
-
 # Set PythonQt_QT_VERSION
-set(PythonQt_QT_VERSION ${_default_qt_major_version} CACHE STRING "Qt major version (5 or 6)")
-set_property(CACHE PythonQt_QT_VERSION PROPERTY STRINGS "5" "6")
-if(NOT "${PythonQt_QT_VERSION}" MATCHES "^(5|6)$")
-  message(FATAL_ERROR "error: PythonQt_QT_VERSION must be 5 or 6.")
-endif()
+set(PythonQt_QT_VERSION 5)
 
 # Requirements
-set(minimum_required_qt5_version "5.15.0")
-set(minimum_required_qt6_version "6.4.0")
+set(minimum_required_qt5_version "5.3.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
-find_package(Qt${PythonQt_QT_VERSION} ${minimum_required_qt_version} QUIET)
+find_package(Qt5 ${minimum_required_qt_version} QUIET)
+set(QT_VERSION_MAJOR ${Qt5_VERSION_MAJOR})
+set(QT_VERSION_MINOR ${Qt5_VERSION_MINOR})
 
 #----------------------------------------------------------------------------
 # Qt components
@@ -32,32 +30,38 @@ set(qtlibs
   Widgets
   Network
   OpenGL
-  Qml
-  Quick
   Sql
   Svg
   Multimedia
   UiTools
   Xml
+  XmlPatterns
   )
-# XmlPatterns is removed from Qt 6
-if(PythonQt_QT_VERSION VERSION_EQUAL "5")
+# Webkit has been removed in Qt >= 5.6
+if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_LESS "5.7")
   list(APPEND qtlibs
-    XmlPatterns
-  )
+    WebKitWidgets
+    )
+endif()
+if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
+  list(APPEND qtlibs
+    Qml
+    Quick
+    )
 endif()
 
 #-----------------------------------------------------------------------------
 # Python libraries
 
-find_package(Python3 COMPONENTS Development REQUIRED)
+find_package(PythonLibs REQUIRED)
+include_directories("${PYTHON_INCLUDE_DIR}")
+add_definitions(
+  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
+  -DPYTHONQT_SUPPORT_NAME_PROPERTY
+  )
 
 #-----------------------------------------------------------------------------
 # Build options
-
-option(PythonQt_SUPPORT_NAME_PROPERTY "Enable PythonQt name-property support" ON)
-option(PythonQt_USE_RELEASE_PYTHON_FALLBACK "Fallback to Release python when Debug missing" ON)
-option(PythonQt_DEBUG "Enable PythonQt debug output" OFF)
 
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
@@ -81,20 +85,9 @@ endif()
 set(qtlib_to_wraplib_Widgets gui)
 set(qtlib_to_wraplib_WebKitWidgets webkit)
 
-set(qt_wrapped_lib_depends_gui Multimedia PrintSupport)
-if(PythonQt_QT_VERSION VERSION_EQUAL "6")
-  list(APPEND qt_wrapped_lib_depends_gui Widgets OpenGL)
-endif()
-set(qt_wrapped_lib_depends_multimedia MultimediaWidgets)
-set(qt_wrapped_lib_depends_quick QuickWidgets)
-set(qt_wrapped_lib_depends_svg )
-if(PythonQt_QT_VERSION VERSION_EQUAL "6")
-  list(APPEND qt_wrapped_lib_depends_svg SvgWidgets)
-endif()
-set(qt_wrapped_lib_depends_webkit )
-if(PythonQt_QT_VERSION VERSION_EQUAL "6")
-  list(APPEND qt_wrapped_lib_depends_webkit WebKitWidgets)
-endif()
+set(qt5_wrapped_lib_depends_gui Multimedia PrintSupport)
+set(qt5_wrapped_lib_depends_multimedia MultimediaWidgets)
+set(qt5_wrapped_lib_depends_quick QuickWidgets)
 
 foreach(qtlib ${qtlibs})
   string(TOLOWER ${qtlib} qtlib_lowercase)
@@ -127,6 +120,13 @@ if(PythonQt_Wrap_QtAll)
   endforeach()
 endif()
 
+option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
+if(PythonQt_DEBUG)
+  add_definitions(-DPYTHONQT_DEBUG)
+else()
+  remove_definitions(-DPYTHONQT_DEBUG)
+endif()
+
 #-----------------------------------------------------------------------------
 # Setup Qt
 
@@ -135,7 +135,7 @@ set(qt_required_components Core Widgets)
 foreach(qtlib ${qtlibs})
   set(qt_wrapped_lib ${qtlib_to_wraplib_${qtlib}})
   if(${PythonQt_Wrap_Qt${qt_wrapped_lib}})
-    list(APPEND qt_required_components ${qtlib} ${qt_wrapped_lib_depends_${qt_wrapped_lib}})
+    list(APPEND qt_required_components ${qtlib} ${qt${PythonQt_QT_VERSION}_wrapped_lib_depends_${qt_wrapped_lib}})
   endif()
 endforeach()
 if(BUILD_TESTING)
@@ -144,15 +144,21 @@ endif()
 list(REMOVE_DUPLICATES qt_required_components)
 
 message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_components}]")
-find_package(Qt${PythonQt_QT_VERSION} ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
-
-set(QT_VERSION_MAJOR ${Qt${PythonQt_QT_VERSION}_VERSION_MAJOR})
-set(QT_VERSION_MINOR ${Qt${PythonQt_QT_VERSION}_VERSION_MINOR})
+find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
 
 set(QT_LIBRARIES )
-foreach(qt_component ${qt_required_components})
-  list(APPEND QT_LIBRARIES Qt${PythonQt_QT_VERSION}::${qt_component})
+foreach(qtlib ${qt_required_components})
+  include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
+  add_definitions(${Qt5${qtlib}_DEFINITIONS})
+  list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
 endforeach()
+
+# Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
+
+macro(pythonqt_wrap_cpp)
+  qt5_wrap_cpp(${ARGV})
+endmacro()
 
 if(UNIX)
   find_package(OpenGL)
@@ -162,22 +168,21 @@ if(UNIX)
 endif()
 
 #-----------------------------------------------------------------------------
-# Pre-generated wrappers default to Qt 5.15 set (generated_cpp_515). Users may override.
-if(PythonQt_QT_VERSION VERSION_EQUAL "5")
-  set(generated_cpp_suffix "_515")
-  set(_default_generated_path "${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}")
-else()
-  set(_default_generated_path "PythonQt_GENERATED_PATH-NOTFOUND")
-endif()
+# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
+# associated with the Qt version being used.
 
-set(PythonQt_GENERATED_PATH "${_default_generated_path}"
-  CACHE PATH "Directory containing pre-generated PythonQt Qt wrappers for Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} (e.g., generated_cpp_515)")
+set(generated_cpp_suffix_52 _50)
+set(generated_cpp_suffix_51 _50)
 
-if(NOT IS_DIRECTORY "${PythonQt_GENERATED_PATH}")
-  message(FATAL_ERROR
-    "PythonQt: missing generated wrapper sources for Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.\n"
-    "Expected: ${PythonQt_GENERATED_PATH}\n"
-    "Hint: pass -DPythonQt_GENERATED_PATH:PATH=/path/to/generated_cpp")
+set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
+if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
+  set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.10")
+  set(generated_cpp_suffix "_511")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
+  set(generated_cpp_suffix "_56")
+elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.3")
+  set(generated_cpp_suffix "_54")
 endif()
 
 #-----------------------------------------------------------------------------
@@ -206,16 +211,16 @@ set(sources
     src/PythonQtThreadSupport.cpp
     src/gui/PythonQtScriptingConsole.cpp
 
-    extensions/PythonQt_QtAll/PythonQt_QtAll.cpp
+    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
 
-    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
-    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
-    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
-    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
 )
 
 #-----------------------------------------------------------------------------
-# List headers. This list is used for the install command.
+# List headers.  This is list is used for the install command.
 
 set(headers
     src/PythonQtBoolResult.h
@@ -245,13 +250,20 @@ set(headers
     src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
-    extensions/PythonQt_QtAll/PythonQt_QtAll.h
+    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
 )
 
 #-----------------------------------------------------------------------------
 # Headers that should run through moc
 
 set(moc_sources
+    src/PythonQt.h
+    src/PythonQtSignalReceiver.h
+    src/PythonQtStdDecorators.h
+    src/gui/PythonQtScriptingConsole.h
+
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
+    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
 )
 
 #-----------------------------------------------------------------------------
@@ -263,95 +275,53 @@ foreach(qtlib ${qtlibs})
 
   if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
 
-    # Variable expected by PythonQt_QtAll.cpp
-    string(TOUPPER ${qt_wrapped_lib} qt_wrapped_lib_uppercase)
-    ADD_DEFINITIONS(-DPYTHONQT_WITH_${qt_wrapped_lib_uppercase})
+    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
 
-    set(file_prefix com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
+    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
     foreach(index RANGE 0 12)
 
       # Source files
-      if(EXISTS ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.cpp)
-        list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.cpp)
+      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
+        list(APPEND sources ${file_prefix}${index}.cpp)
       endif()
 
       # Headers that should run through moc
-      if(EXISTS ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.h)
-        list(APPEND moc_sources ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.h)
+      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
+        list(APPEND moc_sources ${file_prefix}${index}.h)
       endif()
 
     endforeach()
 
-    list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}_init.cpp)
+    list(APPEND sources ${file_prefix}_init.cpp)
 
   endif()
 endforeach()
 
 #-----------------------------------------------------------------------------
 # Do wrapping
-qt_wrap_cpp(sources ${moc_sources})
-
-#-----------------------------------------------------------------------------
-# Configure header
-
-# Map the CMake option `PythonQt_USE_RELEASE_PYTHON_FALLBACK` (camelCase)
-# to a plain variable used by the configured header. The public-facing
-# preprocessor symbol remains `PYTHONQT_USE_RELEASE_PYTHON_FALLBACK`.
-set(PYTHONQT_USE_RELEASE_PYTHON_FALLBACK ${PythonQt_USE_RELEASE_PYTHON_FALLBACK})
-configure_file(
-  src/PythonQtConfigure.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/src/PythonQtConfigure.h
-  )
-unset(PYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
-
-list(APPEND headers
-  ${CMAKE_CURRENT_BINARY_DIR}/src/PythonQtConfigure.h
-  )
+pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 
 #-----------------------------------------------------------------------------
 # Build the library
 
-add_library(PythonQt SHARED ${sources})
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
+
+add_library(PythonQt SHARED
+            ${sources}
+            ${gen_moc_sources}
+  )
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
-
-set_target_properties(PythonQt
-  PROPERTIES
-    AUTOMOC TRUE
-  )
-
-# Disable AUTOMOC for specified moc sources to avoid QMetaTypeId specialization conflicts.
-foreach(moc_source IN LISTS moc_sources)
-  set_property(SOURCE ${moc_source} PROPERTY SKIP_AUTOMOC ON)
-endforeach()
-
-target_compile_definitions(PythonQt
-  PRIVATE
-    $<$<BOOL:${PythonQt_DEBUG}>:PYTHONQT_DEBUG>
-    $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
-    # No need to export PYTHONQT_USE_RELEASE_PYTHON_FALLBACK publicly. the
-    # configured header handles consumers.
-  )
 
 target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
   )
 
-target_include_directories(PythonQt
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions/PythonQt_QtAll>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
-    $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
-  )
-
 target_link_libraries(PythonQt
-  PUBLIC
-    Python3::Python
-    ${QT_LIBRARIES}
-  PRIVATE
-    # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
-    Qt${PythonQt_QT_VERSION}::CorePrivate
+              ${PYTHON_LIBRARY}
+              ${QT_LIBRARIES}
   )
 
 #-----------------------------------------------------------------------------
@@ -381,9 +351,18 @@ if(BUILD_TESTING)
     tests/PythonQtTests.h
     )
 
+  pythonqt_wrap_cpp(test_sources
+    tests/PythonQtTests.h
+    )
+
   if(PythonQt_Wrap_Qtcore)
+    include_directories(generated_cpp${generated_cpp_suffix})
+
     list(APPEND test_sources
       tests/PythonQtTestCleanup.cpp
+      tests/PythonQtTestCleanup.h
+      )
+    pythonqt_wrap_cpp(test_sources
       tests/PythonQtTestCleanup.h
       )
 
@@ -391,23 +370,7 @@ if(BUILD_TESTING)
   endif()
 
   add_executable(PythonQtCppTests ${test_sources})
-
-  target_include_directories(PythonQtCppTests
-    PRIVATE
-      $<$<BOOL:${PythonQt_Wrap_Qtcore}>:${PythonQt_GENERATED_PATH}>
-    )
-
   target_link_libraries(PythonQtCppTests PythonQt)
-
-  set_target_properties(PythonQtCppTests
-    PROPERTIES
-      AUTOMOC TRUE
-    )
-
-  target_compile_definitions(PythonQtCppTests
-    PRIVATE
-      $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
-    )
 
   add_test(
     NAME tests_PythonQtTestMain

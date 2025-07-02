@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
     Py_Finalize();
   }
 
+#ifdef PythonQt_Wrap_Qtcore
   PythonQtTestCleanup cleanup;
   failCount += QTest::qExec(&cleanup, argc, argv);
 
@@ -85,6 +86,8 @@ int main(int argc, char *argv[])
   } else {
     std::cout << "All tests passed successfully." << std::endl;
   }
+#endif
+
   return failCount != 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
