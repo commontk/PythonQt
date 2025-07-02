@@ -810,7 +810,7 @@ meth_descr_get(PyObject *descr, PyObject *obj, PyObject* type)
   Q_UNUSED(type)
   if (PythonQtSlotFunction_Check(descr)) {
     PythonQtSlotFunctionObject *slotObj = (PythonQtSlotFunctionObject*)descr;
-    return PythonQtSlotFunction_New(slotObj->m_ml, obj, NULL);
+    return PythonQtSlotFunction_New(slotObj->m_ml, obj, nullptr);
   }
   else {
     // wrong type
