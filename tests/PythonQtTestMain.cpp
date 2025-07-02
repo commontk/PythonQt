@@ -54,12 +54,13 @@ int main(int argc, char* argv[])
     QTest::qExec(&test, argc, argv);
     return 0;
   }
-
+#ifdef PythonQt_Wrap_Qtcore
   if (QProcessEnvironment::systemEnvironment().contains("PYTHONQT_RUN_ONLY_CLEANUP_TESTS")) {
     PythonQtTestCleanup cleanup;
     QTest::qExec(&cleanup, argc, argv);
     return 0;
   }
+#endif
 
   PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut);
   int failCount = 0;
