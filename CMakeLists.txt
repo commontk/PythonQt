@@ -53,8 +53,8 @@ endif()
 #-----------------------------------------------------------------------------
 # Python libraries
 
-find_package(PythonLibs REQUIRED)
-include_directories("${PYTHON_INCLUDE_DIR}")
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+include_directories("${Python3_INCLUDE_DIRS}")
 add_definitions(
   -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
   -DPYTHONQT_SUPPORT_NAME_PROPERTY
