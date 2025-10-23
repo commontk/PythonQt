@@ -55,14 +55,12 @@ endif()
 
 find_package(PythonLibs REQUIRED)
 include_directories("${PYTHON_INCLUDE_DIR}")
-add_definitions(
-  -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
-  )
 
 #-----------------------------------------------------------------------------
 # Build options
 
 option(PythonQt_SUPPORT_NAME_PROPERTY "Enable PythonQt name-property support" ON)
+option(PythonQt_USE_RELEASE_PYTHON_FALLBACK "Fallback to Release python when Debug missing" ON)
 
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
@@ -321,6 +319,8 @@ set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 target_compile_definitions(PythonQt
   PRIVATE
     $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
+  PUBLIC
+    $<$<BOOL:${PythonQt_USE_RELEASE_PYTHON_FALLBACK}>:PYTHONQT_USE_RELEASE_PYTHON_FALLBACK>
   )
 
 target_compile_options(PythonQt PRIVATE
