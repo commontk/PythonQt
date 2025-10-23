@@ -16,7 +16,7 @@ project(PythonQt)
 set(PythonQt_QT_VERSION 5)
 
 # Requirements
-set(minimum_required_qt5_version "5.3.0")
+set(minimum_required_qt5_version "5.15.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
 find_package(Qt5 ${minimum_required_qt_version} QUIET)
@@ -30,6 +30,8 @@ set(qtlibs
   Widgets
   Network
   OpenGL
+  Qml
+  Quick
   Sql
   Svg
   Multimedia
@@ -37,18 +39,6 @@ set(qtlibs
   Xml
   XmlPatterns
   )
-# Webkit has been removed in Qt >= 5.6
-if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_LESS "5.7")
-  list(APPEND qtlibs
-    WebKitWidgets
-    )
-endif()
-if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
-  list(APPEND qtlibs
-    Qml
-    Quick
-    )
-endif()
 
 #-----------------------------------------------------------------------------
 # Python libraries
