@@ -159,20 +159,10 @@ endif()
 # The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
 # associated with the Qt version being used.
 
-set(generated_cpp_suffix_52 _50)
-set(generated_cpp_suffix_51 _50)
-
-set(generated_cpp_suffix "_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}")
-if(DEFINED generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR})
-  set(generated_cpp_suffix "${generated_cpp_suffix_${QT_VERSION_MAJOR}${QT_VERSION_MINOR}}")
-elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.14")
+if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER_EQUAL "5.15")
   set(generated_cpp_suffix "_515")
-elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.10")
-  set(generated_cpp_suffix "_511")
-elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.5")
-  set(generated_cpp_suffix "_56")
-elseif("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER "5.3")
-  set(generated_cpp_suffix "_54")
+else()
+  message(FATAL_ERROR "Generated wrappers only available for Qt >= 5.15 (found ${QT_VERSION}).")
 endif()
 
 #-----------------------------------------------------------------------------
