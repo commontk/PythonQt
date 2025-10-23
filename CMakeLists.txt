@@ -57,11 +57,12 @@ find_package(PythonLibs REQUIRED)
 include_directories("${PYTHON_INCLUDE_DIR}")
 add_definitions(
   -DPYTHONQT_USE_RELEASE_PYTHON_FALLBACK
-  -DPYTHONQT_SUPPORT_NAME_PROPERTY
   )
 
 #-----------------------------------------------------------------------------
 # Build options
+
+option(PythonQt_SUPPORT_NAME_PROPERTY "Enable PythonQt name-property support" ON)
 
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
@@ -317,6 +318,11 @@ add_library(PythonQt SHARED
   )
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
+target_compile_definitions(PythonQt
+  PRIVATE
+    $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
+  )
+
 target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
   )
@@ -373,6 +379,11 @@ if(BUILD_TESTING)
 
   add_executable(PythonQtCppTests ${test_sources})
   target_link_libraries(PythonQtCppTests PythonQt)
+
+  target_compile_definitions(PythonQtCppTests
+    PRIVATE
+      $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
+    )
 
   add_test(
     NAME tests_PythonQtTestMain
