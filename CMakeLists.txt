@@ -152,9 +152,6 @@ foreach(qtlib ${qt_required_components})
   list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
 endforeach()
 
-# Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
-include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
-
 macro(pythonqt_wrap_cpp)
   qt5_wrap_cpp(${ARGV})
 endmacro()
@@ -306,10 +303,6 @@ pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 #-----------------------------------------------------------------------------
 # Build the library
 
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  )
-
 add_library(PythonQt SHARED
             ${sources}
             ${gen_moc_sources}
@@ -325,6 +318,15 @@ target_compile_definitions(PythonQt
 
 target_compile_options(PythonQt PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+  )
+
+target_include_directories(PythonQt
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
+  PRIVATE
+    # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+    ${Qt5Core_PRIVATE_INCLUDE_DIRS}
   )
 
 target_link_libraries(PythonQt
@@ -364,8 +366,6 @@ if(BUILD_TESTING)
     )
 
   if(PythonQt_Wrap_Qtcore)
-    include_directories(generated_cpp${generated_cpp_suffix})
-
     list(APPEND test_sources
       tests/PythonQtTestCleanup.cpp
       tests/PythonQtTestCleanup.h
@@ -378,6 +378,12 @@ if(BUILD_TESTING)
   endif()
 
   add_executable(PythonQtCppTests ${test_sources})
+
+  target_include_directories(PythonQtCppTests
+    PRIVATE
+      $<$<BOOL:${PythonQt_Wrap_Qtcore}>:${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}>
+    )
+
   target_link_libraries(PythonQtCppTests PythonQt)
 
   target_compile_definitions(PythonQtCppTests
