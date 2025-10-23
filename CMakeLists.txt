@@ -61,6 +61,7 @@ include_directories("${PYTHON_INCLUDE_DIR}")
 
 option(PythonQt_SUPPORT_NAME_PROPERTY "Enable PythonQt name-property support" ON)
 option(PythonQt_USE_RELEASE_PYTHON_FALLBACK "Fallback to Release python when Debug missing" ON)
+option(PythonQt_DEBUG "Enable PythonQt debug output" OFF)
 
 if(NOT DEFINED PythonQt_INSTALL_RUNTIME_DIR)
   set(PythonQt_INSTALL_RUNTIME_DIR bin)
@@ -117,13 +118,6 @@ if(PythonQt_Wrap_QtAll)
       message(STATUS "Enabling [PythonQt_Wrap_Qt${qt_wrapped_lib}] because of [PythonQt_Wrap_QtAll] evaluates to True")
     endif()
   endforeach()
-endif()
-
-option(PythonQt_DEBUG "Enable/Disable PythonQt debug output" OFF)
-if(PythonQt_DEBUG)
-  add_definitions(-DPYTHONQT_DEBUG)
-else()
-  remove_definitions(-DPYTHONQT_DEBUG)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -311,6 +305,7 @@ set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
 
 target_compile_definitions(PythonQt
   PRIVATE
+    $<$<BOOL:${PythonQt_DEBUG}>:PYTHONQT_DEBUG>
     $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
   PUBLIC
     $<$<BOOL:${PythonQt_USE_RELEASE_PYTHON_FALLBACK}>:PYTHONQT_USE_RELEASE_PYTHON_FALLBACK>
