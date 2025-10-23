@@ -133,10 +133,6 @@ foreach(qt_component ${qt_required_components})
   list(APPEND QT_LIBRARIES Qt5::${qt_component})
 endforeach()
 
-macro(pythonqt_wrap_cpp)
-  qt5_wrap_cpp(${ARGV})
-endmacro()
-
 if(UNIX)
   find_package(OpenGL)
   if(OPENGL_FOUND)
@@ -223,19 +219,6 @@ set(headers
 )
 
 #-----------------------------------------------------------------------------
-# Headers that should run through moc
-
-set(moc_sources
-    src/PythonQt.h
-    src/PythonQtSignalReceiver.h
-    src/PythonQtStdDecorators.h
-    src/gui/PythonQtScriptingConsole.h
-
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.h
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.h
-)
-
-#-----------------------------------------------------------------------------
 # Add extra sources
 
 foreach(qtlib ${qtlibs})
@@ -253,11 +236,6 @@ foreach(qtlib ${qtlibs})
       # Source files
       if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
         list(APPEND sources ${file_prefix}${index}.cpp)
-      endif()
-
-      # Headers that should run through moc
-      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.h)
-        list(APPEND moc_sources ${file_prefix}${index}.h)
       endif()
 
     endforeach()
@@ -285,17 +263,15 @@ list(APPEND headers
   )
 
 #-----------------------------------------------------------------------------
-# Do wrapping
-pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
-
-#-----------------------------------------------------------------------------
 # Build the library
 
-add_library(PythonQt SHARED
-            ${sources}
-            ${gen_moc_sources}
-  )
+add_library(PythonQt SHARED ${sources})
 set_target_properties(PythonQt PROPERTIES DEFINE_SYMBOL PYTHONQT_EXPORTS)
+
+set_target_properties(PythonQt
+  PROPERTIES
+    AUTOMOC TRUE
+  )
 
 target_compile_definitions(PythonQt
   PRIVATE
@@ -352,16 +328,9 @@ if(BUILD_TESTING)
     tests/PythonQtTests.h
     )
 
-  pythonqt_wrap_cpp(test_sources
-    tests/PythonQtTests.h
-    )
-
   if(PythonQt_Wrap_Qtcore)
     list(APPEND test_sources
       tests/PythonQtTestCleanup.cpp
-      tests/PythonQtTestCleanup.h
-      )
-    pythonqt_wrap_cpp(test_sources
       tests/PythonQtTestCleanup.h
       )
 
@@ -376,6 +345,11 @@ if(BUILD_TESTING)
     )
 
   target_link_libraries(PythonQtCppTests PythonQt)
+
+  set_target_properties(PythonQtCppTests
+    PROPERTIES
+      AUTOMOC TRUE
+    )
 
   target_compile_definitions(PythonQtCppTests
     PRIVATE
