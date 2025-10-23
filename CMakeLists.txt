@@ -140,10 +140,8 @@ message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_component
 find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
 
 set(QT_LIBRARIES )
-foreach(qtlib ${qt_required_components})
-  include_directories(${Qt5${qtlib}_INCLUDE_DIRS})
-  add_definitions(${Qt5${qtlib}_DEFINITIONS})
-  list(APPEND QT_LIBRARIES ${Qt5${qtlib}_LIBRARIES})
+foreach(qt_component ${qt_required_components})
+  list(APPEND QT_LIBRARIES Qt5::${qt_component})
 endforeach()
 
 macro(pythonqt_wrap_cpp)
@@ -325,8 +323,9 @@ target_include_directories(PythonQt
   )
 
 target_link_libraries(PythonQt
-              ${PYTHON_LIBRARY}
-              ${QT_LIBRARIES}
+  PUBLIC
+    ${PYTHON_LIBRARY}
+    ${QT_LIBRARIES}
   )
 
 #-----------------------------------------------------------------------------
