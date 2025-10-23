@@ -268,6 +268,23 @@ foreach(qtlib ${qtlibs})
 endforeach()
 
 #-----------------------------------------------------------------------------
+# Configure header
+
+# Map the CMake option `PythonQt_USE_RELEASE_PYTHON_FALLBACK` (camelCase)
+# to a plain variable used by the configured header. The public-facing
+# preprocessor symbol remains `PYTHONQT_USE_RELEASE_PYTHON_FALLBACK`.
+set(PYTHONQT_USE_RELEASE_PYTHON_FALLBACK ${PythonQt_USE_RELEASE_PYTHON_FALLBACK})
+configure_file(
+  src/PythonQtConfigure.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/src/PythonQtConfigure.h
+  )
+unset(PYTHONQT_USE_RELEASE_PYTHON_FALLBACK)
+
+list(APPEND headers
+  ${CMAKE_CURRENT_BINARY_DIR}/src/PythonQtConfigure.h
+  )
+
+#-----------------------------------------------------------------------------
 # Do wrapping
 pythonqt_wrap_cpp(gen_moc_sources ${moc_sources})
 
@@ -284,8 +301,8 @@ target_compile_definitions(PythonQt
   PRIVATE
     $<$<BOOL:${PythonQt_DEBUG}>:PYTHONQT_DEBUG>
     $<$<BOOL:${PythonQt_SUPPORT_NAME_PROPERTY}>:PYTHONQT_SUPPORT_NAME_PROPERTY>
-  PUBLIC
-    $<$<BOOL:${PythonQt_USE_RELEASE_PYTHON_FALLBACK}>:PYTHONQT_USE_RELEASE_PYTHON_FALLBACK>
+    # No need to export PYTHONQT_USE_RELEASE_PYTHON_FALLBACK publicly. the
+    # configured header handles consumers.
   )
 
 target_compile_options(PythonQt PRIVATE
@@ -295,6 +312,7 @@ target_compile_options(PythonQt PRIVATE
 target_include_directories(PythonQt
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
     $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
   PRIVATE
     # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
