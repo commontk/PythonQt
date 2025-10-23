@@ -43,8 +43,7 @@ set(qtlibs
 #-----------------------------------------------------------------------------
 # Python libraries
 
-find_package(PythonLibs REQUIRED)
-include_directories("${PYTHON_INCLUDE_DIR}")
+find_package(Python3 COMPONENTS Development REQUIRED)
 
 #-----------------------------------------------------------------------------
 # Build options
@@ -304,7 +303,7 @@ target_include_directories(PythonQt
 
 target_link_libraries(PythonQt
   PUBLIC
-    ${PYTHON_LIBRARY}
+    Python3::Python
     ${QT_LIBRARIES}
   )
 
