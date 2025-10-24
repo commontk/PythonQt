@@ -33,19 +33,11 @@
  *
  */
 
-#ifdef WIN32
-  #ifdef PYTHONQT_QTALL_EXPORTS
-    #define PYTHONQT_QTALL_EXPORT __declspec(dllexport)
-  #else
-    #define PYTHONQT_QTALL_EXPORT __declspec(dllimport)
-  #endif
-#else
-  #define PYTHONQT_QTALL_EXPORT
-#endif
+#include "PythonQtSystem.h" // For PYTHONQT_EXPORT
 
 namespace PythonQt_QtAll {
-//! initialize the Qt binding
-PYTHONQT_QTALL_EXPORT void init();
+//! Initialize the Qt bindings enabled at configuration time
+PYTHONQT_EXPORT void init();
 }
 
 #endif
