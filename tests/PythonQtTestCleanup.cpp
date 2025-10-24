@@ -1,6 +1,6 @@
 #include "PythonQtTestCleanup.h"
 #include "PythonQt.h"
-#include "PythonQt_QtBindings.h"
+#include "PythonQt_QtAll.h"
 
 void PythonQtTestCleanup::initTestCase() {}
 
@@ -11,7 +11,7 @@ void PythonQtTestCleanup::init()
   // Initialize before each test
 
   PythonQt::init(PythonQt::IgnoreSiteModule);
-  PythonQt_init_QtBindings();
+  PythonQt_QtAll::init();
 
   _helper = new PythonQtTestCleanupHelper();
   PythonQtObjectPtr main = PythonQt::self()->getMainModule();

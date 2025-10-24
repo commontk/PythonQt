@@ -176,7 +176,7 @@ set(sources
     src/PythonQtThreadSupport.cpp
     src/gui/PythonQtScriptingConsole.cpp
 
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.cpp
+    extensions/PythonQt_QtAll/PythonQt_QtAll.cpp
 
     generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
     generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
@@ -215,7 +215,7 @@ set(headers
     src/PythonQtUtils.h
     src/PythonQtVariants.h
     src/PythonQtPythonInclude.h
-    generated_cpp${generated_cpp_suffix}/PythonQt_QtBindings.h
+    extensions/PythonQt_QtAll/PythonQt_QtAll.h
 )
 
 #-----------------------------------------------------------------------------
@@ -227,7 +227,9 @@ foreach(qtlib ${qtlibs})
 
   if (${PythonQt_Wrap_Qt${qt_wrapped_lib}})
 
-    ADD_DEFINITIONS(-DPYTHONQT_WRAP_Qt${qt_wrapped_lib})
+    # Variable expected by PythonQt_QtAll.cpp
+    string(TOUPPER ${qt_wrapped_lib} qt_wrapped_lib_uppercase)
+    ADD_DEFINITIONS(-DPYTHONQT_WITH_${qt_wrapped_lib_uppercase})
 
     set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
@@ -288,6 +290,7 @@ target_compile_options(PythonQt PRIVATE
 target_include_directories(PythonQt
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions/PythonQt_QtAll>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
     $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
   PRIVATE
