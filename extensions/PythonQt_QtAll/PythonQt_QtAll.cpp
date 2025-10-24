@@ -77,7 +77,7 @@ void PythonQt_init_QtWebKit(PyObject*);
 
 namespace PythonQt_QtAll
 {
-  PYTHONQT_QTALL_EXPORT void init() {
+  PYTHONQT_EXPORT void init() {
 #ifdef PYTHONQT_WITH_CORE
     PythonQt_init_QtCore(0);
 #endif
