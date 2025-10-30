@@ -135,13 +135,18 @@ if(UNIX)
 endif()
 
 #-----------------------------------------------------------------------------
-# The variable "generated_cpp_suffix" allows to conditionnally compile the generated wrappers
-# associated with the Qt version being used.
+# Pre-generated wrappers default to Qt 5.15 set (generated_cpp_515). Users may override.
+set(generated_cpp_suffix "_515")
+set(_default_generated_path "${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}")
 
-if("${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}" VERSION_GREATER_EQUAL "5.15")
-  set(generated_cpp_suffix "_515")
-else()
-  message(FATAL_ERROR "Generated wrappers only available for Qt >= 5.15 (found ${QT_VERSION}).")
+set(PythonQt_GENERATED_PATH "${_default_generated_path}"
+  CACHE PATH "Directory containing pre-generated PythonQt Qt wrappers for Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} (e.g., generated_cpp_515)")
+
+if(NOT IS_DIRECTORY "${PythonQt_GENERATED_PATH}")
+  message(FATAL_ERROR
+    "PythonQt: missing generated wrapper sources for Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.\n"
+    "Expected: ${PythonQt_GENERATED_PATH}\n"
+    "Hint: pass -DPythonQt_GENERATED_PATH:PATH=/path/to/generated_cpp")
 endif()
 
 #-----------------------------------------------------------------------------
@@ -172,10 +177,10 @@ set(sources
 
     extensions/PythonQt_QtAll/PythonQt_QtAll.cpp
 
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
-    generated_cpp${generated_cpp_suffix}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
+    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin0.cpp
+    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_core_builtin/com_trolltech_qt_core_builtin_init.cpp
+    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin0.cpp
+    ${PythonQt_GENERATED_PATH}/com_trolltech_qt_gui_builtin/com_trolltech_qt_gui_builtin_init.cpp
 )
 
 #-----------------------------------------------------------------------------
@@ -225,18 +230,18 @@ foreach(qtlib ${qtlibs})
     string(TOUPPER ${qt_wrapped_lib} qt_wrapped_lib_uppercase)
     ADD_DEFINITIONS(-DPYTHONQT_WITH_${qt_wrapped_lib_uppercase})
 
-    set(file_prefix generated_cpp${generated_cpp_suffix}/com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
+    set(file_prefix com_trolltech_qt_${qt_wrapped_lib}/com_trolltech_qt_${qt_wrapped_lib})
 
     foreach(index RANGE 0 12)
 
       # Source files
-      if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file_prefix}${index}.cpp)
-        list(APPEND sources ${file_prefix}${index}.cpp)
+      if(EXISTS ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.cpp)
+        list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.cpp)
       endif()
 
     endforeach()
 
-    list(APPEND sources ${file_prefix}_init.cpp)
+    list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}_init.cpp)
 
   endif()
 endforeach()
@@ -338,7 +343,7 @@ if(BUILD_TESTING)
 
   target_include_directories(PythonQtCppTests
     PRIVATE
-      $<$<BOOL:${PythonQt_Wrap_Qtcore}>:${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}>
+      $<$<BOOL:${PythonQt_Wrap_Qtcore}>:${PythonQt_GENERATED_PATH}>
     )
 
   target_link_libraries(PythonQtCppTests PythonQt)
