@@ -1,9 +1,3 @@
-#-----------------------------------------------------------------------------
-# NOTE: The CMake files have been contributed to PythonQt and have not been tested with the current
-# PythonQt version. They have not yet been updated to support Qt 5 and/or Python 3.
-#
-# If you are not a CMake expert, you should better use the provided qmake profiles.
-#-----------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.20.6)
 
@@ -185,7 +179,7 @@ set(sources
 )
 
 #-----------------------------------------------------------------------------
-# List headers.  This is list is used for the install command.
+# List headers. This list is used for the install command.
 
 set(headers
     src/PythonQtBoolResult.h
