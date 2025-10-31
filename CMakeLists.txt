@@ -292,15 +292,15 @@ target_include_directories(PythonQt
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions/PythonQt_QtAll>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/src>
     $<INSTALL_INTERFACE:${PythonQt_INSTALL_INCLUDE_DIR}>
-  PRIVATE
-    # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
-    ${Qt5Core_PRIVATE_INCLUDE_DIRS}
   )
 
 target_link_libraries(PythonQt
   PUBLIC
     Python3::Python
     ${QT_LIBRARIES}
+  PRIVATE
+    # Required for use of "QtCore/private/qmetaobjectbuilder_p.h" in "PythonQt.cpp"
+    Qt${PythonQt_QT_VERSION}::CorePrivate
   )
 
 #-----------------------------------------------------------------------------
