@@ -6,16 +6,24 @@ project(PythonQt)
 #----------------------------------------------------------------------------
 # Qt version
 
+set(_default_qt_major_version 5)
+if(DEFINED Qt6_DIR)
+  set(_default_qt_major_version 6)
+endif()
+
 # Set PythonQt_QT_VERSION
-set(PythonQt_QT_VERSION 5)
+set(PythonQt_QT_VERSION ${_default_qt_major_version} CACHE STRING "Qt major version (5 or 6)")
+set_property(CACHE PythonQt_QT_VERSION PROPERTY STRINGS "5" "6")
+if(NOT "${PythonQt_QT_VERSION}" MATCHES "^(5|6)$")
+  message(FATAL_ERROR "error: PythonQt_QT_VERSION must be 5 or 6.")
+endif()
 
 # Requirements
 set(minimum_required_qt5_version "5.15.0")
+set(minimum_required_qt6_version "6.9.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
-find_package(Qt5 ${minimum_required_qt_version} QUIET)
-set(QT_VERSION_MAJOR ${Qt5_VERSION_MAJOR})
-set(QT_VERSION_MINOR ${Qt5_VERSION_MINOR})
+find_package(Qt${PythonQt_QT_VERSION} ${minimum_required_qt_version} QUIET)
 
 #----------------------------------------------------------------------------
 # Qt components
@@ -120,11 +128,14 @@ endif()
 list(REMOVE_DUPLICATES qt_required_components)
 
 message(STATUS "${PROJECT_NAME}: Required Qt components [${qt_required_components}]")
-find_package(Qt5 ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
+find_package(Qt${PythonQt_QT_VERSION} ${minimum_required_qt_version} COMPONENTS ${qt_required_components} REQUIRED)
+
+set(QT_VERSION_MAJOR ${Qt${PythonQt_QT_VERSION}_VERSION_MAJOR})
+set(QT_VERSION_MINOR ${Qt${PythonQt_QT_VERSION}_VERSION_MINOR})
 
 set(QT_LIBRARIES )
 foreach(qt_component ${qt_required_components})
-  list(APPEND QT_LIBRARIES Qt5::${qt_component})
+  list(APPEND QT_LIBRARIES Qt${PythonQt_QT_VERSION}::${qt_component})
 endforeach()
 
 if(UNIX)
@@ -136,8 +147,12 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Pre-generated wrappers default to Qt 5.15 set (generated_cpp_515). Users may override.
-set(generated_cpp_suffix "_515")
-set(_default_generated_path "${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}")
+if(PythonQt_QT_VERSION VERSION_EQUAL "5")
+  set(generated_cpp_suffix "_515")
+  set(_default_generated_path "${CMAKE_CURRENT_SOURCE_DIR}/generated_cpp${generated_cpp_suffix}")
+else()
+  set(_default_generated_path "PythonQt_GENERATED_PATH-NOTFOUND")
+endif()
 
 set(PythonQt_GENERATED_PATH "${_default_generated_path}"
   CACHE PATH "Directory containing pre-generated PythonQt Qt wrappers for Qt ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR} (e.g., generated_cpp_515)")

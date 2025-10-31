@@ -5,10 +5,20 @@ project(PythonQtGenerator LANGUAGES CXX)
 #----------------------------------------------------------------------------
 # Setup Qt
 
+set(_default_qt_major_version 5)
+if(DEFINED Qt6_DIR)
+  set(_default_qt_major_version 6)
+endif()
+
 # Set PythonQtGenerator_QT_VERSION
-set(PythonQtGenerator_QT_VERSION 5)
+set(PythonQtGenerator_QT_VERSION ${_default_qt_major_version} CACHE STRING "Qt major version (5 or 6)")
+set_property(CACHE PythonQtGenerator_QT_VERSION PROPERTY STRINGS "5" "6")
+if(NOT "${PythonQtGenerator_QT_VERSION}" MATCHES "^(5|6)$")
+  message(FATAL_ERROR "error: PythonQtGenerator_QT_VERSION must be 5 or 6.")
+endif()
 
 set(minimum_required_qt5_version "5.15.0")
+set(minimum_required_qt6_version "6.9.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQtGenerator_QT_VERSION}_version})
 
 set(qt_required_components Core Xml)
@@ -89,8 +99,8 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-    Qt::Core
-    Qt::Xml
+    Qt${PythonQtGenerator_QT_VERSION}::Core
+    Qt${PythonQtGenerator_QT_VERSION}::Xml
   )
 
 target_compile_definitions(${PROJECT_NAME}
