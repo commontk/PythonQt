@@ -244,6 +244,12 @@ set(headers
 )
 
 #-----------------------------------------------------------------------------
+# Headers that should run through moc
+
+set(moc_sources
+)
+
+#-----------------------------------------------------------------------------
 # Add extra sources
 
 foreach(qtlib ${qtlibs})
@@ -265,12 +271,21 @@ foreach(qtlib ${qtlibs})
         list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.cpp)
       endif()
 
+      # Headers that should run through moc
+      if(EXISTS ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.h)
+        list(APPEND moc_sources ${PythonQt_GENERATED_PATH}/${file_prefix}${index}.h)
+      endif()
+
     endforeach()
 
     list(APPEND sources ${PythonQt_GENERATED_PATH}/${file_prefix}_init.cpp)
 
   endif()
 endforeach()
+
+#-----------------------------------------------------------------------------
+# Do wrapping
+qt_wrap_cpp(sources ${moc_sources})
 
 #-----------------------------------------------------------------------------
 # Configure header
@@ -299,6 +314,11 @@ set_target_properties(PythonQt
   PROPERTIES
     AUTOMOC TRUE
   )
+
+# Disable AUTOMOC for specified moc sources to avoid QMetaTypeId specialization conflicts.
+foreach(moc_source IN LISTS moc_sources)
+  set_property(SOURCE ${moc_source} PROPERTY SKIP_AUTOMOC ON)
+endforeach()
 
 target_compile_definitions(PythonQt
   PRIVATE
