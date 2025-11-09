@@ -18,7 +18,7 @@ if(NOT "${PythonQtGenerator_QT_VERSION}" MATCHES "^(5|6)$")
 endif()
 
 set(minimum_required_qt5_version "5.15.0")
-set(minimum_required_qt6_version "6.9.0")
+set(minimum_required_qt6_version "6.4.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQtGenerator_QT_VERSION}_version})
 
 set(qt_required_components Core Xml)

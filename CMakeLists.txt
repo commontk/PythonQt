@@ -20,7 +20,7 @@ endif()
 
 # Requirements
 set(minimum_required_qt5_version "5.15.0")
-set(minimum_required_qt6_version "6.9.0")
+set(minimum_required_qt6_version "6.4.0")
 set(minimum_required_qt_version ${minimum_required_qt${PythonQt_QT_VERSION}_version})
 
 find_package(Qt${PythonQt_QT_VERSION} ${minimum_required_qt_version} QUIET)
