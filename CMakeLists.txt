@@ -39,8 +39,13 @@ set(qtlibs
   Multimedia
   UiTools
   Xml
-  XmlPatterns
   )
+# XmlPatterns is removed from Qt 6
+if(PythonQt_QT_VERSION VERSION_EQUAL "5")
+  list(APPEND qtlibs
+    XmlPatterns
+  )
+endif()
 
 #-----------------------------------------------------------------------------
 # Python libraries
